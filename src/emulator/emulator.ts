@@ -181,7 +181,7 @@ function configFromForm() {
   return {
     ...defaultConfig,
     sendDelaySeconds: Number(query<HTMLInputElement>("#emu-delay").value),
-    requireExternalRecipientConfirmation: query<HTMLInputElement>("#emu-require-external").checked,
+    requireRecipientConfirmation: query<HTMLInputElement>("#emu-require-recipients").checked,
     requireAttachmentConfirmation: query<HTMLInputElement>("#emu-require-attachments").checked,
     requireBodyConfirmation: query<HTMLInputElement>("#emu-require-body").checked,
     fallbackLocale: query<HTMLSelectElement>("#emu-locale").value as LocaleTag,
@@ -225,18 +225,24 @@ function mountReview(model: ReviewModel, locale: LocaleTag): void {
   let state: ReviewState = initialReviewState(model);
 
   const handle = renderDialog(model, messages, {
-    onExternalToggle(email, checked) {
-      const next = new Set(state.confirmedExternalEmails);
+    onRecipientToggle(index, checked) {
+      const next = new Set(state.confirmedRecipients);
       if (checked) {
-        next.add(email);
+        next.add(index);
       } else {
-        next.delete(email);
+        next.delete(index);
       }
-      state = { ...state, confirmedExternalEmails: next };
+      state = { ...state, confirmedRecipients: next };
       handle.setSendEnabled(canSend(model, state));
     },
-    onAttachmentsToggle(checked) {
-      state = { ...state, attachmentsConfirmed: checked };
+    onAttachmentToggle(index, checked) {
+      const next = new Set(state.confirmedAttachments);
+      if (checked) {
+        next.add(index);
+      } else {
+        next.delete(index);
+      }
+      state = { ...state, confirmedAttachments: next };
       handle.setSendEnabled(canSend(model, state));
     },
     onBodyToggle(checked) {
@@ -315,8 +321,8 @@ function renderShell(): void {
 
         <fieldset class="ml-checks">
           <legend>Required confirmations</legend>
-          <label><input id="emu-require-external" type="checkbox" checked /> External recipients</label>
-          <label><input id="emu-require-attachments" type="checkbox" checked /> Attachments</label>
+          <label><input id="emu-require-recipients" type="checkbox" checked /> Recipients (each)</label>
+          <label><input id="emu-require-attachments" type="checkbox" checked /> Attachments (each)</label>
           <label><input id="emu-require-body" type="checkbox" checked /> Body</label>
         </fieldset>
 

@@ -18,10 +18,10 @@ you send".
 This add-in does four things at send time.
 
 1. **Recipient check.** It lists every recipient by field (To, Cc,
-   Bcc). It marks external recipients, and it asks you to confirm
-   each external address one by one.
+   Bcc) and marks external ones. It asks you to confirm each
+   recipient one by one.
 2. **Attachment check.** It lists every real attachment and asks
-   you to confirm you reviewed them.
+   you to confirm each file one by one.
 3. **Body check.** It shows a preview of the body and asks you to
    confirm you reviewed it.
 4. **Send delay.** It counts down a few seconds before the send
@@ -168,10 +168,9 @@ Fork that file. The main options:
 - `internalDomains`: domains treated as internal.
 - `sendDelaySeconds`: seconds to count down before send turns on.
   Set `0` to disable.
-- `requireExternalRecipientConfirmation`: check each external
-  address one by one.
-- `requireAttachmentConfirmation`: confirm attachments were
-  reviewed.
+- `requireRecipientConfirmation`: check each recipient one by one.
+- `requireAttachmentConfirmation`: check each attachment one by
+  one.
 - `requireBodyConfirmation`: confirm the body was reviewed.
 - `attachmentKeywords`: words that hint the body refers to an
   attachment, used by the forgotten-attachment warning.

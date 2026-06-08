@@ -23,12 +23,12 @@ export const ja: Messages = {
   recipients: {
     externalBadge: "社外",
     internalBadge: "社内",
-    confirmExternal: "この社外の宛先を確認しました",
+    confirmHint: "宛先を1人ずつ確認してチェックしてください。",
     none: "宛先がありません",
   },
   attachments: {
     none: "添付ファイルはありません",
-    confirm: "添付ファイルを確認しました",
+    confirmHint: "添付ファイルを1つずつ確認してチェックしてください。",
   },
   body: {
     confirm: "本文を確認しました",

@@ -56,18 +56,24 @@ function start(model: ReviewModel, locale: LocaleTag): void {
   }
 
   const handle = renderDialog(model, messages, {
-    onExternalToggle(email, checked) {
-      const next = new Set(state.confirmedExternalEmails);
+    onRecipientToggle(index, checked) {
+      const next = new Set(state.confirmedRecipients);
       if (checked) {
-        next.add(email);
+        next.add(index);
       } else {
-        next.delete(email);
+        next.delete(index);
       }
-      state = { ...state, confirmedExternalEmails: next };
+      state = { ...state, confirmedRecipients: next };
       refresh();
     },
-    onAttachmentsToggle(checked) {
-      state = { ...state, attachmentsConfirmed: checked };
+    onAttachmentToggle(index, checked) {
+      const next = new Set(state.confirmedAttachments);
+      if (checked) {
+        next.add(index);
+      } else {
+        next.delete(index);
+      }
+      state = { ...state, confirmedAttachments: next };
       refresh();
     },
     onBodyToggle(checked) {

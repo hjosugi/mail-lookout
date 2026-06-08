@@ -63,8 +63,8 @@ function el<K extends keyof HTMLElementTagNameMap>(
 
 /** Callbacks the controller passes in to react to user actions. */
 export interface DialogCallbacks {
-  readonly onExternalToggle: (email: string, checked: boolean) => void;
-  readonly onAttachmentsToggle: (checked: boolean) => void;
+  readonly onRecipientToggle: (index: number, checked: boolean) => void;
+  readonly onAttachmentToggle: (index: number, checked: boolean) => void;
   readonly onBodyToggle: (checked: boolean) => void;
   readonly onSend: () => void;
   readonly onBack: () => void;
@@ -131,8 +131,8 @@ function buildWarnings(warnings: readonly Warning[], messages: Messages): HTMLEl
   return el("ul", { className: "so-warnings" }, list);
 }
 
-/** Build one recipient row. */
-function buildRecipientRow(recipient: RecipientView, messages: Messages): HTMLElement {
+/** The inner content of a recipient line: badge, name, optional email. */
+function recipientContent(recipient: RecipientView, messages: Messages): Node[] {
   const badgeText = recipient.isExternal
     ? messages.recipients.externalBadge
     : messages.recipients.internalBadge;
@@ -141,26 +141,53 @@ function buildRecipientRow(recipient: RecipientView, messages: Messages): HTMLEl
 
   const name = recipient.displayName.trim();
   const primary = name.length > 0 ? name : recipient.emailAddress;
-  const nameEl = el("span", { className: "so-recipient-name", text: primary });
-
-  const children: Node[] = [badge, nameEl];
+  const children: Node[] = [badge, el("span", { className: "so-recipient-name", text: primary })];
   if (name.length > 0) {
     children.push(el("span", { className: "so-recipient-email", text: recipient.emailAddress }));
   }
-  return el("div", { className: "so-recipient" }, children);
+  return children;
+}
+
+/** A recipient together with its index in the model's recipient list. */
+interface IndexedRecipient {
+  readonly recipient: RecipientView;
+  readonly index: number;
+}
+
+/**
+ * Build one recipient row.
+ *
+ * When recipient confirmation is required, the row is a checkbox the
+ * user must tick one by one. Otherwise it is a static line.
+ */
+function buildRecipientRow(
+  entry: IndexedRecipient,
+  model: ReviewModel,
+  messages: Messages,
+  callbacks: DialogCallbacks,
+): HTMLElement {
+  const content = recipientContent(entry.recipient, messages);
+  if (model.requireRecipientConfirmation) {
+    return buildCheckboxRow("so-recipient so-recipient-check", content, (checked) => {
+      callbacks.onRecipientToggle(entry.index, checked);
+    });
+  }
+  return el("div", { className: "so-recipient" }, content);
 }
 
 /** Build the grouped recipient list for one field. */
 function buildFieldGroup(
   field: RecipientField,
-  recipients: readonly RecipientView[],
+  indexed: readonly IndexedRecipient[],
+  model: ReviewModel,
   messages: Messages,
+  callbacks: DialogCallbacks,
 ): HTMLElement | null {
-  const inField = recipients.filter((recipient) => recipient.field === field);
+  const inField = indexed.filter((entry) => entry.recipient.field === field);
   if (inField.length === 0) {
     return null;
   }
-  const rows = inField.map((recipient) => buildRecipientRow(recipient, messages));
+  const rows = inField.map((entry) => buildRecipientRow(entry, model, messages, callbacks));
   return el("div", { className: "so-field-group" }, [
     el("div", { className: "so-field-label", text: fieldLabel(field, messages) }),
     el("div", { className: "so-field-rows" }, rows),
@@ -182,6 +209,27 @@ function buildCheckbox(labelText: string, onToggle: (checked: boolean) => void):
   return el("div", { className: "so-check" }, [input, label]);
 }
 
+/**
+ * Build a checkbox whose label is arbitrary content, not just text.
+ *
+ * Used for per-recipient and per-attachment rows, where the label is
+ * the recipient or file itself. Clicking the row toggles the box.
+ */
+function buildCheckboxRow(
+  className: string,
+  content: readonly Node[],
+  onToggle: (checked: boolean) => void,
+): HTMLElement {
+  inputCounter += 1;
+  const id = `so-check-${inputCounter}`;
+  const input = el("input", { type: "checkbox", id });
+  input.addEventListener("change", () => {
+    onToggle(input.checked);
+  });
+  const label = el("label", { className: "so-check-label", htmlFor: id }, content);
+  return el("div", { className }, [input, label]);
+}
+
 /** Build the recipients section. */
 function buildRecipientsSection(
   model: ReviewModel,
@@ -195,26 +243,22 @@ function buildRecipientsSection(
   if (model.recipients.length === 0) {
     children.push(el("p", { className: "so-empty", text: messages.recipients.none }));
   } else {
+    if (model.requireRecipientConfirmation) {
+      children.push(
+        el("p", { className: "so-confirm-hint", text: messages.recipients.confirmHint }),
+      );
+    }
+    const indexed: IndexedRecipient[] = model.recipients.map((recipient, index) => ({
+      recipient,
+      index,
+    }));
     const fields: RecipientField[] = ["to", "cc", "bcc"];
     for (const field of fields) {
-      const group = buildFieldGroup(field, model.recipients, messages);
+      const group = buildFieldGroup(field, indexed, model, messages, callbacks);
       if (group) {
         children.push(group);
       }
     }
-  }
-
-  if (model.requireExternalRecipientConfirmation) {
-    const confirmList = el(
-      "div",
-      { className: "so-confirm-list" },
-      model.externalEmails.map((email) =>
-        buildCheckbox(`${messages.recipients.confirmExternal}: ${email}`, (checked) => {
-          callbacks.onExternalToggle(email, checked);
-        }),
-      ),
-    );
-    children.push(confirmList);
   }
 
   return el("section", { className: "so-section" }, children);
@@ -233,25 +277,27 @@ function buildAttachmentsSection(
   if (model.attachments.length === 0) {
     children.push(el("p", { className: "so-empty", text: messages.attachments.none }));
   } else {
-    const rows = model.attachments.map((attachment: AttachmentView) => {
+    if (model.requireAttachmentConfirmation) {
+      children.push(
+        el("p", { className: "so-confirm-hint", text: messages.attachments.confirmHint }),
+      );
+    }
+    const rows = model.attachments.map((attachment: AttachmentView, index: number) => {
       const size = formatSize(attachment.sizeBytes);
-      const rowChildren: Node[] = [
+      const content: Node[] = [
         el("span", { className: "so-attachment-name", text: attachment.name }),
       ];
       if (size.length > 0) {
-        rowChildren.push(el("span", { className: "so-attachment-size", text: size }));
+        content.push(el("span", { className: "so-attachment-size", text: size }));
       }
-      return el("div", { className: "so-attachment" }, rowChildren);
+      if (model.requireAttachmentConfirmation) {
+        return buildCheckboxRow("so-attachment so-attachment-check", content, (checked) => {
+          callbacks.onAttachmentToggle(index, checked);
+        });
+      }
+      return el("div", { className: "so-attachment" }, content);
     });
     children.push(el("div", { className: "so-attachment-list" }, rows));
-
-    if (model.requireAttachmentConfirmation) {
-      children.push(
-        buildCheckbox(messages.attachments.confirm, (checked) => {
-          callbacks.onAttachmentsToggle(checked);
-        }),
-      );
-    }
   }
 
   return el("section", { className: "so-section" }, children);

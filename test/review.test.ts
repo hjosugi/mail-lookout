@@ -89,11 +89,14 @@ describe("buildReviewModel", () => {
     expect(warning?.count).toBe(2);
   });
 
-  it("requires external confirmation only when there are external recipients", () => {
-    const withExternal = buildReviewModel(snapshot({ recipients: [externalA] }), defaultConfig);
-    const withoutExternal = buildReviewModel(snapshot({ recipients: [internal] }), defaultConfig);
-    expect(withExternal.requireExternalRecipientConfirmation).toBe(true);
-    expect(withoutExternal.requireExternalRecipientConfirmation).toBe(false);
+  it("requires recipient confirmation only when there are recipients", () => {
+    const withRecipients = buildReviewModel(
+      snapshot({ recipients: [internal, externalA, externalB] }),
+      defaultConfig,
+    );
+    const withoutRecipients = buildReviewModel(snapshot({ recipients: [] }), defaultConfig);
+    expect(withRecipients.requireRecipientConfirmation).toBe(true);
+    expect(withoutRecipients.requireRecipientConfirmation).toBe(false);
   });
 
   it("requires attachment confirmation only when there are attachments", () => {
@@ -162,30 +165,32 @@ describe("canSend", () => {
     expect(canSend(model, state)).toBe(false);
   });
 
-  it("blocks until attachments are confirmed", () => {
+  it("blocks until every attachment is confirmed one by one", () => {
+    const secondFile: Attachment = { id: "3", name: "data.csv", size: 2000, isInline: false };
     const model = modelWith(
-      { attachments: [realFile] },
+      { attachments: [realFile, secondFile] },
       config({ sendDelaySeconds: 0, requireBodyConfirmation: false }),
     );
-    const state = initialReviewState(model);
-    expect(canSend(model, state)).toBe(false);
-    const confirmed = { ...state, attachmentsConfirmed: true };
-    expect(canSend(model, confirmed)).toBe(true);
+    const partial = { ...initialReviewState(model), confirmedAttachments: new Set([0]) };
+    expect(canSend(model, partial)).toBe(false);
+    const full = { ...initialReviewState(model), confirmedAttachments: new Set([0, 1]) };
+    expect(canSend(model, full)).toBe(true);
   });
 
-  it("blocks until every external recipient is confirmed", () => {
+  it("blocks until every recipient is confirmed one by one", () => {
+    // Several recipients spanning To and Cc, mixed internal and external.
     const model = modelWith(
-      { recipients: [externalA, externalB] },
+      { recipients: [internal, externalA, externalB] },
       config({ sendDelaySeconds: 0, requireBodyConfirmation: false }),
     );
     const partial = {
       ...initialReviewState(model),
-      confirmedExternalEmails: new Set(["a@other.com"]),
+      confirmedRecipients: new Set([0, 1]),
     };
     expect(canSend(model, partial)).toBe(false);
     const full = {
       ...initialReviewState(model),
-      confirmedExternalEmails: new Set(["a@other.com", "b@other.com"]),
+      confirmedRecipients: new Set([0, 1, 2]),
     };
     expect(canSend(model, full)).toBe(true);
   });

@@ -15,8 +15,8 @@ export interface Config {
   readonly internalDomains: readonly string[];
   /** Seconds to count down before the send button turns on. */
   readonly sendDelaySeconds: number;
-  /** Require a per-address check for each external recipient. */
-  readonly requireExternalRecipientConfirmation: boolean;
+  /** Require a per-recipient check for every recipient across To/Cc/Bcc. */
+  readonly requireRecipientConfirmation: boolean;
   /** Require a check that attachments were reviewed. */
   readonly requireAttachmentConfirmation: boolean;
   /** Require a check that the body was reviewed. */

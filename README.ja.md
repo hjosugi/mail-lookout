@@ -16,10 +16,10 @@
 このアドインは送信時に 4 つのことを行います。
 
 1. **宛先確認。** すべての宛先をフィールド別（To / Cc / Bcc）に
-   一覧表示します。社外の宛先には印を付け、社外アドレスを 1 件ずつ
+   一覧表示し、社外の宛先には印を付けます。宛先を 1 件ずつ
    確認させます。
-2. **添付ファイル確認。** 実体のある添付をすべて一覧表示し、確認
-   したことをチェックさせます。
+2. **添付ファイル確認。** 実体のある添付をすべて一覧表示し、ファイル
+   を 1 つずつ確認させます。
 3. **本文確認。** 本文のプレビューを表示し、確認したことをチェック
    させます。
 4. **送信ディレイ。** 送信ボタンが有効になるまで数秒カウントダウン
@@ -164,9 +164,8 @@ npm run validate       # office-addin-manifest validate
 - `internalDomains`: 社内として扱うドメイン。
 - `sendDelaySeconds`: 送信が有効になるまでのカウントダウン秒数。
   `0` で無効。
-- `requireExternalRecipientConfirmation`: 社外アドレスを 1 件ずつ
-  確認させる。
-- `requireAttachmentConfirmation`: 添付を確認したことをチェック
+- `requireRecipientConfirmation`: 宛先を 1 件ずつ確認させる。
+- `requireAttachmentConfirmation`: 添付ファイルを 1 つずつ確認
   させる。
 - `requireBodyConfirmation`: 本文を確認したことをチェックさせる。
 - `attachmentKeywords`: 本文が添付に言及しているか判定する語。

@@ -59,7 +59,7 @@ export interface ReviewModel {
   readonly externalEmails: readonly string[];
   readonly warnings: readonly Warning[];
   readonly sendDelaySeconds: number;
-  readonly requireExternalRecipientConfirmation: boolean;
+  readonly requireRecipientConfirmation: boolean;
   readonly requireAttachmentConfirmation: boolean;
   readonly requireBodyConfirmation: boolean;
 }
@@ -117,10 +117,10 @@ export function buildReviewModel(snapshot: MessageSnapshot, config: Config): Rev
   const sendDelaySeconds = Math.max(0, Math.floor(config.sendDelaySeconds));
 
   // A confirmation is required only when it is both turned on and
-  // there is something to confirm. No external recipients means no
-  // external confirmation, and so on.
-  const requireExternalRecipientConfirmation =
-    config.requireExternalRecipientConfirmation && externalEmails.length > 0;
+  // there is something to confirm. No recipients means no recipient
+  // confirmation, no attachments means no attachment confirmation.
+  const requireRecipientConfirmation =
+    config.requireRecipientConfirmation && recipients.length > 0;
   const requireAttachmentConfirmation =
     config.requireAttachmentConfirmation && attachments.length > 0;
   const requireBodyConfirmation = config.requireBodyConfirmation;
@@ -133,7 +133,7 @@ export function buildReviewModel(snapshot: MessageSnapshot, config: Config): Rev
     externalEmails,
     warnings,
     sendDelaySeconds,
-    requireExternalRecipientConfirmation,
+    requireRecipientConfirmation,
     requireAttachmentConfirmation,
     requireBodyConfirmation,
   };
@@ -146,9 +146,10 @@ export function buildReviewModel(snapshot: MessageSnapshot, config: Config): Rev
  * send delay has elapsed.
  */
 export interface ReviewState {
-  /** External addresses the user has confirmed one by one. */
-  readonly confirmedExternalEmails: ReadonlySet<string>;
-  readonly attachmentsConfirmed: boolean;
+  /** Indices of recipients the user has confirmed one by one. */
+  readonly confirmedRecipients: ReadonlySet<number>;
+  /** Indices of attachments the user has confirmed one by one. */
+  readonly confirmedAttachments: ReadonlySet<number>;
   readonly bodyConfirmed: boolean;
   readonly delayElapsed: boolean;
 }
@@ -161,19 +162,29 @@ export interface ReviewState {
  */
 export function initialReviewState(model: ReviewModel): ReviewState {
   return {
-    confirmedExternalEmails: new Set<string>(),
-    attachmentsConfirmed: !model.requireAttachmentConfirmation,
+    confirmedRecipients: new Set<number>(),
+    confirmedAttachments: new Set<number>(),
     bodyConfirmed: !model.requireBodyConfirmation,
     delayElapsed: model.sendDelaySeconds === 0,
   };
 }
 
+/** True when every index from 0 to count-1 is present in the set. */
+function allIndicesConfirmed(count: number, confirmed: ReadonlySet<number>): boolean {
+  for (let index = 0; index < count; index += 1) {
+    if (!confirmed.has(index)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 /**
  * Decide if the user may send now.
  *
- * The delay must be over, and every required confirmation must
- * be satisfied. For external recipients, every external address
- * must be individually confirmed.
+ * The delay must be over, and every required confirmation must be
+ * satisfied. When recipient or attachment confirmation is required,
+ * every recipient and every attachment must be checked one by one.
  */
 export function canSend(model: ReviewModel, state: ReviewState): boolean {
   if (!state.delayElapsed) {
@@ -182,15 +193,17 @@ export function canSend(model: ReviewModel, state: ReviewState): boolean {
   if (model.requireBodyConfirmation && !state.bodyConfirmed) {
     return false;
   }
-  if (model.requireAttachmentConfirmation && !state.attachmentsConfirmed) {
+  if (
+    model.requireRecipientConfirmation &&
+    !allIndicesConfirmed(model.recipients.length, state.confirmedRecipients)
+  ) {
     return false;
   }
-  if (model.requireExternalRecipientConfirmation) {
-    for (const email of model.externalEmails) {
-      if (!state.confirmedExternalEmails.has(email)) {
-        return false;
-      }
-    }
+  if (
+    model.requireAttachmentConfirmation &&
+    !allIndicesConfirmed(model.attachments.length, state.confirmedAttachments)
+  ) {
+    return false;
   }
   return true;
 }

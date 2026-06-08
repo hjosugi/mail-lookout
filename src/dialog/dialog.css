@@ -193,11 +193,48 @@ body {
   color: var(--so-external-fg);
 }
 
-.so-confirm-list {
-  margin-top: 10px;
+.so-confirm-hint {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: var(--so-fg-muted);
+}
+
+/* A recipient or attachment row that doubles as a confirmation checkbox. */
+.so-recipient-check,
+.so-attachment-check {
+  cursor: pointer;
+}
+
+.so-attachment-check {
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.so-recipient-check > input[type="checkbox"],
+.so-attachment-check > input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--so-accent);
+  flex: 0 0 auto;
+}
+
+.so-recipient-check > .so-check-label {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 1 1 auto;
+  margin: 0;
+}
+
+.so-attachment-check > .so-check-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  flex: 1 1 auto;
+  margin: 0;
 }
 
 .so-attachment-list {

@@ -9,12 +9,17 @@ const model: ReviewModel = {
   bodyPreview: "Body text",
   recipients: [
     { field: "to", displayName: "Ann", emailAddress: "ann@other.com", isExternal: true },
+    { field: "to", displayName: "Ben", emailAddress: "ben@example.com", isExternal: false },
+    { field: "cc", displayName: "Cara", emailAddress: "cara@partner.test", isExternal: true },
   ],
-  attachments: [{ name: "report.pdf", sizeBytes: 1024 }],
-  externalEmails: ["ann@other.com"],
-  warnings: [{ kind: "externalRecipients", count: 1 }],
+  attachments: [
+    { name: "report.pdf", sizeBytes: 1024 },
+    { name: "data.csv", sizeBytes: 2048 },
+  ],
+  externalEmails: ["ann@other.com", "cara@partner.test"],
+  warnings: [{ kind: "externalRecipients", count: 2 }],
   sendDelaySeconds: 5,
-  requireExternalRecipientConfirmation: true,
+  requireRecipientConfirmation: true,
   requireAttachmentConfirmation: true,
   requireBodyConfirmation: true,
 };

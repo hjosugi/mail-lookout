@@ -31,12 +31,12 @@ export interface Messages {
   readonly recipients: {
     readonly externalBadge: string;
     readonly internalBadge: string;
-    readonly confirmExternal: string;
+    readonly confirmHint: string;
     readonly none: string;
   };
   readonly attachments: {
     readonly none: string;
-    readonly confirm: string;
+    readonly confirmHint: string;
   };
   readonly body: {
     readonly confirm: string;
