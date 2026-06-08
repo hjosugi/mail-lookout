@@ -8,3 +8,6 @@ coverage/
 *.pem
 *.crt
 *.key
+
+# Private, personal notes — never committed
+private/
