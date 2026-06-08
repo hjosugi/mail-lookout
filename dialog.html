@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Confirm before sending</title>
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <style>
+      /* Minimal critical CSS for the loading state. The full
+         stylesheet is imported by the dialog module. */
+      body {
+        margin: 0;
+        font-family: "Segoe UI", system-ui, sans-serif;
+      }
+      .loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        color: #616161;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" class="loading">Loading...</div>
+    <script type="module" src="./src/dialog/dialog.ts"></script>
+  </body>
+</html>

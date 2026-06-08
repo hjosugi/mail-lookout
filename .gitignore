@@ -1,0 +1,10 @@
+node_modules/
+dist/
+coverage/
+*.log
+.DS_Store
+
+# Local dev certificates
+*.pem
+*.crt
+*.key

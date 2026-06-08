@@ -1,0 +1,321 @@
+/*
+ * Dialog styles.
+ *
+ * Design note: this dialog lives inside Outlook. The right look is
+ * a quiet, native one that matches the host, not a bold standalone
+ * brand. So this leans on the Fluent look: Segoe UI, a calm blue
+ * accent, clear spacing, and full dark-mode support. The Segoe UI
+ * font stack is a deliberate host-match choice.
+ */
+
+:root {
+  --so-bg: #ffffff;
+  --so-fg: #242424;
+  --so-fg-muted: #616161;
+  --so-border: #e0e0e0;
+  --so-surface: #faf9f8;
+  --so-accent: #0f6cbd;
+  --so-accent-hover: #115ea3;
+  --so-accent-fg: #ffffff;
+  --so-warning-bg: #fff4ce;
+  --so-warning-fg: #6b5900;
+  --so-warning-border: #f2d98a;
+  --so-external-bg: #fde7e9;
+  --so-external-fg: #a4262c;
+  --so-badge-bg: #eef2f6;
+  --so-badge-fg: #424f5e;
+  --so-disabled-bg: #f0f0f0;
+  --so-disabled-fg: #a6a6a6;
+  --so-focus: #0f6cbd;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --so-bg: #1f1f1f;
+    --so-fg: #f5f5f5;
+    --so-fg-muted: #adadad;
+    --so-border: #3d3d3d;
+    --so-surface: #2a2a2a;
+    --so-accent: #479ef5;
+    --so-accent-hover: #62abf5;
+    --so-accent-fg: #0a0a0a;
+    --so-warning-bg: #4a3f0a;
+    --so-warning-fg: #f7e6a0;
+    --so-warning-border: #6b5900;
+    --so-external-bg: #4a1f22;
+    --so-external-fg: #f1a5a9;
+    --so-badge-bg: #333a42;
+    --so-badge-fg: #c5d0db;
+    --so-disabled-bg: #2e2e2e;
+    --so-disabled-fg: #6b6b6b;
+    --so-focus: #479ef5;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family:
+    "Segoe UI",
+    "Segoe UI Web (West European)",
+    -apple-system,
+    BlinkMacSystemFont,
+    system-ui,
+    sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--so-fg);
+  background: var(--so-bg);
+}
+
+.so-dialog {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.so-header {
+  padding: 20px 20px 12px;
+  border-bottom: 1px solid var(--so-border);
+}
+
+.so-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.so-intro {
+  margin: 6px 0 0;
+  color: var(--so-fg-muted);
+  font-size: 13px;
+}
+
+.so-body-content {
+  flex: 1 1 auto;
+  padding: 8px 20px 16px;
+  overflow-y: auto;
+}
+
+.so-warnings {
+  list-style: none;
+  margin: 12px 0 4px;
+  padding: 10px 12px;
+  background: var(--so-warning-bg);
+  color: var(--so-warning-fg);
+  border: 1px solid var(--so-warning-border);
+  border-radius: 6px;
+}
+
+.so-warning {
+  margin: 0;
+  padding: 2px 0;
+  font-size: 13px;
+}
+
+.so-warning + .so-warning {
+  border-top: 1px solid var(--so-warning-border);
+  margin-top: 4px;
+  padding-top: 6px;
+}
+
+.so-section {
+  margin-top: 16px;
+}
+
+.so-section-title {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--so-fg-muted);
+}
+
+.so-empty {
+  margin: 0;
+  color: var(--so-fg-muted);
+  font-style: italic;
+}
+
+.so-field-group {
+  margin-bottom: 10px;
+}
+
+.so-field-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--so-fg-muted);
+  margin-bottom: 4px;
+}
+
+.so-field-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.so-recipient {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 6px 8px;
+  background: var(--so-surface);
+  border: 1px solid var(--so-border);
+  border-radius: 6px;
+}
+
+.so-recipient-name {
+  font-weight: 500;
+}
+
+.so-recipient-email {
+  color: var(--so-fg-muted);
+  font-size: 13px;
+}
+
+.so-badge {
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--so-badge-bg);
+  color: var(--so-badge-fg);
+}
+
+.so-badge-external {
+  background: var(--so-external-bg);
+  color: var(--so-external-fg);
+}
+
+.so-confirm-list {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.so-attachment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.so-attachment {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  background: var(--so-surface);
+  border: 1px solid var(--so-border);
+  border-radius: 6px;
+}
+
+.so-attachment-name {
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.so-attachment-size {
+  flex: 0 0 auto;
+  color: var(--so-fg-muted);
+  font-size: 12px;
+}
+
+.so-subject {
+  margin: 0;
+  padding: 8px 10px;
+  background: var(--so-surface);
+  border: 1px solid var(--so-border);
+  border-radius: 6px;
+  word-break: break-word;
+}
+
+.so-body {
+  margin: 0;
+  padding: 8px 10px;
+  background: var(--so-surface);
+  border: 1px solid var(--so-border);
+  border-radius: 6px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 140px;
+  overflow-y: auto;
+}
+
+.so-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.so-check input[type="checkbox"] {
+  margin-top: 3px;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--so-accent);
+  flex: 0 0 auto;
+}
+
+.so-check-label {
+  cursor: pointer;
+  font-size: 13px;
+  word-break: break-word;
+}
+
+.so-footer {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--so-border);
+  background: var(--so-bg);
+}
+
+.so-button {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.so-button:focus-visible {
+  outline: 2px solid var(--so-focus);
+  outline-offset: 2px;
+}
+
+.so-button-secondary {
+  background: transparent;
+  color: var(--so-fg);
+  border-color: var(--so-border);
+}
+
+.so-button-secondary:hover {
+  background: var(--so-surface);
+}
+
+.so-button-primary {
+  background: var(--so-accent);
+  color: var(--so-accent-fg);
+}
+
+.so-button-primary:hover:not(:disabled) {
+  background: var(--so-accent-hover);
+}
+
+.so-button-primary:disabled {
+  background: var(--so-disabled-bg);
+  color: var(--so-disabled-fg);
+  cursor: not-allowed;
+}

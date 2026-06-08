@@ -1,0 +1,49 @@
+{
+  "name": "mail-lookout",
+  "version": "1.0.0",
+  "description": "A send-confirmation add-in for the new Outlook. It opens a review dialog before each send to help prevent misdelivery.",
+  "type": "module",
+  "license": "MIT",
+  "keywords": [
+    "outlook",
+    "office-addin",
+    "smart-alerts",
+    "email",
+    "send-confirmation"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev-certs": "office-addin-dev-certs install",
+    "dev": "vite",
+    "dev:emulator": "vite --open /emulator.html",
+    "dev:outlook": "vite --port 3000 --strictPort",
+    "build": "tsc -p tsconfig.json --noEmit && vite build",
+    "preview": "vite preview --port 3000",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.node.json --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "validate": "office-addin-manifest validate manifest.xml",
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm run test:coverage && npm run build && npm run validate"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^25.9.1",
+    "@types/office-js": "^1.0.592",
+    "@vitest/coverage-v8": "^4.1.8",
+    "eslint": "^10.4.1",
+    "office-addin-dev-certs": "^2.0.9",
+    "office-addin-manifest": "^2.1.5",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.60.1",
+    "vite": "^8.0.16",
+    "vitest": "^4.1.8"
+  }
+}

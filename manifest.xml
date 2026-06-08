@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  mail-lookout add-in manifest (add-in only, XML format).
+
+  This manifest registers a Smart Alerts handler. The handler runs
+  on send (OnMessageSend) and opens a confirmation dialog.
+
+  Before you deploy:
+    1. Replace the <Id> below with your own GUID.
+    2. Replace every https://localhost:3000 URL with your host.
+    3. Replace ProviderName, SupportUrl, and AppDomains.
+
+  SendMode is SoftBlock. To make every cancel one-click
+  bypassable instead, change SendMode to PromptUser below. See the
+  README for the tradeoff.
+-->
+<OfficeApp
+  xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
+  xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides/1.0"
+  xsi:type="MailApp">
+
+  <Id>7888d7db-1c99-4e49-a191-ea73f4088740</Id>
+  <Version>1.0.0.0</Version>
+  <ProviderName>mail-lookout contributors</ProviderName>
+  <DefaultLocale>en-US</DefaultLocale>
+  <DisplayName DefaultValue="mail-lookout" />
+  <Description DefaultValue="Confirm recipients, attachments, and body before an email is sent." />
+  <IconUrl DefaultValue="https://localhost:3000/assets/icon-64.png" />
+  <HighResolutionIconUrl DefaultValue="https://localhost:3000/assets/icon-128.png" />
+  <SupportUrl DefaultValue="https://github.com/your-org/mail-lookout" />
+
+  <AppDomains>
+    <AppDomain>https://localhost:3000</AppDomain>
+  </AppDomains>
+
+  <Hosts>
+    <Host Name="Mailbox" />
+  </Hosts>
+
+  <Requirements>
+    <Sets>
+      <Set Name="Mailbox" MinVersion="1.15" />
+    </Sets>
+  </Requirements>
+
+  <!--
+    Legacy activation block. Modern clients use VersionOverrides
+    below, but the base manifest still needs a form and a rule to
+    be valid. This points at the same page as the runtime.
+  -->
+  <FormSettings>
+    <Form xsi:type="ItemRead">
+      <DesktopSettings>
+        <SourceLocation DefaultValue="https://localhost:3000/commands.html" />
+        <RequestedHeight>250</RequestedHeight>
+      </DesktopSettings>
+    </Form>
+  </FormSettings>
+
+  <Permissions>ReadWriteItem</Permissions>
+
+  <Rule xsi:type="RuleCollection" Mode="Or">
+    <Rule xsi:type="ItemIs" ItemType="Message" FormType="Edit" />
+  </Rule>
+
+  <DisableEntityHighlighting>false</DisableEntityHighlighting>
+
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides" xsi:type="VersionOverridesV1_0">
+    <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides/1.1" xsi:type="VersionOverridesV1_1">
+
+      <Requirements>
+        <bt:Sets DefaultMinVersion="1.15">
+          <bt:Set Name="Mailbox" MinVersion="1.15" />
+        </bt:Sets>
+      </Requirements>
+
+      <Hosts>
+        <Host xsi:type="MailHost">
+          <!--
+            The runtime that hosts the send handler. New Outlook
+            and Outlook on the web load commands.html in a browser
+            runtime. The javascript override is for the legacy
+            JS-only runtime on classic Windows, which this project
+            does not target. See the README limitations section.
+          -->
+          <Runtimes>
+            <Runtime resid="WebViewRuntime.Url">
+              <Override type="javascript" resid="JSRuntime.Url" />
+            </Runtime>
+          </Runtimes>
+
+          <DesktopFormFactor>
+            <FunctionFile resid="WebViewRuntime.Url" />
+
+            <!-- The send-time event that drives the whole add-in. -->
+            <ExtensionPoint xsi:type="LaunchEvent">
+              <LaunchEvents>
+                <LaunchEvent Type="OnMessageSend" FunctionName="onMessageSendHandler" SendMode="SoftBlock" />
+              </LaunchEvents>
+              <SourceLocation resid="WebViewRuntime.Url" />
+            </ExtensionPoint>
+          </DesktopFormFactor>
+        </Host>
+      </Hosts>
+
+      <Resources>
+        <bt:Images>
+          <bt:Image id="Icon.16" DefaultValue="https://localhost:3000/assets/icon-16.png" />
+          <bt:Image id="Icon.32" DefaultValue="https://localhost:3000/assets/icon-32.png" />
+          <bt:Image id="Icon.80" DefaultValue="https://localhost:3000/assets/icon-80.png" />
+        </bt:Images>
+
+        <bt:Urls>
+          <bt:Url id="WebViewRuntime.Url" DefaultValue="https://localhost:3000/commands.html" />
+          <bt:Url id="JSRuntime.Url" DefaultValue="https://localhost:3000/assets/commands.js" />
+        </bt:Urls>
+      </Resources>
+
+    </VersionOverrides>
+  </VersionOverrides>
+
+</OfficeApp>
