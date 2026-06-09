@@ -195,6 +195,14 @@ body {
   color: var(--so-fg-muted);
 }
 
+/* Base label style, kept above the more specific check-row rules
+   below so specificity stays ascending. */
+.so-check-label {
+  cursor: pointer;
+  font-size: 13px;
+  word-break: break-word;
+}
+
 /* A recipient or attachment row that doubles as a confirmation checkbox. */
 .so-recipient-check,
 .so-attachment-check {
@@ -217,6 +225,9 @@ body {
 
 .so-recipient-check > .so-check-label {
   display: flex;
+  /* Explicit row so an ambient label{flex-direction:column} on the
+     host page (the emulator sets one) cannot stack badge/name/email. */
+  flex-direction: row;
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
@@ -226,6 +237,7 @@ body {
 
 .so-attachment-check > .so-check-label {
   display: flex;
+  flex-direction: row;
   align-items: baseline;
   justify-content: space-between;
   gap: 8px;
@@ -303,12 +315,6 @@ body {
   height: 16px;
   accent-color: var(--so-accent);
   flex: 0 0 auto;
-}
-
-.so-check-label {
-  cursor: pointer;
-  font-size: 13px;
-  word-break: break-word;
 }
 
 .so-footer {
