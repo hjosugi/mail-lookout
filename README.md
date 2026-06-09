@@ -8,8 +8,8 @@ to check, wait out a short delay, and then send. The goal is to stop
 the small mistakes: the wrong recipient, the forgotten attachment,
 the empty subject.
 
-The name "mail-lookout" comes from 送信お願い, "please confirm before
-you send".
+The name is literal: a lookout for your outgoing mail — a quiet watch
+that flags problems before a message leaves.
 
 > Japanese version: [README.ja.md](./README.ja.md)
 
