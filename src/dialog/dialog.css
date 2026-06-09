@@ -275,15 +275,23 @@ body {
 }
 
 .so-body {
+  display: block;
+  width: 100%;
   margin: 0;
   padding: 8px 10px;
+  font: inherit;
+  color: var(--so-fg);
   background: var(--so-surface);
   border: 1px solid var(--so-border);
   border-radius: 6px;
   white-space: pre-wrap;
   word-break: break-word;
-  max-height: 140px;
-  overflow-y: auto;
+  resize: vertical;
+}
+
+.so-body:focus-visible {
+  outline: 2px solid var(--so-focus);
+  outline-offset: 1px;
 }
 
 .so-check {

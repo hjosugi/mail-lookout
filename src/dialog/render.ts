@@ -318,9 +318,17 @@ function buildBodySection(
   callbacks: DialogCallbacks,
 ): HTMLElement {
   const previewText = model.bodyPreview.length > 0 ? model.bodyPreview : messages.body.empty;
+  // A read-only textarea, not a <p>: it gives the body its own
+  // bounded, scrollable box and keeps every line break visible, so
+  // it reads like the message rather than a wrapped paragraph. Still
+  // filled with textContent, so it stays injection-safe.
+  const bodyField = el("textarea", { className: "so-body", text: previewText });
+  bodyField.readOnly = true;
+  bodyField.rows = 6;
+  bodyField.setAttribute("aria-label", messages.sections.body);
   const children: Node[] = [
     el("h2", { className: "so-section-title", text: messages.sections.body }),
-    el("p", { className: "so-body", text: previewText }),
+    bodyField,
   ];
   if (model.requireBodyConfirmation) {
     children.push(
