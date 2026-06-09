@@ -1,16 +1,16 @@
-import { defaultConfig } from "../config";
-import { buildReviewModel, canSend, initialReviewState } from "../domain/review";
-import type { ReviewModel, ReviewState } from "../domain/review";
-import type { Attachment, FieldRecipient, MessageSnapshot, RecipientField } from "../domain/types";
-import { getMessages } from "../i18n/catalog";
-import type { LocaleTag } from "../i18n/catalog";
-import { renderDialog } from "../dialog/render";
-import "./emulator.css";
+import { defaultConfig } from "../config"
+import { buildReviewModel, canSend, initialReviewState } from "../domain/review"
+import type { ReviewModel, ReviewState } from "../domain/review"
+import type { Attachment, FieldRecipient, MessageSnapshot, RecipientField } from "../domain/types"
+import { getMessages } from "../i18n/catalog"
+import type { LocaleTag } from "../i18n/catalog"
+import { renderDialog } from "../dialog/render"
+import "./emulator.css"
 
 interface Scenario {
-  readonly id: string;
-  readonly label: string;
-  readonly snapshot: MessageSnapshot;
+  readonly id: string
+  readonly label: string
+  readonly snapshot: MessageSnapshot
 }
 
 const scenarios: readonly Scenario[] = [
@@ -19,8 +19,7 @@ const scenarios: readonly Scenario[] = [
     label: "External recipient with attachment",
     snapshot: {
       subject: "Quarterly forecast review",
-      body:
-        "Hi team,\n\nPlease see attached forecast before the 15:00 review.\n\nRegards,\nMail Lookout",
+      body: "Hi team,\n\nPlease see attached forecast before the 15:00 review.\n\nRegards,\nMail Lookout",
       recipients: [
         recipient("to", "Aki Tanaka", "aki@example.com"),
         recipient("cc", "Jordan Lee", "jordan@partner.test"),
@@ -62,85 +61,85 @@ const scenarios: readonly Scenario[] = [
       senderEmail: "sender@example.com",
     },
   },
-];
+]
 
 function firstScenario(): Scenario {
-  const scenario = scenarios[0];
+  const scenario = scenarios[0]
   if (!scenario) {
-    throw new Error("No emulator scenarios configured.");
+    throw new Error("No emulator scenarios configured.")
   }
-  return scenario;
+  return scenario
 }
 
-let currentTimer: number | null = null;
+let currentTimer: number | null = null
 
 function recipient(
   field: RecipientField,
   displayName: string,
   emailAddress: string,
 ): FieldRecipient {
-  return { field, displayName, emailAddress: emailAddress.trim().toLowerCase() };
+  return { field, displayName, emailAddress: emailAddress.trim().toLowerCase() }
 }
 
 function attachment(name: string, size: number | null): Attachment {
-  return { id: name, name, size, isInline: false };
+  return { id: name, name, size, isInline: false }
 }
 
 function query<T extends HTMLElement>(selector: string, root: ParentNode = document): T {
-  const node = root.querySelector<T>(selector);
+  const node = root.querySelector<T>(selector)
   if (!node) {
-    throw new Error(`Missing emulator element: ${selector}`);
+    throw new Error(`Missing emulator element: ${selector}`)
   }
-  return node;
+  return node
 }
 
 function parseRecipientLine(field: RecipientField, line: string): FieldRecipient | null {
-  const trimmed = line.trim();
+  const trimmed = line.trim()
   if (trimmed.length === 0) {
-    return null;
+    return null
   }
 
-  const match = /^(?<name>.*?)\s*<(?<email>[^<>]+)>$/.exec(trimmed);
+  const match = /^(?<name>.*?)\s*<(?<email>[^<>]+)>$/.exec(trimmed)
   if (match?.groups) {
-    const name = match.groups.name;
-    const email = match.groups.email;
+    const name = match.groups.name
+    const email = match.groups.email
     if (name !== undefined && email !== undefined) {
-      return recipient(field, name.trim(), email.trim());
+      return recipient(field, name.trim(), email.trim())
     }
   }
 
-  return recipient(field, "", trimmed);
+  return recipient(field, "", trimmed)
 }
 
 function parseRecipients(field: RecipientField, raw: string): readonly FieldRecipient[] {
   return raw
     .split("\n")
     .map((line) => parseRecipientLine(field, line))
-    .filter((parsed): parsed is FieldRecipient => parsed !== null);
+    .filter((parsed): parsed is FieldRecipient => parsed !== null)
 }
 
 function parseAttachmentLine(index: number, line: string): Attachment | null {
-  const trimmed = line.trim();
+  const trimmed = line.trim()
   if (trimmed.length === 0) {
-    return null;
+    return null
   }
 
-  const [rawName, rawSize] = trimmed.split(/[,|]/, 2);
-  const name = rawName?.trim() ?? "";
+  const [rawName, rawSize] = trimmed.split(/[,|]/, 2)
+  const name = rawName?.trim() ?? ""
   if (name.length === 0) {
-    return null;
+    return null
   }
 
-  const parsedSize = rawSize === undefined ? null : Number(rawSize.trim());
-  const size = parsedSize === null || Number.isNaN(parsedSize) ? null : Math.max(0, parsedSize);
-  return { id: `local-${index}`, name, size, isInline: false };
+  const parsedSize = rawSize === undefined ? null : Number(rawSize.trim())
+  const size = parsedSize === null || Number.isNaN(parsedSize) ? null : Math.max(0, parsedSize)
+  return { id: `local-${index}`, name, size, isInline: false }
 }
 
 function parseAttachments(raw: string): readonly Attachment[] {
   return raw
     .split("\n")
     .map((line, index) => parseAttachmentLine(index, line))
-    .filter((parsed): parsed is Attachment => parsed !== null);
+    .filter((parsed): parsed is Attachment => parsed !== null)
 }
 
 function recipientText(snapshot: MessageSnapshot, field: RecipientField): string {
@@ -151,14 +150,14 @@ function recipientText(snapshot: MessageSnapshot, field: RecipientField): string
         ? `${item.displayName} <${item.emailAddress}>`
         : item.emailAddress,
     )
-    .join("\n");
+    .join("\n")
 }
 
 function attachmentText(snapshot: MessageSnapshot): string {
   return snapshot.attachments
     .filter((item) => !item.isInline)
     .map((item) => `${item.name}${item.size === null ? "" : `, ${item.size}`}`)
-    .join("\n");
+    .join("\n")
 }
 
 function snapshotFromForm(): MessageSnapshot {
@@ -166,7 +165,7 @@ function snapshotFromForm(): MessageSnapshot {
     ...parseRecipients("to", query<HTMLTextAreaElement>("#emu-to").value),
     ...parseRecipients("cc", query<HTMLTextAreaElement>("#emu-cc").value),
     ...parseRecipients("bcc", query<HTMLTextAreaElement>("#emu-bcc").value),
-  ];
+  ]
 
   return {
     subject: query<HTMLInputElement>("#emu-subject").value,
@@ -174,7 +173,7 @@ function snapshotFromForm(): MessageSnapshot {
     recipients,
     attachments: parseAttachments(query<HTMLTextAreaElement>("#emu-attachments").value),
     senderEmail: "sender@example.com",
-  };
+  }
 }
 
 function configFromForm() {
@@ -185,111 +184,111 @@ function configFromForm() {
     requireAttachmentConfirmation: query<HTMLInputElement>("#emu-require-attachments").checked,
     requireBodyConfirmation: query<HTMLInputElement>("#emu-require-body").checked,
     fallbackLocale: query<HTMLSelectElement>("#emu-locale").value as LocaleTag,
-  };
+  }
 }
 
 function fillForm(snapshot: MessageSnapshot): void {
-  query<HTMLInputElement>("#emu-subject").value = snapshot.subject;
-  query<HTMLTextAreaElement>("#emu-body").value = snapshot.body;
-  query<HTMLTextAreaElement>("#emu-to").value = recipientText(snapshot, "to");
-  query<HTMLTextAreaElement>("#emu-cc").value = recipientText(snapshot, "cc");
-  query<HTMLTextAreaElement>("#emu-bcc").value = recipientText(snapshot, "bcc");
-  query<HTMLTextAreaElement>("#emu-attachments").value = attachmentText(snapshot);
+  query<HTMLInputElement>("#emu-subject").value = snapshot.subject
+  query<HTMLTextAreaElement>("#emu-body").value = snapshot.body
+  query<HTMLTextAreaElement>("#emu-to").value = recipientText(snapshot, "to")
+  query<HTMLTextAreaElement>("#emu-cc").value = recipientText(snapshot, "cc")
+  query<HTMLTextAreaElement>("#emu-bcc").value = recipientText(snapshot, "bcc")
+  query<HTMLTextAreaElement>("#emu-attachments").value = attachmentText(snapshot)
 }
 
 function stopTimer(): void {
   if (currentTimer !== null) {
-    window.clearInterval(currentTimer);
-    currentTimer = null;
+    window.clearInterval(currentTimer)
+    currentTimer = null
   }
 }
 
 function setStatus(text: string): void {
-  query<HTMLElement>("#emu-status").textContent = text;
+  query<HTMLElement>("#emu-status").textContent = text
 }
 
 function closeReview(): void {
-  stopTimer();
-  query<HTMLElement>("#emu-dialog").hidden = true;
-  query<HTMLElement>("#emu-preview").replaceChildren();
+  stopTimer()
+  query<HTMLElement>("#emu-dialog").hidden = true
+  query<HTMLElement>("#emu-preview").replaceChildren()
 }
 
 function openReview(): void {
-  query<HTMLElement>("#emu-dialog").hidden = false;
+  query<HTMLElement>("#emu-dialog").hidden = false
 }
 
 function mountReview(model: ReviewModel, locale: LocaleTag): void {
-  stopTimer();
-  const preview = query<HTMLElement>("#emu-preview");
-  const messages = getMessages(locale);
-  let state: ReviewState = initialReviewState(model);
+  stopTimer()
+  const preview = query<HTMLElement>("#emu-preview")
+  const messages = getMessages(locale)
+  let state: ReviewState = initialReviewState(model)
 
   const handle = renderDialog(model, messages, {
     onRecipientToggle(index, checked) {
-      const next = new Set(state.confirmedRecipients);
+      const next = new Set(state.confirmedRecipients)
       if (checked) {
-        next.add(index);
+        next.add(index)
       } else {
-        next.delete(index);
+        next.delete(index)
       }
-      state = { ...state, confirmedRecipients: next };
-      handle.setSendEnabled(canSend(model, state));
+      state = { ...state, confirmedRecipients: next }
+      handle.setSendEnabled(canSend(model, state))
     },
     onAttachmentToggle(index, checked) {
-      const next = new Set(state.confirmedAttachments);
+      const next = new Set(state.confirmedAttachments)
       if (checked) {
-        next.add(index);
+        next.add(index)
       } else {
-        next.delete(index);
+        next.delete(index)
       }
-      state = { ...state, confirmedAttachments: next };
-      handle.setSendEnabled(canSend(model, state));
+      state = { ...state, confirmedAttachments: next }
+      handle.setSendEnabled(canSend(model, state))
     },
     onBodyToggle(checked) {
-      state = { ...state, bodyConfirmed: checked };
-      handle.setSendEnabled(canSend(model, state));
+      state = { ...state, bodyConfirmed: checked }
+      handle.setSendEnabled(canSend(model, state))
     },
     onSend() {
-      setStatus(locale === "ja" ? "送信を許可しました。" : "Send allowed.");
-      closeReview();
+      setStatus(locale === "ja" ? "送信を許可しました。" : "Send allowed.")
+      closeReview()
     },
     onBack() {
-      setStatus(locale === "ja" ? "編集に戻る判定です。" : "Back to draft selected.");
-      closeReview();
+      setStatus(locale === "ja" ? "編集に戻る判定です。" : "Back to draft selected.")
+      closeReview()
     },
-  });
+  })
 
-  preview.replaceChildren(handle.element);
-  openReview();
-  handle.setSendEnabled(canSend(model, state));
+  preview.replaceChildren(handle.element)
+  openReview()
+  handle.setSendEnabled(canSend(model, state))
 
-  let remaining = model.sendDelaySeconds;
+  let remaining = model.sendDelaySeconds
   if (remaining > 0) {
-    handle.setCountdown(remaining);
+    handle.setCountdown(remaining)
     currentTimer = window.setInterval(() => {
-      remaining -= 1;
+      remaining -= 1
       if (remaining <= 0) {
-        stopTimer();
-        handle.setCountdown(null);
-        state = { ...state, delayElapsed: true };
-        handle.setSendEnabled(canSend(model, state));
+        stopTimer()
+        handle.setCountdown(null)
+        state = { ...state, delayElapsed: true }
+        handle.setSendEnabled(canSend(model, state))
       } else {
-        handle.setCountdown(remaining);
+        handle.setCountdown(remaining)
       }
-    }, 1000);
+    }, 1000)
   }
 }
 
 function runReview(): void {
-  const config = configFromForm();
-  const model = buildReviewModel(snapshotFromForm(), config);
-  setStatus(config.fallbackLocale === "ja" ? "確認中です。" : "Reviewing draft.");
-  mountReview(model, config.fallbackLocale);
+  const config = configFromForm()
+  const model = buildReviewModel(snapshotFromForm(), config)
+  setStatus(config.fallbackLocale === "ja" ? "確認中です。" : "Reviewing draft.")
+  mountReview(model, config.fallbackLocale)
 }
 
 function renderShell(): void {
-  const initialScenario = firstScenario();
-  const root = query<HTMLElement>("#root");
+  const initialScenario = firstScenario()
+  const root = query<HTMLElement>("#root")
   root.innerHTML = `
     <main class="ml-emulator">
       <section class="ml-panel ml-form-panel" aria-labelledby="emu-title">
@@ -377,39 +376,40 @@ function renderShell(): void {
         <div id="emu-preview" class="ml-preview"></div>
       </section>
     </div>
-  `;
+  `
 
-  const scenarioSelect = query<HTMLSelectElement>("#emu-scenario");
+  const scenarioSelect = query<HTMLSelectElement>("#emu-scenario")
   for (const scenario of scenarios) {
-    const option = document.createElement("option");
-    option.value = scenario.id;
-    option.textContent = scenario.label;
-    scenarioSelect.append(option);
+    const option = document.createElement("option")
+    option.value = scenario.id
+    option.textContent = scenario.label
+    scenarioSelect.append(option)
   }
 
-  scenarioSelect.value = initialScenario.id;
-  fillForm(initialScenario.snapshot);
-  updateDraftSummary();
+  scenarioSelect.value = initialScenario.id
+  fillForm(initialScenario.snapshot)
+  updateDraftSummary()
   scenarioSelect.addEventListener("change", () => {
-    const selected = scenarios.find((scenario) => scenario.id === scenarioSelect.value);
+    const selected = scenarios.find((scenario) => scenario.id === scenarioSelect.value)
     if (selected) {
-      fillForm(selected.snapshot);
-      updateDraftSummary();
+      fillForm(selected.snapshot)
+      updateDraftSummary()
     }
-  });
-  query<HTMLButtonElement>("#emu-review").addEventListener("click", runReview);
-  query<HTMLButtonElement>("#emu-close").addEventListener("click", closeReview);
-  query<HTMLElement>("[data-close-review]").addEventListener("click", closeReview);
+  })
+  query<HTMLButtonElement>("#emu-review").addEventListener("click", runReview)
+  query<HTMLButtonElement>("#emu-close").addEventListener("click", closeReview)
+  query<HTMLElement>("[data-close-review]").addEventListener("click", closeReview)
   for (const selector of ["#emu-subject", "#emu-to", "#emu-cc", "#emu-bcc", "#emu-attachments"]) {
-    query<HTMLElement>(selector).addEventListener("input", updateDraftSummary);
+    query<HTMLElement>(selector).addEventListener("input", updateDraftSummary)
   }
 }
 
 function updateDraftSummary(): void {
-  const snapshot = snapshotFromForm();
-  const subject = snapshot.subject.trim().length > 0 ? snapshot.subject : "(No subject)";
-  query<HTMLElement>("#emu-result-subject").textContent = subject;
-  query<HTMLElement>("#emu-result-meta").textContent = `${snapshot.recipients.length} recipients, ${snapshot.attachments.length} attachments`;
+  const snapshot = snapshotFromForm()
+  const subject = snapshot.subject.trim().length > 0 ? snapshot.subject : "(No subject)"
+  query<HTMLElement>("#emu-result-subject").textContent = subject
+  query<HTMLElement>("#emu-result-meta").textContent =
+    `${snapshot.recipients.length} recipients, ${snapshot.attachments.length} attachments`
 }
 
-renderShell();
+renderShell()

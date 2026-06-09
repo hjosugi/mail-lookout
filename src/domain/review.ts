@@ -11,37 +11,37 @@
  * why it is easy to test, and the tests are where the value is.
  */
 
-import type { Config } from "../config";
-import { detectForgottenAttachment, realAttachments } from "./attachments";
-import { isExternal } from "./recipients";
-import { isSubjectEmpty } from "./body";
-import { bodyPreview } from "./body";
-import type { Attachment, FieldRecipient, MessageSnapshot, RecipientField } from "./types";
+import type { Config } from "../config"
+import { detectForgottenAttachment, realAttachments } from "./attachments"
+import { isExternal } from "./recipients"
+import { isSubjectEmpty } from "./body"
+import { bodyPreview } from "./body"
+import type { Attachment, FieldRecipient, MessageSnapshot, RecipientField } from "./types"
 
 /** The longest body preview we show in the dialog. */
-export const BODY_PREVIEW_MAX_LENGTH = 600;
+export const BODY_PREVIEW_MAX_LENGTH = 600
 
 /** A recipient as shown in the dialog. */
 export interface RecipientView {
-  readonly field: RecipientField;
-  readonly displayName: string;
-  readonly emailAddress: string;
-  readonly isExternal: boolean;
+  readonly field: RecipientField
+  readonly displayName: string
+  readonly emailAddress: string
+  readonly isExternal: boolean
 }
 
 /** An attachment as shown in the dialog. */
 export interface AttachmentView {
-  readonly name: string;
-  readonly sizeBytes: number | null;
+  readonly name: string
+  readonly sizeBytes: number | null
 }
 
 /** The kinds of warning we can raise. */
-export type WarningKind = "emptySubject" | "forgottenAttachment" | "externalRecipients";
+export type WarningKind = "emptySubject" | "forgottenAttachment" | "externalRecipients"
 
 /** A single warning with an optional count. */
 export interface Warning {
-  readonly kind: WarningKind;
-  readonly count: number;
+  readonly kind: WarningKind
+  readonly count: number
 }
 
 /**
@@ -51,17 +51,17 @@ export interface Warning {
  * functions and no Set. It crosses the dialog boundary as JSON.
  */
 export interface ReviewModel {
-  readonly subject: string;
-  readonly bodyPreview: string;
-  readonly recipients: readonly RecipientView[];
-  readonly attachments: readonly AttachmentView[];
+  readonly subject: string
+  readonly bodyPreview: string
+  readonly recipients: readonly RecipientView[]
+  readonly attachments: readonly AttachmentView[]
   /** Unique external addresses, deduplicated across all fields. */
-  readonly externalEmails: readonly string[];
-  readonly warnings: readonly Warning[];
-  readonly sendDelaySeconds: number;
-  readonly requireRecipientConfirmation: boolean;
-  readonly requireAttachmentConfirmation: boolean;
-  readonly requireBodyConfirmation: boolean;
+  readonly externalEmails: readonly string[]
+  readonly warnings: readonly Warning[]
+  readonly sendDelaySeconds: number
+  readonly requireRecipientConfirmation: boolean
+  readonly requireAttachmentConfirmation: boolean
+  readonly requireBodyConfirmation: boolean
 }
 
 /** Map one recipient to its view form. */
@@ -74,12 +74,12 @@ function toRecipientView(
     displayName: recipient.displayName,
     emailAddress: recipient.emailAddress,
     isExternal: isExternal(recipient.emailAddress, internalDomains),
-  };
+  }
 }
 
 /** Map one attachment to its view form. */
 function toAttachmentView(attachment: Attachment): AttachmentView {
-  return { name: attachment.name, sizeBytes: attachment.size };
+  return { name: attachment.name, sizeBytes: attachment.size }
 }
 
 /**
@@ -91,7 +91,7 @@ function toAttachmentView(attachment: Attachment): AttachmentView {
 export function buildReviewModel(snapshot: MessageSnapshot, config: Config): ReviewModel {
   const recipients = snapshot.recipients.map((recipient) =>
     toRecipientView(recipient, config.internalDomains),
-  );
+  )
 
   const externalEmails = [
     ...new Set(
@@ -99,31 +99,30 @@ export function buildReviewModel(snapshot: MessageSnapshot, config: Config): Rev
         .filter((recipient) => recipient.isExternal)
         .map((recipient) => recipient.emailAddress),
     ),
-  ];
+  ]
 
-  const attachments = realAttachments(snapshot.attachments).map(toAttachmentView);
+  const attachments = realAttachments(snapshot.attachments).map(toAttachmentView)
 
-  const warnings: Warning[] = [];
+  const warnings: Warning[] = []
   if (config.warnOnEmptySubject && isSubjectEmpty(snapshot)) {
-    warnings.push({ kind: "emptySubject", count: 0 });
+    warnings.push({ kind: "emptySubject", count: 0 })
   }
   if (detectForgottenAttachment(snapshot, config.attachmentKeywords)) {
-    warnings.push({ kind: "forgottenAttachment", count: 0 });
+    warnings.push({ kind: "forgottenAttachment", count: 0 })
   }
   if (externalEmails.length > 0) {
-    warnings.push({ kind: "externalRecipients", count: externalEmails.length });
+    warnings.push({ kind: "externalRecipients", count: externalEmails.length })
   }
 
-  const sendDelaySeconds = Math.max(0, Math.floor(config.sendDelaySeconds));
+  const sendDelaySeconds = Math.max(0, Math.floor(config.sendDelaySeconds))
 
   // A confirmation is required only when it is both turned on and
   // there is something to confirm. No recipients means no recipient
   // confirmation, no attachments means no attachment confirmation.
-  const requireRecipientConfirmation =
-    config.requireRecipientConfirmation && recipients.length > 0;
+  const requireRecipientConfirmation = config.requireRecipientConfirmation && recipients.length > 0
   const requireAttachmentConfirmation =
-    config.requireAttachmentConfirmation && attachments.length > 0;
-  const requireBodyConfirmation = config.requireBodyConfirmation;
+    config.requireAttachmentConfirmation && attachments.length > 0
+  const requireBodyConfirmation = config.requireBodyConfirmation
 
   return {
     subject: snapshot.subject,
@@ -136,7 +135,7 @@ export function buildReviewModel(snapshot: MessageSnapshot, config: Config): Rev
     requireRecipientConfirmation,
     requireAttachmentConfirmation,
     requireBodyConfirmation,
-  };
+  }
 }
 
 /**
@@ -147,11 +146,11 @@ export function buildReviewModel(snapshot: MessageSnapshot, config: Config): Rev
  */
 export interface ReviewState {
   /** Indices of recipients the user has confirmed one by one. */
-  readonly confirmedRecipients: ReadonlySet<number>;
+  readonly confirmedRecipients: ReadonlySet<number>
   /** Indices of attachments the user has confirmed one by one. */
-  readonly confirmedAttachments: ReadonlySet<number>;
-  readonly bodyConfirmed: boolean;
-  readonly delayElapsed: boolean;
+  readonly confirmedAttachments: ReadonlySet<number>
+  readonly bodyConfirmed: boolean
+  readonly delayElapsed: boolean
 }
 
 /**
@@ -166,17 +165,17 @@ export function initialReviewState(model: ReviewModel): ReviewState {
     confirmedAttachments: new Set<number>(),
     bodyConfirmed: !model.requireBodyConfirmation,
     delayElapsed: model.sendDelaySeconds === 0,
-  };
+  }
 }
 
 /** True when every index from 0 to count-1 is present in the set. */
 function allIndicesConfirmed(count: number, confirmed: ReadonlySet<number>): boolean {
   for (let index = 0; index < count; index += 1) {
     if (!confirmed.has(index)) {
-      return false;
+      return false
     }
   }
-  return true;
+  return true
 }
 
 /**
@@ -188,22 +187,22 @@ function allIndicesConfirmed(count: number, confirmed: ReadonlySet<number>): boo
  */
 export function canSend(model: ReviewModel, state: ReviewState): boolean {
   if (!state.delayElapsed) {
-    return false;
+    return false
   }
   if (model.requireBodyConfirmation && !state.bodyConfirmed) {
-    return false;
+    return false
   }
   if (
     model.requireRecipientConfirmation &&
     !allIndicesConfirmed(model.recipients.length, state.confirmedRecipients)
   ) {
-    return false;
+    return false
   }
   if (
     model.requireAttachmentConfirmation &&
     !allIndicesConfirmed(model.attachments.length, state.confirmedAttachments)
   ) {
-    return false;
+    return false
   }
-  return true;
+  return true
 }

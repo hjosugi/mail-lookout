@@ -16,27 +16,27 @@
  * measured on the pure layers, where the logic lives.
  */
 
-import { fileURLToPath } from "node:url";
-import type { ServerOptions } from "vite";
-import { defineConfig } from "vitest/config";
+import { fileURLToPath } from "node:url"
+import type { ServerOptions } from "vite"
+import { defineConfig } from "vitest/config"
 
-const rootDir = fileURLToPath(new URL(".", import.meta.url));
+const rootDir = fileURLToPath(new URL(".", import.meta.url))
 
 /** Load HTTPS options from dev-certs, or undefined if missing. */
 async function httpsOptions(): Promise<ServerOptions["https"]> {
   try {
-    const devCerts = await import("office-addin-dev-certs");
-    const options = await devCerts.getHttpsServerOptions();
-    return { key: options.key, cert: options.cert, ca: options.ca };
+    const devCerts = await import("office-addin-dev-certs")
+    const options = await devCerts.getHttpsServerOptions()
+    return { key: options.key, cert: options.cert, ca: options.ca }
   } catch {
     console.warn(
       "[mail-lookout] HTTPS certs not found. Run `npm run dev-certs`. Falling back to HTTP.",
-    );
-    return undefined;
+    )
+    return undefined
   }
 }
 
-const https = await httpsOptions();
+const https = await httpsOptions()
 
 export default defineConfig({
   root: rootDir,
@@ -76,4 +76,4 @@ export default defineConfig({
       include: ["src/domain/**", "src/i18n/**", "src/shared/**", "src/config/**"],
     },
   },
-});
+})

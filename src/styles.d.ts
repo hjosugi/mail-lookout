@@ -5,4 +5,4 @@
  * Vite handles the real loading at build time. TypeScript just
  * needs to know the module exists.
  */
-declare module "*.css";
+declare module "*.css"

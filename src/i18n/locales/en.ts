@@ -1,4 +1,4 @@
-import type { Messages } from "../types";
+import type { Messages } from "../types"
 
 /** English messages. */
 export const en: Messages = {
@@ -52,4 +52,4 @@ export const en: Messages = {
     notSent: "The message was not sent. Return to your draft to review it.",
     returnLabel: "Back to draft",
   },
-};
+}

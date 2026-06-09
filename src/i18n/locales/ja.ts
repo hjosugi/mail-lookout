@@ -1,4 +1,4 @@
-import type { Messages } from "../types";
+import type { Messages } from "../types"
 
 /** Japanese messages. */
 export const ja: Messages = {
@@ -50,4 +50,4 @@ export const ja: Messages = {
     notSent: "メールは送信していません。下書きに戻って内容を確認してください。",
     returnLabel: "下書きに戻る",
   },
-};
+}

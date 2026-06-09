@@ -14,16 +14,16 @@
  * cancel is always safe: the message is not sent.
  */
 
-import type { Config } from "../config";
-import type { ReviewModel } from "../domain/review";
-import type { LocaleTag } from "../i18n/catalog";
-import { decodeDialogToParent, encode } from "../shared/messaging";
+import type { Config } from "../config"
+import type { ReviewModel } from "../domain/review"
+import type { LocaleTag } from "../i18n/catalog"
+import { decodeDialogToParent, encode } from "../shared/messaging"
 
 /** Thrown when the dialog cannot be opened at all. */
 export class DialogUnavailableError extends Error {
   constructor(message: string) {
-    super(message);
-    this.name = "DialogUnavailableError";
+    super(message)
+    this.name = "DialogUnavailableError"
   }
 }
 
@@ -55,48 +55,48 @@ export function showConfirmationDialog(
             new DialogUnavailableError(
               result.error?.message ?? "The confirmation dialog could not open.",
             ),
-          );
-          return;
+          )
+          return
         }
 
-        const dialog = result.value;
-        let settled = false;
+        const dialog = result.value
+        let settled = false
 
         // Close the dialog once and resolve with the decision.
         // Guarded so we never resolve twice or close twice.
         const finish = (allow: boolean): void => {
           if (settled) {
-            return;
+            return
           }
-          settled = true;
+          settled = true
           try {
-            dialog.close();
+            dialog.close()
           } catch {
             // The dialog may already be closing. Ignore.
           }
-          resolve(allow);
-        };
+          resolve(allow)
+        }
 
         dialog.addEventHandler(Office.EventType.DialogMessageReceived, (arg) => {
           if (!("message" in arg)) {
-            return;
+            return
           }
-          const message = decodeDialogToParent(arg.message);
+          const message = decodeDialogToParent(arg.message)
           if (!message) {
-            return;
+            return
           }
           if (message.type === "ready") {
-            dialog.messageChild(encode({ type: "init", model, locale }));
+            dialog.messageChild(encode({ type: "init", model, locale }))
           } else if (message.type === "decision") {
-            finish(message.allow);
+            finish(message.allow)
           }
-        });
+        })
 
         // Any dialog close or error means cancel, which is safe.
         dialog.addEventHandler(Office.EventType.DialogEventReceived, () => {
-          finish(false);
-        });
+          finish(false)
+        })
       },
-    );
-  });
+    )
+  })
 }

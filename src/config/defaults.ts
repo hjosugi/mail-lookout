@@ -1,4 +1,4 @@
-import type { Config } from "./types";
+import type { Config } from "./types"
 
 /**
  * The default configuration.
@@ -33,4 +33,4 @@ export const defaultConfig: Config = {
     heightPercent: 60,
     displayInIframe: false,
   },
-};
+}

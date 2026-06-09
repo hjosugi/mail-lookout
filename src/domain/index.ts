@@ -10,16 +10,16 @@ export type {
   MessageSnapshot,
   Recipient,
   RecipientField,
-} from "./types";
+} from "./types"
 
-export { domainOf, isExternal, classifyRecipients } from "./recipients";
-export type { ClassifiedRecipients } from "./recipients";
+export { domainOf, isExternal, classifyRecipients } from "./recipients"
+export type { ClassifiedRecipients } from "./recipients"
 
-export { realAttachments, mentionsAttachment, detectForgottenAttachment } from "./attachments";
+export { realAttachments, mentionsAttachment, detectForgottenAttachment } from "./attachments"
 
-export { isBlank, isSubjectEmpty, bodyPreview } from "./body";
+export { isBlank, isSubjectEmpty, bodyPreview } from "./body"
 
-export { BODY_PREVIEW_MAX_LENGTH, buildReviewModel, initialReviewState, canSend } from "./review";
+export { BODY_PREVIEW_MAX_LENGTH, buildReviewModel, initialReviewState, canSend } from "./review"
 export type {
   AttachmentView,
   RecipientView,
@@ -27,4 +27,4 @@ export type {
   ReviewState,
   Warning,
   WarningKind,
-} from "./review";
+} from "./review"

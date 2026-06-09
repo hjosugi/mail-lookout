@@ -11,23 +11,23 @@
  * rather than cast and hoped for.
  */
 
-import { z } from "zod";
+import { z } from "zod"
 
-import { supportedLocales } from "../i18n/catalog";
-import type { LocaleTag } from "../i18n/catalog";
-import type { ReviewModel } from "../domain/review";
+import { supportedLocales } from "../i18n/catalog"
+import type { LocaleTag } from "../i18n/catalog"
+import type { ReviewModel } from "../domain/review"
 
 /** Messages sent from the parent handler to the dialog. */
 export interface ParentToDialog {
-  readonly type: "init";
-  readonly model: ReviewModel;
-  readonly locale: LocaleTag;
+  readonly type: "init"
+  readonly model: ReviewModel
+  readonly locale: LocaleTag
 }
 
 /** Messages sent from the dialog back to the parent handler. */
 export type DialogToParent =
   | { readonly type: "ready" }
-  | { readonly type: "decision"; readonly allow: boolean };
+  | { readonly type: "decision"; readonly allow: boolean }
 
 // --- Schemas -------------------------------------------------------------
 //
@@ -38,24 +38,24 @@ export type DialogToParent =
 
 // Built from the locale registry, so it can never drift from the
 // set of locales we actually ship.
-const localeTagSchema = z.enum(supportedLocales as [LocaleTag, ...LocaleTag[]]);
+const localeTagSchema = z.enum(supportedLocales as [LocaleTag, ...LocaleTag[]])
 
 const recipientViewSchema = z.object({
   field: z.enum(["to", "cc", "bcc"]),
   displayName: z.string(),
   emailAddress: z.string(),
   isExternal: z.boolean(),
-});
+})
 
 const attachmentViewSchema = z.object({
   name: z.string(),
   sizeBytes: z.number().nullable(),
-});
+})
 
 const warningSchema = z.object({
   kind: z.enum(["emptySubject", "forgottenAttachment", "externalRecipients"]),
   count: z.number(),
-});
+})
 
 const reviewModelSchema = z.object({
   subject: z.string(),
@@ -68,18 +68,18 @@ const reviewModelSchema = z.object({
   requireRecipientConfirmation: z.boolean(),
   requireAttachmentConfirmation: z.boolean(),
   requireBodyConfirmation: z.boolean(),
-});
+})
 
 const parentToDialogSchema = z.object({
   type: z.literal("init"),
   model: reviewModelSchema,
   locale: localeTagSchema,
-});
+})
 
 const dialogToParentSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("ready") }),
   z.object({ type: z.literal("decision"), allow: z.boolean() }),
-]);
+])
 
 // --- Compile-time agreement checks --------------------------------------
 //
@@ -91,10 +91,10 @@ type DeepWritable<T> = T extends readonly (infer U)[]
   ? DeepWritable<U>[]
   : T extends object
     ? { -readonly [K in keyof T]: DeepWritable<T[K]> }
-    : T;
+    : T
 
-type Exact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
-type Assert<T extends true> = T;
+type Exact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false
+type Assert<T extends true> = T
 
 // Exported only so the unused-locals check keeps it; it is purely a
 // type, with no runtime presence. If a schema drifts from its protocol
@@ -102,21 +102,21 @@ type Assert<T extends true> = T;
 export type SchemasMatchProtocol = [
   Assert<Exact<z.infer<typeof parentToDialogSchema>, DeepWritable<ParentToDialog>>>,
   Assert<Exact<z.infer<typeof dialogToParentSchema>, DeepWritable<DialogToParent>>>,
-];
+]
 
 // --- Encode / decode -----------------------------------------------------
 
 /** Encode a message to a JSON string. */
 export function encode(message: ParentToDialog | DialogToParent): string {
-  return JSON.stringify(message);
+  return JSON.stringify(message)
 }
 
 /** Parse a JSON string, or undefined if it is not valid JSON. */
 function parseJson(raw: string): unknown {
   try {
-    return JSON.parse(raw);
+    return JSON.parse(raw)
   } catch {
-    return undefined;
+    return undefined
   }
 }
 
@@ -127,12 +127,12 @@ function parseJson(raw: string): unknown {
  * string was not valid JSON, or it did not satisfy the schema.
  */
 export function decodeParentToDialog(raw: string): ParentToDialog | null {
-  const result = parentToDialogSchema.safeParse(parseJson(raw));
-  return result.success ? result.data : null;
+  const result = parentToDialogSchema.safeParse(parseJson(raw))
+  return result.success ? result.data : null
 }
 
 /** Decode a dialog-to-parent message, or null if it does not match. */
 export function decodeDialogToParent(raw: string): DialogToParent | null {
-  const result = dialogToParentSchema.safeParse(parseJson(raw));
-  return result.success ? result.data : null;
+  const result = dialogToParentSchema.safeParse(parseJson(raw))
+  return result.success ? result.data : null
 }

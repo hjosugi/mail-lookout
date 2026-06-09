@@ -59,11 +59,7 @@
 body {
   margin: 0;
   font-family:
-    "Segoe UI",
-    "Segoe UI Web (West European)",
-    -apple-system,
-    BlinkMacSystemFont,
-    system-ui,
+    "Segoe UI", "Segoe UI Web (West European)", -apple-system, BlinkMacSystemFont, system-ui,
     sans-serif;
   font-size: 14px;
   line-height: 1.5;

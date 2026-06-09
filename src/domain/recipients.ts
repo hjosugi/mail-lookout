@@ -6,7 +6,7 @@
  * of the address and a list of internal domains.
  */
 
-import type { FieldRecipient } from "./types";
+import type { FieldRecipient } from "./types"
 
 /**
  * Return the domain part of an email address.
@@ -15,21 +15,21 @@ import type { FieldRecipient } from "./types";
  * An address with no "@" returns "".
  */
 export function domainOf(email: string): string {
-  const at = email.lastIndexOf("@");
+  const at = email.lastIndexOf("@")
   if (at < 0) {
-    return "";
+    return ""
   }
   return email
     .slice(at + 1)
     .trim()
-    .toLowerCase();
+    .toLowerCase()
 }
 
 /** Normalize a list of internal domains: lowercase, trim, drop empties. */
 function normalizeDomains(internalDomains: readonly string[]): string[] {
   return internalDomains
     .map((domain) => domain.trim().toLowerCase())
-    .filter((domain) => domain.length > 0);
+    .filter((domain) => domain.length > 0)
 }
 
 /**
@@ -39,18 +39,18 @@ function normalizeDomains(internalDomains: readonly string[]): string[] {
  * prove it is safe, so we warn to be safe.
  */
 export function isExternal(email: string, internalDomains: readonly string[]): boolean {
-  const domain = domainOf(email);
+  const domain = domainOf(email)
   if (domain === "") {
-    return true;
+    return true
   }
-  const internal = normalizeDomains(internalDomains);
-  return !internal.includes(domain);
+  const internal = normalizeDomains(internalDomains)
+  return !internal.includes(domain)
 }
 
 /** Recipients split into internal and external groups. */
 export interface ClassifiedRecipients {
-  readonly internal: readonly FieldRecipient[];
-  readonly external: readonly FieldRecipient[];
+  readonly internal: readonly FieldRecipient[]
+  readonly external: readonly FieldRecipient[]
 }
 
 /** Split recipients into internal and external groups. */
@@ -58,14 +58,14 @@ export function classifyRecipients(
   recipients: readonly FieldRecipient[],
   internalDomains: readonly string[],
 ): ClassifiedRecipients {
-  const internal: FieldRecipient[] = [];
-  const external: FieldRecipient[] = [];
+  const internal: FieldRecipient[] = []
+  const external: FieldRecipient[] = []
   for (const recipient of recipients) {
     if (isExternal(recipient.emailAddress, internalDomains)) {
-      external.push(recipient);
+      external.push(recipient)
     } else {
-      internal.push(recipient);
+      internal.push(recipient)
     }
   }
-  return { internal, external };
+  return { internal, external }
 }

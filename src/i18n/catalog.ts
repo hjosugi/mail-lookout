@@ -7,9 +7,9 @@
  * and `LocaleTag` updates on its own from the keys.
  */
 
-import type { Messages } from "./types";
-import { ja } from "./locales/ja";
-import { en } from "./locales/en";
+import type { Messages } from "./types"
+import { ja } from "./locales/ja"
+import { en } from "./locales/en"
 
 /**
  * All known locales.
@@ -20,17 +20,17 @@ import { en } from "./locales/en";
 export const locales = {
   ja,
   en,
-} satisfies Record<string, Messages>;
+} satisfies Record<string, Messages>
 
 /** A valid locale tag, derived from the keys of `locales`. */
-export type LocaleTag = keyof typeof locales;
+export type LocaleTag = keyof typeof locales
 
 /** Every supported locale tag, as an array. */
-export const supportedLocales = Object.keys(locales) as LocaleTag[];
+export const supportedLocales = Object.keys(locales) as LocaleTag[]
 
 /** Type guard: is this string one of our locale tags? */
 export function isLocaleTag(value: string): value is LocaleTag {
-  return Object.prototype.hasOwnProperty.call(locales, value);
+  return Object.hasOwn(locales, value)
 }
 
 /**
@@ -42,13 +42,13 @@ export function isLocaleTag(value: string): value is LocaleTag {
  */
 export function resolveLocale(displayLanguage: string | undefined, fallback: LocaleTag): LocaleTag {
   if (!displayLanguage) {
-    return fallback;
+    return fallback
   }
-  const primary = displayLanguage.split("-")[0]?.toLowerCase() ?? "";
-  return isLocaleTag(primary) ? primary : fallback;
+  const primary = displayLanguage.split("-")[0]?.toLowerCase() ?? ""
+  return isLocaleTag(primary) ? primary : fallback
 }
 
 /** Get the message set for a locale tag. */
 export function getMessages(tag: LocaleTag): Messages {
-  return locales[tag];
+  return locales[tag]
 }

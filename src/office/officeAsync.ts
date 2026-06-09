@@ -20,10 +20,10 @@ export function promisify<T>(
   return new Promise<T>((resolve, reject) => {
     call((result) => {
       if (result.status === Office.AsyncResultStatus.Succeeded) {
-        resolve(result.value);
+        resolve(result.value)
       } else {
-        reject(new Error(result.error?.message ?? "Office async call failed"));
+        reject(new Error(result.error?.message ?? "Office async call failed"))
       }
-    });
-  });
+    })
+  })
 }

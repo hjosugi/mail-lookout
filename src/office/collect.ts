@@ -8,8 +8,8 @@
  * fast. The slow part is the user reviewing the dialog, not us.
  */
 
-import type { Attachment, FieldRecipient, MessageSnapshot, RecipientField } from "../domain/types";
-import { promisify } from "./officeAsync";
+import type { Attachment, FieldRecipient, MessageSnapshot, RecipientField } from "../domain/types"
+import { promisify } from "./officeAsync"
 
 /** Map host recipient details to our recipient type. */
 function mapRecipients(
@@ -20,7 +20,7 @@ function mapRecipients(
     field,
     displayName: detail.displayName ?? "",
     emailAddress: (detail.emailAddress ?? "").trim().toLowerCase(),
-  }));
+  }))
 }
 
 /** Map host attachment details to our attachment type. */
@@ -30,7 +30,7 @@ function mapAttachments(details: readonly Office.AttachmentDetailsCompose[]): At
     name: detail.name,
     size: typeof detail.size === "number" ? detail.size : null,
     isInline: detail.isInline === true,
-  }));
+  }))
 }
 
 /**
@@ -46,15 +46,15 @@ export async function collectSnapshot(item: Office.MessageCompose): Promise<Mess
     promisify<Office.EmailAddressDetails[]>((cb) => item.cc.getAsync(cb)),
     promisify<Office.EmailAddressDetails[]>((cb) => item.bcc.getAsync(cb)),
     promisify<Office.AttachmentDetailsCompose[]>((cb) => item.getAttachmentsAsync(cb)),
-  ]);
+  ])
 
   const recipients: FieldRecipient[] = [
     ...mapRecipients(to, "to"),
     ...mapRecipients(cc, "cc"),
     ...mapRecipients(bcc, "bcc"),
-  ];
+  ]
 
-  const senderEmail = (Office.context.mailbox.userProfile.emailAddress ?? "").trim().toLowerCase();
+  const senderEmail = (Office.context.mailbox.userProfile.emailAddress ?? "").trim().toLowerCase()
 
   return {
     subject,
@@ -62,5 +62,5 @@ export async function collectSnapshot(item: Office.MessageCompose): Promise<Mess
     recipients,
     attachments: mapAttachments(attachments),
     senderEmail,
-  };
+  }
 }

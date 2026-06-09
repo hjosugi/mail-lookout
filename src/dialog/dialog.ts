@@ -47,7 +47,7 @@ function start(model: ReviewModel, locale: LocaleTag): void {
 
   let state: ReviewState = initialReviewState(model)
 
-  // Re-check the send gate and update the button. 
+  // Re-check the send gate and update the button.
   function refresh(): void {
     handle.setSendEnabled(canSend(model, state))
   }
