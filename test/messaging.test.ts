@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { decode, encode } from "../src/shared/messaging";
+import { decodeDialogToParent, decodeParentToDialog, encode } from "../src/shared/messaging";
 import type { DialogToParent, ParentToDialog } from "../src/shared/messaging";
 import type { ReviewModel } from "../src/domain/review";
 
+// A realistic model: several recipients across To/Cc, a mix of
+// internal and external, and more than one attachment. Single-address
+// fixtures would miss the cases this add-in exists to catch.
 const model: ReviewModel = {
   subject: "Hello",
   bodyPreview: "Body text",
@@ -24,11 +27,10 @@ const model: ReviewModel = {
   requireBodyConfirmation: true,
 };
 
-describe("encode and decode", () => {
+describe("encode and decode round-trips", () => {
   it("round-trips an init message from parent to dialog", () => {
     const message: ParentToDialog = { type: "init", model, locale: "ja" };
-    const raw = encode(message);
-    const back = decode<ParentToDialog>(raw);
+    const back = decodeParentToDialog(encode(message));
     // The decoded value must equal the original. This proves the
     // model survives the JSON boundary with no loss.
     expect(back).toEqual(message);
@@ -36,30 +38,85 @@ describe("encode and decode", () => {
 
   it("round-trips a ready message from dialog to parent", () => {
     const message: DialogToParent = { type: "ready" };
-    expect(decode<DialogToParent>(encode(message))).toEqual(message);
+    expect(decodeDialogToParent(encode(message))).toEqual(message);
   });
 
   it("round-trips a decision message with allow true", () => {
     const message: DialogToParent = { type: "decision", allow: true };
-    expect(decode<DialogToParent>(encode(message))).toEqual(message);
+    expect(decodeDialogToParent(encode(message))).toEqual(message);
   });
 
   it("round-trips a decision message with allow false", () => {
     const message: DialogToParent = { type: "decision", allow: false };
-    expect(decode<DialogToParent>(encode(message))).toEqual(message);
+    expect(decodeDialogToParent(encode(message))).toEqual(message);
   });
 });
 
-describe("decode on bad input", () => {
+describe("decode rejects malformed input", () => {
   it("returns null for a string that is not JSON", () => {
-    expect(decode("not json")).toBeNull();
+    expect(decodeParentToDialog("not json")).toBeNull();
+    expect(decodeDialogToParent("not json")).toBeNull();
   });
 
   it("returns null for an empty string", () => {
-    expect(decode("")).toBeNull();
+    expect(decodeDialogToParent("")).toBeNull();
   });
 
   it("returns null for a truncated JSON string", () => {
-    expect(decode('{"type":"rea')).toBeNull();
+    expect(decodeDialogToParent('{"type":"rea')).toBeNull();
+  });
+});
+
+describe("decode rejects schema violations", () => {
+  it("rejects an init message with an unknown locale", () => {
+    const raw = JSON.stringify({ type: "init", model, locale: "xx" });
+    expect(decodeParentToDialog(raw)).toBeNull();
+  });
+
+  it("rejects an init message missing a model field", () => {
+    const incomplete = JSON.parse(JSON.stringify(model)) as Record<string, unknown>;
+    delete incomplete.subject;
+    const raw = JSON.stringify({ type: "init", model: incomplete, locale: "ja" });
+    expect(decodeParentToDialog(raw)).toBeNull();
+  });
+
+  it("rejects an init message with a wrong-typed model field", () => {
+    const raw = JSON.stringify({
+      type: "init",
+      model: { ...model, sendDelaySeconds: "5" },
+      locale: "ja",
+    });
+    expect(decodeParentToDialog(raw)).toBeNull();
+  });
+
+  it("rejects a recipient whose field is not to/cc/bcc", () => {
+    const badModel = {
+      ...model,
+      recipients: [
+        { field: "reply-to", displayName: "X", emailAddress: "x@other.com", isExternal: true },
+      ],
+    };
+    const raw = JSON.stringify({ type: "init", model: badModel, locale: "ja" });
+    expect(decodeParentToDialog(raw)).toBeNull();
+  });
+
+  it("rejects a dialog message with an unknown type", () => {
+    expect(decodeDialogToParent(JSON.stringify({ type: "bogus" }))).toBeNull();
+  });
+
+  it("rejects a decision message missing allow", () => {
+    expect(decodeDialogToParent(JSON.stringify({ type: "decision" }))).toBeNull();
+  });
+
+  it("rejects a decision message with a non-boolean allow", () => {
+    expect(decodeDialogToParent(JSON.stringify({ type: "decision", allow: "yes" }))).toBeNull();
+  });
+
+  it("rejects a message handed to the wrong decoder", () => {
+    // A ready message is not a valid parent-to-dialog message, and an
+    // init message is not a valid dialog-to-parent message.
+    expect(decodeParentToDialog(encode({ type: "ready" }))).toBeNull();
+    const init: ParentToDialog = { type: "init", model, locale: "en" };
+    expect(decodeDialogToParent(encode(init))).toBeNull();
   });
 });

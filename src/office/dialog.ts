@@ -17,8 +17,7 @@
 import type { Config } from "../config";
 import type { ReviewModel } from "../domain/review";
 import type { LocaleTag } from "../i18n/catalog";
-import { decode, encode } from "../shared/messaging";
-import type { DialogToParent } from "../shared/messaging";
+import { decodeDialogToParent, encode } from "../shared/messaging";
 
 /** Thrown when the dialog cannot be opened at all. */
 export class DialogUnavailableError extends Error {
@@ -82,7 +81,7 @@ export function showConfirmationDialog(
           if (!("message" in arg)) {
             return;
           }
-          const message = decode<DialogToParent>(arg.message);
+          const message = decodeDialogToParent(arg.message);
           if (!message) {
             return;
           }
