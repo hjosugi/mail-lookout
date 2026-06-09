@@ -70,9 +70,9 @@ data. The tests are where the value is.
 
 The `office` layer is a thin adapter. It reads the draft through
 the Office APIs, hands a plain snapshot to `domain`, opens the
-dialog, and then allows or cancels the send. A lint rule blocks the
-global `Office` object from the core layers, so the split cannot
-drift by accident.
+dialog, and then allows or cancels the send. The core layers import
+nothing from Office, so the boundary holds by construction; keep any
+new host calls in the `office` layer.
 
 ## Setup
 
@@ -126,13 +126,14 @@ if port 3000 is already in use.
 npm run check
 ```
 
-This runs, in order: format check, lint, type check on both
+This runs, in order: Biome (format and lint), type check on both
 tsconfigs, tests with coverage, the production build, and manifest
 validation. Each step must pass. Useful single steps:
 
 ```sh
 npm run typecheck      # tsc on src and on the build config
-npm run lint           # eslint
+npm run lint           # biome lint
+npm run format         # biome format --write
 npm run test           # vitest, run once
 npm run test:coverage  # vitest with coverage on the pure layers
 npm run build          # tsc --noEmit then vite build
