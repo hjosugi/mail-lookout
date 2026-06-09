@@ -23,12 +23,12 @@ export const en: Messages = {
   recipients: {
     externalBadge: "External",
     internalBadge: "Internal",
-    confirmHint: "Check each recipient one by one before sending.",
+    confirmHint: "Check each recipient before sending.",
     none: "No recipients",
   },
   attachments: {
     none: "No attachments",
-    confirmHint: "Check each attachment one by one before sending.",
+    confirmHint: "Check each attachment before sending.",
   },
   body: {
     confirm: "I checked the body",

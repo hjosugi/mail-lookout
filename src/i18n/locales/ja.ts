@@ -4,7 +4,7 @@ import type { Messages } from "../types"
 export const ja: Messages = {
   dialog: {
     title: "送信前の確認",
-    intro: "送信する前に、宛先・添付・本文を確認してください。",
+    intro: "送信前に、宛先・添付・本文を確認してください。",
     sendNow: "今すぐ送信",
     backToEdit: "編集に戻る",
     sendInSeconds: (seconds) => `送信まで ${seconds} 秒`,
@@ -23,12 +23,12 @@ export const ja: Messages = {
   recipients: {
     externalBadge: "社外",
     internalBadge: "社内",
-    confirmHint: "宛先を1人ずつ確認してチェックしてください。",
+    confirmHint: "宛先を確認してチェックしてください。",
     none: "宛先がありません",
   },
   attachments: {
     none: "添付ファイルはありません",
-    confirmHint: "添付ファイルを1つずつ確認してチェックしてください。",
+    confirmHint: "添付ファイルを確認してチェックしてください。",
   },
   body: {
     confirm: "本文を確認しました",
@@ -36,13 +36,13 @@ export const ja: Messages = {
   },
   warnings: {
     emptySubject: "件名が空です。",
-    forgottenAttachment: "本文は添付ファイルに触れていますが、ファイルが添付されていません。",
+    forgottenAttachment: "本文は添付ファイルの記載がありますが、ファイルが添付されていません。",
     externalRecipients: (count) => `社外の宛先が ${count} 件あります。`,
   },
   fallback: {
     title: "送信前の確認",
     externalLine: (count) => `社外の宛先が ${count} 件あります。`,
-    forgottenAttachmentLine: "本文は添付ファイルに触れていますが、ファイルが添付されていません。",
+    forgottenAttachmentLine: "本文は添付ファイルの記載がありますが、ファイルが添付されていません。",
     emptySubjectLine: "件名が空です。",
     reviewLine: "宛先と内容を確認してから送信してください。",
   },
