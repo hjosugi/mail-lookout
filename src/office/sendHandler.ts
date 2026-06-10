@@ -9,17 +9,14 @@
  *
  * Safety rules:
  *   - event.completed is called exactly once, always.
- *   - If the rich dialog cannot open, fall back to the built-in
- *     prompt so the user still sees a confirmation.
+ *   - If the rich dialog cannot open, cancel the send.
  *   - On any unexpected error, cancel the send rather than sending
  *     without a confirmation.
  */
 
 import { defaultConfig } from "../config"
 import { buildReviewModel } from "../domain/review"
-import type { ReviewModel } from "../domain/review"
 import { collectSnapshot } from "./collect"
-import { buildFallbackMessage } from "./fallbackMessage"
 import { getMessages, resolveLocale } from "../i18n/catalog"
 import type { LocaleTag } from "../i18n/catalog"
 import { DialogUnavailableError, showConfirmationDialog } from "./dialog"
@@ -41,10 +38,8 @@ function completeOnce(
 /**
  * Options that cancel the send cleanly.
  *
- * No sendModeOverride here. Under SoftBlock this shows our
- * message with a single "back to draft" action. The user is not
- * offered a redundant "send anyway", which is the point of a
- * confirmation tool.
+ * Under SoftBlock this shows our message with a single "back to draft"
+ * action. There is intentionally no "send anyway" path.
  */
 function cancelOptions(locale: LocaleTag): Office.SmartAlertsEventCompletedOptions {
   const messages = getMessages(locale)
@@ -53,28 +48,6 @@ function cancelOptions(locale: LocaleTag): Office.SmartAlertsEventCompletedOptio
     errorMessage: messages.cancel.notSent,
     cancelLabel: messages.cancel.returnLabel,
   }
-}
-
-/**
- * Respond using the built-in prompt instead of the rich dialog.
- *
- * This is still a confirmation path. Even when there are no warnings,
- * the user sees the host prompt instead of sending without review.
- */
-function respondWithFallback(
-  complete: (options: Office.SmartAlertsEventCompletedOptions) => void,
-  model: ReviewModel,
-  locale: LocaleTag,
-): void {
-  const fallback = buildFallbackMessage(model, locale)
-  complete({
-    allowEvent: false,
-    errorMessage: fallback.text,
-    errorMessageMarkdown: fallback.markdown,
-    // When the rich dialog is down, use the host prompt so the
-    // user still gets a confirmation instead of a silent send.
-    sendModeOverride: Office.MailboxEnums.SendModeOverride.PromptUser,
-  })
 }
 
 /**
@@ -93,9 +66,9 @@ export async function onMessageSendHandler(event: Office.AddinCommands.Event): P
     const model = buildReviewModel(snapshot, config)
 
     // The rich dialog needs messageChild, which is DialogApi 1.2.
-    // Without it, use the fallback prompt.
+    // Without it, keep SoftBlock behavior and cancel the send.
     if (!Office.context.requirements.isSetSupported("DialogApi", "1.2")) {
-      respondWithFallback(complete, model, locale)
+      complete(cancelOptions(locale))
       return
     }
 
@@ -105,7 +78,7 @@ export async function onMessageSendHandler(event: Office.AddinCommands.Event): P
       complete(allow ? { allowEvent: true } : cancelOptions(locale))
     } catch (error) {
       if (error instanceof DialogUnavailableError) {
-        respondWithFallback(complete, model, locale)
+        complete(cancelOptions(locale))
       } else {
         throw error
       }

@@ -10,9 +10,7 @@
     2. Replace every https://localhost:3000 URL with your host.
     3. Replace ProviderName, SupportUrl, and AppDomains.
 
-  SendMode is SoftBlock. To make every cancel one-click
-  bypassable instead, change SendMode to PromptUser below. See the
-  README for the tradeoff.
+  SendMode is SoftBlock. There is no one-click "send anyway" path.
 -->
 <OfficeApp
   xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"

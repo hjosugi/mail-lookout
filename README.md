@@ -212,24 +212,16 @@ The compiler will tell you if you miss a key. A test in
 of keys. Nothing else needs to change. The locale tag type updates
 itself from the keys of `locales`.
 
-## SendMode: SoftBlock vs PromptUser
+## SendMode
 
-The manifest uses `SendMode="SoftBlock"`. With SoftBlock, when the
-add-in cancels a send, the user must go back and edit the draft.
-There is no one-click "send anyway". This is on purpose: a
-confirmation tool whose every cancel is one click to bypass does
-not confirm much.
+The manifest uses `SendMode="SoftBlock"`. When the add-in cancels a
+send, the user must go back and edit the draft. There is no one-click
+"send anyway" path. This is on purpose: a confirmation tool whose
+every cancel is one click to bypass does not confirm much.
 
-If you prefer a softer tool, change `SendMode` to `PromptUser` in
-`manifest.xml`. Then every cancel offers a "send anyway" button.
-The tradeoff is that users can click past the check without
-reviewing.
-
-The handler is careful in one case. If the rich dialog cannot open
-after a few attempts, the handler falls back to the host's built-in
-prompt and uses `PromptUser` for that one path, so the user still
-sees a confirmation. On any unexpected error, the handler cancels
-the send rather than sending without confirmation.
+If the rich dialog cannot open after a few attempts, or if any
+unexpected error happens, the handler cancels the send. It never
+sends real mail without confirmation.
 
 ## Limitations
 

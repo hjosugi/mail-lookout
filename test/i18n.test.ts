@@ -106,9 +106,6 @@ describe("locale completeness", () => {
       for (const count of [1, 3]) {
         const external = messages.warnings.externalRecipients(count)
         expect(external).toContain(String(count))
-
-        const fallbackLine = messages.fallback.externalLine(count)
-        expect(fallbackLine).toContain(String(count))
       }
     }
   })

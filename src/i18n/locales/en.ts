@@ -55,14 +55,6 @@ export const en: Messages = {
     externalRecipients: count =>
       `There ${count === 1 ? "is" : "are"} ${count} external recipient${count === 1 ? "" : "s"}.`,
   },
-  fallback: {
-    title: "Confirm before sending",
-    externalLine: count =>
-      `There ${count === 1 ? "is" : "are"} ${count} external recipient${count === 1 ? "" : "s"}.`,
-    forgottenAttachmentLine: "The body mentions an attachment, but no file is attached.",
-    emptySubjectLine: "The subject is empty.",
-    reviewLine: "Please review the recipients and content before you send.",
-  },
   cancel: {
     notSent: "The message was not sent. Return to your draft to review it.",
     returnLabel: "Back to draft",

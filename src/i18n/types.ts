@@ -56,19 +56,6 @@ export interface Messages {
     readonly forgottenAttachment: string
     readonly externalRecipients: (count: number) => string
   }
-  /**
-   * Text used by the built-in fallback prompt.
-   *
-   * The fallback runs when the rich dialog cannot open. It uses
-   * the host's own notification, so it is plain text only.
-   */
-  readonly fallback: {
-    readonly title: string
-    readonly externalLine: (count: number) => string
-    readonly forgottenAttachmentLine: string
-    readonly emptySubjectLine: string
-    readonly reviewLine: string
-  }
   readonly cancel: {
     readonly notSent: string
     readonly returnLabel: string

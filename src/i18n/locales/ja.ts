@@ -54,13 +54,6 @@ export const ja: Messages = {
     forgottenAttachment: "本文は添付ファイルの記載がありますが、ファイルが添付されていません。",
     externalRecipients: count => `社外の宛先が ${count} 件あります。`,
   },
-  fallback: {
-    title: "送信前の確認",
-    externalLine: count => `社外の宛先が ${count} 件あります。`,
-    forgottenAttachmentLine: "本文は添付ファイルの記載がありますが、ファイルが添付されていません。",
-    emptySubjectLine: "件名が空です。",
-    reviewLine: "宛先と内容を確認してから送信してください。",
-  },
   cancel: {
     notSent: "メールは送信していません。下書きに戻って内容を確認してください。",
     returnLabel: "下書きに戻る",
