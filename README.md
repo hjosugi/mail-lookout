@@ -208,10 +208,10 @@ The tradeoff is that users can click past the check without
 reviewing.
 
 The handler is careful in one case. If the rich dialog cannot open
-at all, the handler does **not** trap the user. It falls back to
-the host's built-in prompt and uses `PromptUser` for that one path,
-so a bug in the add-in can never block real mail. On any unexpected
-error, the handler allows the send.
+after a few attempts, the handler falls back to the host's built-in
+prompt and uses `PromptUser` for that one path, so the user still
+sees a confirmation. On any unexpected error, the handler cancels
+the send rather than sending without confirmation.
 
 ## Limitations
 

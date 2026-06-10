@@ -10,9 +10,9 @@
  * Safety rules:
  *   - event.completed is called exactly once, always.
  *   - If the rich dialog cannot open, fall back to the built-in
- *     prompt so the user is never stuck.
- *   - On any unexpected error, allow the send. A confirmation
- *     tool must not block real mail because of its own bug.
+ *     prompt so the user still sees a confirmation.
+ *   - On any unexpected error, cancel the send rather than sending
+ *     without a confirmation.
  */
 
 import { defaultConfig } from "../config"
@@ -103,27 +103,21 @@ function buildFallbackMessage(model: ReviewModel, locale: LocaleTag): FallbackMe
 /**
  * Respond using the built-in prompt instead of the rich dialog.
  *
- * If nothing is worth warning about, allow the send. Otherwise
- * show the warnings and let the user choose, because the rich UI
- * is not available to confirm in detail.
+ * This is still a confirmation path. Even when there are no warnings,
+ * the user sees the host prompt instead of sending without review.
  */
 function respondWithFallback(
   complete: (options: Office.SmartAlertsEventCompletedOptions) => void,
   model: ReviewModel,
   locale: LocaleTag,
 ): void {
-  const noConcern = model.warnings.length === 0 && model.externalEmails.length === 0
-  if (noConcern) {
-    complete({ allowEvent: true })
-    return
-  }
   const fallback = buildFallbackMessage(model, locale)
   complete({
     allowEvent: false,
     errorMessage: fallback.text,
     errorMessageMarkdown: fallback.markdown,
-    // When the rich dialog is down, do not trap the user. Let
-    // them send anyway after reading the warning.
+    // When the rich dialog is down, use the host prompt so the
+    // user still gets a confirmation instead of a silent send.
     sendModeOverride: Office.MailboxEnums.SendModeOverride.PromptUser,
   })
 }
@@ -162,8 +156,8 @@ export async function onMessageSendHandler(event: Office.AddinCommands.Event): P
       }
     }
   } catch (error) {
-    // Last resort. Never block real mail because of our own bug.
+    // Last resort. Never send real mail without a confirmation.
     console.error("mail-lookout: unexpected error in send handler", error)
-    complete({ allowEvent: true })
+    complete(cancelOptions(locale))
   }
 }
