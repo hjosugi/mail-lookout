@@ -256,7 +256,7 @@ Outlook 内から通常のアドインとして検索・インストールでき
 
 ### OutlookOkan との関係
 
-[OutlookOkan](https://github.com/0xww/OutlookOkan) は Outlook 向けの
+[OutlookOkan](https://github.com/t-miyake/OutlookOkan) は Outlook 向けの
 既存の送信確認ツールです。mail-lookout はそのツールの目的に敬意を持っています。
 
 mail-lookout は独立したプロジェクトです。OutlookOkan およびその作者と

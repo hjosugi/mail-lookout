@@ -260,7 +260,7 @@ environment.
 
 ### Relation to OutlookOkan
 
-[OutlookOkan](https://github.com/0xww/OutlookOkan) is an existing
+[OutlookOkan](https://github.com/t-miyake/OutlookOkan) is an existing
 send-confirmation tool for Outlook. mail-lookout respects the work
 and the problem it addresses.
 
