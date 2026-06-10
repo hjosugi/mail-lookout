@@ -156,6 +156,17 @@ npm run validate       # office-addin-manifest validate
 `mail-lookout-manifest.xml` も添付します。常に最新ではなく固定版を
 使いたい場合は、そのファイルを使います。
 
+patch version を上げるには:
+
+```sh
+bun run version:patch
+```
+
+この script は `package.json`、`package-lock.json`、`manifest.xml` の
+version をまとめて更新します。minor / major は `bun run version:minor`、
+`bun run version:major`、明示指定は `bun run version:set 1.2.3` を
+使います。version 更新を commit / push してから release tag を作ります。
+
 `package.json` の version から release tag を作って push するには:
 
 ```sh

@@ -62,6 +62,16 @@
 
 Git tag `v*` を push すると、GitHub Actions が `mail-lookout-manifest.xml` を Release asset として添付します。
 
+patch version を上げる場合:
+
+```sh
+bun run version:patch
+```
+
+この script は `package.json`、`package-lock.json`、`manifest.xml` の version をまとめて更新します。minor / major は `bun run version:minor`、`bun run version:major`、明示的に指定する場合は `bun run version:set 1.2.3` を使います。
+
+version 更新後は commit / push してから tag を作ります。
+
 tag は以下で作成・pushできます。
 
 ```sh
