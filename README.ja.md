@@ -152,6 +152,10 @@ npm run validate       # office-addin-manifest validate
 です。アドインをサイドロードするときは、このサイトの `/manifest.xml`
 を使います。
 
+タグ付きリリースでは、GitHub Releases に
+`mail-lookout-manifest.xml` も添付します。常に最新ではなく固定版を
+使いたい場合は、そのファイルを使います。
+
 手順は [NETLIFY.md](./NETLIFY.md) を参照してください。
 
 元のマニフェストはプレースホルダ値で出荷されます。本番運用や

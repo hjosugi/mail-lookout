@@ -152,6 +152,10 @@ The current public preview is served at
 [`https://mail-lookout.netlify.app/`](https://mail-lookout.netlify.app/).
 Use `/manifest.xml` from that site when sideloading the add-in.
 
+Tagged releases also attach `mail-lookout-manifest.xml` on the
+GitHub Releases page. Use that file when you want a fixed version
+instead of the latest hosted manifest.
+
 See [NETLIFY.md](./NETLIFY.md) for the step-by-step flow.
 
 The source manifest still ships with placeholder values. Replace

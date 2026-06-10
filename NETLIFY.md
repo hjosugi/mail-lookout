@@ -58,6 +58,12 @@
    > **【注意】**
    > このマニフェストファイルには、すでに Netlify の公開URLがすべて埋め込まれています。
 
+### GitHub Releases から固定版をダウンロード
+
+Git tag `v*` を push すると、GitHub Actions が `mail-lookout-manifest.xml` を Release asset として添付します。
+
+常に最新でよい場合は Netlify の `/manifest.xml`、特定バージョンを配りたい場合は GitHub Releases の `mail-lookout-manifest.xml` を使います。
+
 ### Outlook へのサイドロード（インストール）
 1. **Outlook on the web** または **新しい Outlook** にサインインします。
 2. メール新規作成画面などの「アドインを取得」メニュー、または **[設定] -> [アドイン]** に移動します。
