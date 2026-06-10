@@ -148,6 +148,10 @@ The repository includes `netlify.toml`, so Netlify can build with
 `scripts/generate-manifest.js` writes `dist/manifest.xml` with the
 Netlify site URL embedded.
 
+The current public preview is served at
+[`https://mail-lookout.netlify.app/`](https://mail-lookout.netlify.app/).
+Use `/manifest.xml` from that site when sideloading the add-in.
+
 See [NETLIFY.md](./NETLIFY.md) for the step-by-step flow.
 
 The source manifest still ships with placeholder values. Replace

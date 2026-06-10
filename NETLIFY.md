@@ -48,6 +48,8 @@
 
 デプロイが完了すると、`https://<あなたのサイト名>.netlify.app` のような公開用URLが割り当てられます。
 
+このプロジェクトの現在の公開URLは `https://mail-lookout.netlify.app/` です。
+
 ### マニフェストのダウンロード
 1. ブラウザで `https://<あなたのサイト名>.netlify.app/manifest.xml` にアクセスします。
 2. 画面に表示されるXMLデータを右クリックして **「名前を付けて保存」** でPCに保存します（ファイル名: `manifest.xml`）。

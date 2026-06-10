@@ -147,6 +147,11 @@ npm run validate       # office-addin-manifest validate
 `scripts/generate-manifest.js` が Netlify のサイトURLを埋め込んだ
 `dist/manifest.xml` を生成します。
 
+現在の公開プレビューは
+[`https://mail-lookout.netlify.app/`](https://mail-lookout.netlify.app/)
+です。アドインをサイドロードするときは、このサイトの `/manifest.xml`
+を使います。
+
 手順は [NETLIFY.md](./NETLIFY.md) を参照してください。
 
 元のマニフェストはプレースホルダ値で出荷されます。本番運用や

@@ -1,10 +1,9 @@
 /**
  * Vite config.
  *
- * Build: two HTML entries at the project root, commands.html and
- * dialog.html. Entry JS keeps a stable name so the manifest URLs
- * do not change between builds. Chunks and assets are hashed for
- * caching.
+ * Build: static public pages plus the Office runtime entries at the
+ * project root. Entry JS keeps a stable name so the manifest URLs do
+ * not change between builds. Chunks and assets are hashed for caching.
  *
  * Dev server: HTTPS, which Outlook requires. The certificate comes
  * from office-addin-dev-certs. If it is not installed yet, we fall
@@ -46,6 +45,7 @@ export default defineConfig({
     target: "es2022",
     rollupOptions: {
       input: {
+        index: fileURLToPath(new URL("index.html", import.meta.url)),
         commands: fileURLToPath(new URL("commands.html", import.meta.url)),
         dialog: fileURLToPath(new URL("dialog.html", import.meta.url)),
         emulator: fileURLToPath(new URL("emulator.html", import.meta.url)),

@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="mail-lookout is a send-confirmation add-in for Outlook."
+    />
+    <title>mail-lookout</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f7f7f5;
+        --ink: #1f2933;
+        --muted: #56616d;
+        --line: #d8ddd7;
+        --accent: #0f766e;
+        --accent-strong: #115e59;
+        --surface: #ffffff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          "Segoe UI",
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        line-height: 1.5;
+      }
+
+      main {
+        width: min(920px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 56px 0 40px;
+      }
+
+      header {
+        display: grid;
+        gap: 28px;
+        align-items: center;
+        grid-template-columns: auto 1fr;
+        padding-bottom: 40px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      img {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2.2rem, 8vw, 4.8rem);
+        line-height: 1;
+        font-weight: 720;
+      }
+
+      .lead {
+        max-width: 680px;
+        margin: 18px 0 0;
+        color: var(--muted);
+        font-size: 1.12rem;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 28px;
+      }
+
+      a {
+        color: var(--accent-strong);
+      }
+
+      .button {
+        display: inline-flex;
+        min-height: 44px;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--accent);
+        border-radius: 6px;
+        padding: 10px 14px;
+        background: var(--accent);
+        color: #ffffff;
+        font-weight: 650;
+        text-decoration: none;
+      }
+
+      .button.secondary {
+        background: transparent;
+        color: var(--accent-strong);
+      }
+
+      section {
+        display: grid;
+        gap: 18px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        padding-top: 32px;
+      }
+
+      article {
+        min-height: 148px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: 18px;
+      }
+
+      h2 {
+        margin: 0 0 8px;
+        font-size: 1rem;
+      }
+
+      p {
+        margin: 0;
+      }
+
+      article p {
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      @media (max-width: 720px) {
+        main {
+          padding-top: 36px;
+        }
+
+        header {
+          grid-template-columns: 1fr;
+        }
+
+        section {
+          grid-template-columns: 1fr;
+        }
+
+        .actions {
+          flex-direction: column;
+        }
+
+        .button {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <img src="/assets/icon-128.png" alt="" width="80" height="80" />
+        <div>
+          <h1>mail-lookout</h1>
+          <p class="lead">
+            A send-confirmation add-in for Outlook. It helps review recipients,
+            attachments, and message content before mail leaves your draft.
+          </p>
+          <nav class="actions" aria-label="Project links">
+            <a class="button" href="/manifest.xml">Download manifest</a>
+            <a class="button secondary" href="/emulator.html">Try emulator</a>
+            <a class="button secondary" href="https://github.com/hjosugi/mail-lookout">GitHub</a>
+          </nav>
+        </div>
+      </header>
+
+      <section aria-label="What mail-lookout checks">
+        <article>
+          <h2>Recipients</h2>
+          <p>Review To, Cc, and Bcc recipients before Outlook sends the message.</p>
+        </article>
+        <article>
+          <h2>Attachments</h2>
+          <p>Confirm real attachments and catch messages that mention missing files.</p>
+        </article>
+        <article>
+          <h2>Body</h2>
+          <p>Pause for a short review of the message body and empty-subject warning.</p>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>
