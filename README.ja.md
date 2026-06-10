@@ -156,6 +156,18 @@ npm run validate       # office-addin-manifest validate
 `mail-lookout-manifest.xml` も添付します。常に最新ではなく固定版を
 使いたい場合は、そのファイルを使います。
 
+`package.json` の version から release tag を作って push するには:
+
+```sh
+bun run release:tag
+```
+
+明示的に version を指定する場合:
+
+```sh
+bun run release:tag v1.0.1
+```
+
 手順は [NETLIFY.md](./NETLIFY.md) を参照してください。
 
 元のマニフェストはプレースホルダ値で出荷されます。本番運用や

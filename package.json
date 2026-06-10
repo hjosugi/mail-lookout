@@ -38,6 +38,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "validate": "office-addin-manifest validate manifest.xml",
+    "release:tag": "node scripts/release-tag.js",
     "check": "biome ci . && npm run typecheck && npm run test:coverage && npm run build && npm run validate"
   },
   "devDependencies": {

@@ -156,6 +156,18 @@ Tagged releases also attach `mail-lookout-manifest.xml` on the
 GitHub Releases page. Use that file when you want a fixed version
 instead of the latest hosted manifest.
 
+To create and push a release tag from `package.json`'s version:
+
+```sh
+bun run release:tag
+```
+
+Pass an explicit version when needed:
+
+```sh
+bun run release:tag v1.0.1
+```
+
 See [NETLIFY.md](./NETLIFY.md) for the step-by-step flow.
 
 The source manifest still ships with placeholder values. Replace

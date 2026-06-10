@@ -62,6 +62,14 @@
 
 Git tag `v*` を push すると、GitHub Actions が `mail-lookout-manifest.xml` を Release asset として添付します。
 
+tag は以下で作成・pushできます。
+
+```sh
+bun run release:tag
+```
+
+この script は `package.json` の version から `v1.0.0` のような tag を作ります。別の version を指定したい場合は `bun run release:tag v1.0.1` を使います。
+
 常に最新でよい場合は Netlify の `/manifest.xml`、特定バージョンを配りたい場合は GitHub Releases の `mail-lookout-manifest.xml` を使います。
 
 ### Outlook へのサイドロード（インストール）
