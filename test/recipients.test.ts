@@ -1,7 +1,19 @@
 import { describe, expect, it } from "vitest"
 
-import { classifyRecipients, domainOf, isExternal } from "../src/domain/recipients"
+import {
+  classifyRecipients,
+  createExternalRecipientChecker,
+  domainOf,
+  isExternal,
+  normalizeEmailAddress,
+} from "../src/domain/recipients"
 import type { FieldRecipient } from "../src/domain/types"
+
+describe("normalizeEmailAddress", () => {
+  it("trims and lowercases an email address", () => {
+    expect(normalizeEmailAddress("  Alice@Example.COM ")).toBe("alice@example.com")
+  })
+})
 
 describe("domainOf", () => {
   it("returns the domain part, lowercased", () => {
@@ -14,6 +26,14 @@ describe("domainOf", () => {
 
   it("uses the last at sign", () => {
     expect(domainOf("weird@name@example.com")).toBe("example.com")
+  })
+})
+
+describe("createExternalRecipientChecker", () => {
+  it("reuses one normalized internal-domain set", () => {
+    const isExternalRecipient = createExternalRecipientChecker([" Example.COM ", ""])
+    expect(isExternalRecipient("alice@example.com")).toBe(false)
+    expect(isExternalRecipient("bob@other.com")).toBe(true)
   })
 })
 

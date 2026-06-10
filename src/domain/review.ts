@@ -13,7 +13,7 @@
 
 import type { Config } from "../config"
 import { detectForgottenAttachment, realAttachments } from "./attachments"
-import { isExternal } from "./recipients"
+import { createExternalRecipientChecker } from "./recipients"
 import { isSubjectEmpty } from "./body"
 import { bodyPreview } from "./body"
 import type { Attachment, FieldRecipient, MessageSnapshot, RecipientField } from "./types"
@@ -67,13 +67,13 @@ export interface ReviewModel {
 /** Map one recipient to its view form. */
 function toRecipientView(
   recipient: FieldRecipient,
-  internalDomains: readonly string[],
+  isExternalRecipient: (email: string) => boolean,
 ): RecipientView {
   return {
     field: recipient.field,
     displayName: recipient.displayName,
     emailAddress: recipient.emailAddress,
-    isExternal: isExternal(recipient.emailAddress, internalDomains),
+    isExternal: isExternalRecipient(recipient.emailAddress),
   }
 }
 
@@ -89,8 +89,9 @@ function toAttachmentView(attachment: Attachment): AttachmentView {
  * and which confirmations are required.
  */
 export function buildReviewModel(snapshot: MessageSnapshot, config: Config): ReviewModel {
+  const isExternalRecipient = createExternalRecipientChecker(config.internalDomains)
   const recipients = snapshot.recipients.map(recipient =>
-    toRecipientView(recipient, config.internalDomains),
+    toRecipientView(recipient, isExternalRecipient),
   )
 
   const externalEmails = [

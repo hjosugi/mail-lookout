@@ -1,4 +1,5 @@
 import { defaultConfig } from "../config"
+import { normalizeEmailAddress } from "../domain/recipients"
 import { buildReviewModel, canSend, initialReviewState } from "../domain/review"
 import type { ReviewModel, ReviewState } from "../domain/review"
 import type { Attachment, FieldRecipient, MessageSnapshot, RecipientField } from "../domain/types"
@@ -96,7 +97,7 @@ function recipient(
   displayName: string,
   emailAddress: string,
 ): FieldRecipient {
-  return { field, displayName, emailAddress: emailAddress.trim().toLowerCase() }
+  return { field, displayName, emailAddress: normalizeEmailAddress(emailAddress) }
 }
 
 function attachment(name: string, size: number | null): Attachment {

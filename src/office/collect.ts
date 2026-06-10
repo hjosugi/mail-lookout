@@ -9,6 +9,7 @@
  */
 
 import type { Attachment, FieldRecipient, MessageSnapshot, RecipientField } from "../domain/types"
+import { normalizeEmailAddress } from "../domain/recipients"
 import { promisify } from "./officeAsync"
 
 /** Map host recipient details to our recipient type. */
@@ -19,7 +20,7 @@ function mapRecipients(
   return details.map(detail => ({
     field,
     displayName: detail.displayName ?? "",
-    emailAddress: (detail.emailAddress ?? "").trim().toLowerCase(),
+    emailAddress: normalizeEmailAddress(detail.emailAddress ?? ""),
   }))
 }
 
@@ -54,7 +55,7 @@ export async function collectSnapshot(item: Office.MessageCompose): Promise<Mess
     ...mapRecipients(bcc, "bcc"),
   ]
 
-  const senderEmail = (Office.context.mailbox.userProfile.emailAddress ?? "").trim().toLowerCase()
+  const senderEmail = normalizeEmailAddress(Office.context.mailbox.userProfile.emailAddress ?? "")
 
   return {
     subject,

@@ -12,7 +12,13 @@ export type {
   RecipientField,
 } from "./types"
 
-export { domainOf, isExternal, classifyRecipients } from "./recipients"
+export {
+  normalizeEmailAddress,
+  domainOf,
+  createExternalRecipientChecker,
+  isExternal,
+  classifyRecipients,
+} from "./recipients"
 export type { ClassifiedRecipients } from "./recipients"
 
 export { realAttachments, mentionsAttachment, detectForgottenAttachment } from "./attachments"

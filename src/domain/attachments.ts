@@ -7,6 +7,7 @@
  */
 
 import type { Attachment, MessageSnapshot } from "./types"
+import { includesAnyCaseInsensitive } from "./text"
 
 /** Keep only real attachments. Inline images are dropped. */
 export function realAttachments(attachments: readonly Attachment[]): readonly Attachment[] {
@@ -20,14 +21,7 @@ export function realAttachments(attachments: readonly Attachment[]): readonly At
  * substring. Empty keywords are skipped.
  */
 export function mentionsAttachment(text: string, keywords: readonly string[]): boolean {
-  const haystack = text.toLowerCase()
-  return keywords.some(keyword => {
-    const needle = keyword.trim().toLowerCase()
-    if (needle.length === 0) {
-      return false
-    }
-    return haystack.includes(needle)
-  })
+  return includesAnyCaseInsensitive(text, keywords)
 }
 
 /**
