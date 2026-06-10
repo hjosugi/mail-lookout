@@ -3,6 +3,17 @@ dist/
 coverage/
 *.log
 .DS_Store
+*.zip
+
+# Environment and deployment secrets
+.env
+.env.*
+!.env.example
+
+# Local assistant/editor state
+.claude/
+.codex/
+.gemini/
 
 # Local dev certificates
 *.pem

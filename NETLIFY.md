@@ -29,6 +29,19 @@
 
 独自ドメインを先に使いたい場合は、Netlify の **Environment variables** に `DEPLOY_URL=https://your-domain.example` を設定すると、そのURLが優先されます。
 
+### IaC で管理できる範囲
+
+このリポジトリでは `netlify.toml` を使って、Netlify のビルド設定をコード管理しています。これで以下は Git に残ります。
+
+- build command: `npm run build`
+- publish directory: `dist`
+- Node.js version
+- `manifest.xml` の `Content-Type` header
+
+つまり、Netlify に GitHub repo を一度 import すれば、その後のビルド設定は IaC 的に管理できます。
+
+サイト作成、独自ドメイン、環境変数まで完全にコード化したい場合は Terraform の Netlify provider でも可能です。ただし `NETLIFY_TOKEN` などの管理が必要になり、最初の個人公開には少し重いです。まずは `netlify.toml` + GitHub 連携で始めるのが一番ラクです。
+
 ---
 
 ## 3. マニフェストファイルの入手と Outlook への登録
@@ -53,3 +66,14 @@
 Netlify で公開されるのは、アドイン本体のWebファイルと配布用マニフェストです。README で `manifest.xml` のURLを案内すれば、試してもらうことはできます。
 
 ただし、Outlook 内から通常のアドインとして検索・インストールできる状態にするには、最終的に Microsoft Marketplace / AppSource への申請が必要です。最初は Netlify で公開して反応を見る、広げる段階で Marketplace 申請に進む、という流れが現実的です。
+
+## 5. Public repo にする前の確認
+
+このプロジェクトは、現在の構成なら public repo として公開しやすい形です。公開前には以下を確認してください。
+
+- `private/` は commit しない。
+- `.env`、`.env.*`、証明書、秘密鍵、zip は commit しない。
+- `.claude/`、`.codex/`、`.gemini/` などのローカルAI設定は commit しない。
+- `src/config/defaults.ts` の `internalDomains` は、公開したくない社内ドメインに置き換えた状態で commit しない。
+- `manifest.xml` の `SupportUrl` は `https://github.com/your-org/mail-lookout` のままではなく、公開先のリポジトリURLに直す。
+- Marketplace / AppSource に出す段階では、Support URL、Privacy Policy、Terms of Use、アイコン、説明文を本番用に整える。
