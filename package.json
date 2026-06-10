@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.16",
-    "@types/node": "^25.9.1",
+    "@types/node": "^25.9.2",
     "@types/office-js": "^1.0.592",
     "@vitest/coverage-v8": "^4.1.8",
     "office-addin-dev-certs": "^2.0.9",
