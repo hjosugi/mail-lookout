@@ -28,5 +28,5 @@ export function bodyPreview(body: string, maxLength: number): string {
   if (collapsed.length <= maxLength) {
     return collapsed
   }
-  return collapsed.slice(0, maxLength).trimEnd() + "\u2026"
+  return `${collapsed.slice(0, maxLength).trimEnd()}\u2026`
 }
