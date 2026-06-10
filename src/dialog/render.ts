@@ -81,6 +81,11 @@ export interface DialogHandle {
   readonly setSending: (seconds: number | null) => void
 }
 
+export interface DialogRenderOptions {
+  readonly showBackButton?: boolean
+  readonly showDelayControl?: boolean
+}
+
 /** Map a warning to its text. Exhaustive over WarningKind. */
 function warningText(warning: Warning, messages: Messages): string {
   const kind: WarningKind = warning.kind
@@ -398,8 +403,11 @@ export function renderDialog(
   model: ReviewModel,
   messages: Messages,
   callbacks: DialogCallbacks,
+  options: DialogRenderOptions = {},
 ): DialogHandle {
   inputCounter = 0
+  const showBackButton = options.showBackButton ?? true
+  const showDelayControl = options.showDelayControl ?? true
 
   let baseEnabled = false
   // Non-null while the post-click send countdown is running. Send is
@@ -460,10 +468,13 @@ export function renderDialog(
     buildBodySection(model, messages, callbacks),
   )
 
-  const footer = el("footer", { className: "so-footer" }, [
-    buildDelayControl(model, messages, callbacks),
-    el("div", { className: "so-footer-actions" }, [backBtn, sendBtn]),
-  ])
+  const footerChildren: Node[] = []
+  if (showDelayControl) {
+    footerChildren.push(buildDelayControl(model, messages, callbacks))
+  }
+  const footerActions = showBackButton ? [backBtn, sendBtn] : [sendBtn]
+  footerChildren.push(el("div", { className: "so-footer-actions" }, footerActions))
+  const footer = el("footer", { className: "so-footer" }, footerChildren)
 
   const element = el("div", { className: "so-dialog" }, [header, body, footer])
 

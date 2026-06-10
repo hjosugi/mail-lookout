@@ -3,10 +3,10 @@
 A send-confirmation add-in for new Outlook and Outlook on the web.
 
 It runs when you press Send. Outlook's built-in Smart Alerts dialog
-shows the recipients, the attachments, warnings, and a preview of the
-body. If everything is correct, you return to the draft and press
-Send again without changes. The goal is to stop the small mistakes:
-the wrong recipient, the forgotten attachment, the empty subject.
+opens a review task pane with checkboxes for recipients, attachments,
+subject, and body. After everything is checked, you press Send again.
+The goal is to stop the small mistakes: the wrong recipient, the
+forgotten attachment, the empty subject.
 
 The name is literal: a lookout for your outgoing mail — a quiet watch
 that flags problems before a message leaves.
@@ -22,9 +22,8 @@ This add-in does four things at send time.
 2. **Attachment check.** It lists every real attachment.
 3. **Body check.** It shows a preview of the body and asks you to
    review it.
-4. **Second-send confirmation.** It blocks the first send attempt.
-   If the draft is unchanged, pressing Send again confirms the
-   review and sends the message.
+4. **Review pane confirmation.** It blocks the first send attempt
+   and opens a task pane where required items must be checked.
 
 It also raises two warnings:
 
@@ -96,9 +95,9 @@ host:
   reached from Outlook on the web with the same account.
 
 After sideloading, open a new message, fill in a recipient, and
-press Send. Outlook's Smart Alerts dialog should appear with the
-review summary. If everything is correct, close it and press Send
-again without changing the draft.
+press Send. Outlook's Smart Alerts dialog should appear. Choose
+"Open review", check the required items in the task pane, then press
+Send again without changing the draft.
 
 ### Local emulator without Outlook
 
@@ -249,8 +248,9 @@ send, the user must go back and edit the draft. There is no one-click
 every cancel is one click to bypass does not confirm much.
 
 The first send attempt shows the Smart Alerts dialog and cancels the
-send. If the draft is unchanged, the next Send confirms the review
-and the handler allows the message. If the user changes the subject,
+send. The dialog's action button opens a task pane with the checkbox
+review UI. After the task pane marks the draft as reviewed, the next
+unchanged Send allows the message. If the user changes the subject,
 body, recipients, or attachments, the next attempt shows the review
 again. If any unexpected error happens, the handler cancels the send.
 It never sends real mail without confirmation.

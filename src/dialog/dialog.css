@@ -335,6 +335,15 @@ body {
   margin-left: auto;
 }
 
+.so-taskpane-status {
+  margin: 0;
+  padding: 12px 20px;
+  color: var(--so-accent);
+  border-top: 1px solid var(--so-border);
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .so-delay {
   display: flex;
   align-items: center;

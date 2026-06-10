@@ -5,6 +5,7 @@ import { buildReviewModel } from "../src/domain/review"
 import type { MessageSnapshot } from "../src/domain/types"
 import { locales } from "../src/i18n/catalog"
 import {
+  REVIEW_PANE_COMMAND_ID,
   buildSmartAlertMessage,
   consumeConfirmation,
   needsSmartAlertConfirmation,
@@ -113,6 +114,8 @@ describe("Smart Alerts message", () => {
     expect(options.allowEvent).toBe(false)
     expect(options.errorMessage).toContain("press Send again")
     expect(options.errorMessageMarkdown).toContain("**Confirm before sending**")
+    expect(options.cancelLabel).toBe("Open review")
+    expect(options.commandId).toBe(REVIEW_PANE_COMMAND_ID)
   })
 
   it("does not require confirmation when every gate is disabled and there are no warnings", () => {

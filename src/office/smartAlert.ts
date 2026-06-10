@@ -9,6 +9,7 @@ const CONFIRMATION_STORAGE_KEY = "mail-lookout:send-confirmation"
 const CONFIRMATION_TTL_MS = 10 * 60 * 1000
 const MAX_ALERT_MESSAGE_LENGTH = 500
 const LIST_PREVIEW_COUNT = 3
+export const REVIEW_PANE_COMMAND_ID = "ReviewPaneButton"
 
 interface StoredConfirmation {
   readonly fingerprint: string
@@ -91,7 +92,8 @@ export function smartAlertCancelOptions(
     allowEvent: false,
     errorMessage: buildSmartAlertMessage(model, messages, false),
     errorMessageMarkdown: buildSmartAlertMessage(model, messages, true),
-    cancelLabel: messages.cancel.returnLabel,
+    cancelLabel: messages.smartAlert.openReview,
+    commandId: REVIEW_PANE_COMMAND_ID,
   }
 }
 

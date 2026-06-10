@@ -60,9 +60,17 @@ export const en: Messages = {
       `There ${count === 1 ? "is" : "are"} ${count} external recipient${count === 1 ? "" : "s"}.`,
   },
   smartAlert: {
-    sendAgain: "Review the details. If everything is correct, press Send again without changes.",
+    sendAgain: "Open the review pane and check the required items. Then press Send again.",
     warnings: "Warnings",
     moreItems: count => `${count} more`,
+    openReview: "Open review",
+  },
+  taskPane: {
+    title: "Confirm before sending",
+    intro: "Check the required items. After confirming, press Outlook's Send button again.",
+    confirm: "Mark as reviewed",
+    confirmed: "Reviewed. Press Outlook's Send button again.",
+    loadFailed: "The review pane could not load. Return to your draft and review it.",
   },
   cancel: {
     notSent: "The message was not sent. Return to your draft to review it.",

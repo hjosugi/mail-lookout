@@ -65,6 +65,14 @@ export interface Messages {
     readonly sendAgain: string
     readonly warnings: string
     readonly moreItems: (count: number) => string
+    readonly openReview: string
+  }
+  readonly taskPane: {
+    readonly title: string
+    readonly intro: string
+    readonly confirm: string
+    readonly confirmed: string
+    readonly loadFailed: string
   }
   readonly cancel: {
     readonly notSent: string

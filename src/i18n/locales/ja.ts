@@ -59,9 +59,17 @@ export const ja: Messages = {
     externalRecipients: count => `社外の宛先が ${count} 件あります。`,
   },
   smartAlert: {
-    sendAgain: "内容を確認し、問題なければ変更せずにもう一度送信を押してください。",
+    sendAgain: "確認を開いて必要な項目をチェックしてください。確認後、もう一度送信を押します。",
     warnings: "警告",
     moreItems: count => `ほか ${count} 件`,
+    openReview: "確認を開く",
+  },
+  taskPane: {
+    title: "送信前の確認",
+    intro: "必要な項目をチェックしてください。確認後、Outlook の送信ボタンをもう一度押します。",
+    confirm: "確認済みにする",
+    confirmed: "確認済みです。Outlook の送信ボタンをもう一度押してください。",
+    loadFailed: "確認画面を読み込めませんでした。下書きに戻って内容を確認してください。",
   },
   cancel: {
     notSent: "メールは送信していません。下書きに戻って内容を確認してください。",
