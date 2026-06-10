@@ -272,9 +272,10 @@ textarea {
   box-shadow: 0 24px 80px rgb(0 0 0 / 35%);
 }
 
-/* Mimic the Outlook task pane: a narrow side panel, not a wide modal. */
+/* The task pane window. Generous on a desktop so rows never wrap, and
+   it falls back to most of the viewport width on smaller screens. */
 .ml-dialog-window--taskpane {
-  width: min(360px, 100%);
+  width: min(880px, 92vw);
 }
 
 .ml-dialog-header {

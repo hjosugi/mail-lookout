@@ -37,6 +37,16 @@ function start(model: ReviewModel, fingerprint: string, locale: LocaleTag): void
   let state: ReviewState = initialReviewState(model)
   const status = showStatus("")
 
+  // A single timer drives the pre-confirm countdown. The hold is floored
+  // so confirming is never instant.
+  let timer: number | null = null
+  const stopTimer = (): void => {
+    if (timer !== null) {
+      window.clearInterval(timer)
+      timer = null
+    }
+  }
+
   const refresh = (): void => {
     handle.setSendEnabled(canSend(model, state))
   }
@@ -78,16 +88,41 @@ function start(model: ReviewModel, fingerprint: string, locale: LocaleTag): void
         refresh()
       },
       onDelayChange() {
-        // The production Smart Alerts flow does not use a countdown.
+        // The task pane shows no delay control; the hold comes from config.
       },
       onSend() {
-        rememberConfirmation(fingerprint)
-        status.textContent = baseMessages.taskPane.confirmed
+        // Record the review so the user's next unchanged Send passes the
+        // Smart Alerts check. A 0 delay confirms at once; any positive
+        // delay runs a countdown first so the confirm is never skipped.
+        const confirm = (): void => {
+          rememberConfirmation(fingerprint)
+          status.textContent = baseMessages.taskPane.confirmed
+        }
+        if (model.sendDelaySeconds <= 0) {
+          confirm()
+          return
+        }
+        let remaining = model.sendDelaySeconds
+        handle.setSending(remaining)
+        timer = window.setInterval(() => {
+          remaining -= 1
+          if (remaining <= 0) {
+            stopTimer()
+            handle.setSending(null)
+            confirm()
+          } else {
+            handle.setSending(remaining)
+          }
+        }, 1000)
       },
       onCancelSend() {
-        // No countdown runs in the task pane.
+        stopTimer()
+        handle.setSending(null)
+        status.textContent = ""
       },
       onBack() {
+        stopTimer()
+        handle.setSending(null)
         status.textContent = ""
       },
     },

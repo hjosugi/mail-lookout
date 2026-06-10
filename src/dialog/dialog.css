@@ -207,10 +207,12 @@ body {
 .so-recipient-check,
 .so-attachment-check {
   cursor: pointer;
+  /* Pin the checkbox to the first text line so it stays aligned with the
+     name even when the label wraps to a second line. */
+  align-items: flex-start;
 }
 
 .so-attachment-check {
-  align-items: center;
   justify-content: flex-start;
 }
 
@@ -218,7 +220,8 @@ body {
 .so-attachment-check > input[type="checkbox"] {
   width: 16px;
   height: 16px;
-  margin: 0;
+  /* Nudge down to sit on the first line's optical center. */
+  margin: 2px 0 0;
   accent-color: var(--so-accent);
   flex: 0 0 auto;
 }

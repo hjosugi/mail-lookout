@@ -6,7 +6,7 @@ import type { Attachment, FieldRecipient, MessageSnapshot, RecipientField } from
 import { getMessages } from "../i18n/catalog"
 import type { LocaleTag } from "../i18n/catalog"
 import { renderDialog, type DialogHandle } from "../dialog/render"
-import { taskPaneMessages, taskPaneRenderOptions } from "../dialog/taskPaneView"
+import { taskPaneMessages } from "../dialog/taskPaneView"
 import { getEmulatorMessages, type EmulatorMessages } from "./messages"
 import "./emulator.css"
 
@@ -417,97 +417,19 @@ function openReview(): void {
 }
 
 /**
- * Mount the task pane variant of the review.
+ * Mount the review.
  *
- * This mirrors how the Outlook task pane mounts renderDialog: task-pane
- * wording, no back button, and no send-delay control. Pressing the
- * primary button only marks the review as done (no countdown, no send),
- * which is what the real task pane does before the user returns to the
- * draft and presses Send again.
+ * Both presentations run the same flow — checklist, send-delay control,
+ * and a cancellable countdown that runs in a corner toast after Send so
+ * the surface closes right away. The task pane only differs in its narrow
+ * window styling and task-pane heading copy.
  */
-function mountTaskPaneReview(model: ReviewModel, locale: LocaleTag): void {
+function mountReview(model: ReviewModel, locale: LocaleTag, asTaskPane: boolean): void {
   stopTimer()
   hideToast()
   const preview = query<HTMLElement>("#emu-preview")
-  const baseMessages = getMessages(locale)
-  const messages = taskPaneMessages(baseMessages)
-  let state: ReviewState = initialReviewState(model)
-
-  const refresh = (): void => {
-    handle.setSendEnabled(canSend(model, state))
-  }
-  const onToggle = (mutate: () => void): void => {
-    mutate()
-    setStatus(getEmulatorMessages(locale).status.reviewing)
-    refresh()
-  }
-
-  const handle = renderDialog(
-    model,
-    messages,
-    {
-      onRecipientToggle(index, checked) {
-        onToggle(() => {
-          const next = new Set(state.confirmedRecipients)
-          if (checked) {
-            next.add(index)
-          } else {
-            next.delete(index)
-          }
-          state = { ...state, confirmedRecipients: next }
-        })
-      },
-      onAttachmentToggle(index, checked) {
-        onToggle(() => {
-          const next = new Set(state.confirmedAttachments)
-          if (checked) {
-            next.add(index)
-          } else {
-            next.delete(index)
-          }
-          state = { ...state, confirmedAttachments: next }
-        })
-      },
-      onSubjectToggle(checked) {
-        onToggle(() => {
-          state = { ...state, subjectConfirmed: checked }
-        })
-      },
-      onBodyToggle(checked) {
-        onToggle(() => {
-          state = { ...state, bodyConfirmed: checked }
-        })
-      },
-      onDelayChange() {
-        // The task pane has no send-delay control.
-      },
-      onSend() {
-        // The task pane does not send; it only records the review.
-        setStatus(baseMessages.taskPane.confirmed)
-      },
-      onCancelSend() {
-        // No countdown runs in the task pane.
-      },
-      onBack() {
-        // The task pane has no back button.
-      },
-    },
-    taskPaneRenderOptions,
-  )
-
-  activeHandle = handle
-  query<HTMLElement>(".ml-dialog-window").classList.add("ml-dialog-window--taskpane")
-  preview.replaceChildren(handle.element)
-  openReview()
-  refresh()
-}
-
-function mountReview(model: ReviewModel, locale: LocaleTag): void {
-  stopTimer()
-  hideToast()
-  const preview = query<HTMLElement>("#emu-preview")
-  query<HTMLElement>(".ml-dialog-window").classList.remove("ml-dialog-window--taskpane")
-  const messages = getMessages(locale)
+  query<HTMLElement>(".ml-dialog-window").classList.toggle("ml-dialog-window--taskpane", asTaskPane)
+  const messages = asTaskPane ? taskPaneMessages(getMessages(locale)) : getMessages(locale)
   let state: ReviewState = initialReviewState(model)
   // The wait before sending starts from the model but can be changed
   // on the dialog, so it lives in the controller.
@@ -577,11 +499,7 @@ function runReview(): void {
   const config = configFromForm()
   const model = buildReviewModel(snapshotFromForm(), config)
   setStatus(getEmulatorMessages(config.fallbackLocale).status.reviewing)
-  if (currentPresentation() === "taskpane") {
-    mountTaskPaneReview(model, config.fallbackLocale)
-  } else {
-    mountReview(model, config.fallbackLocale)
-  }
+  mountReview(model, config.fallbackLocale, currentPresentation() === "taskpane")
 }
 
 function renderShell(): void {
