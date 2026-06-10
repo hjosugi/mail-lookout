@@ -4,12 +4,14 @@
  * The Smart Alerts handler.
  *
  * This runs when the user presses Send. It collects the message,
- * builds the review model, and shows the confirmation dialog.
- * Then it allows or cancels the send.
+ * builds the review model, and uses Outlook's built-in Smart Alerts
+ * dialog to show a review summary. If the user returns to the draft
+ * and presses Send again without changing the message, the send is
+ * allowed.
  *
  * Safety rules:
  *   - event.completed is called exactly once, always.
- *   - If the rich dialog cannot open, cancel the send.
+ *   - The first send attempt is canceled when confirmation is needed.
  *   - On any unexpected error, cancel the send rather than sending
  *     without a confirmation.
  */
@@ -19,7 +21,13 @@ import { buildReviewModel } from "../domain/review"
 import { collectSnapshot } from "./collect"
 import { getMessages, resolveLocale } from "../i18n/catalog"
 import type { LocaleTag } from "../i18n/catalog"
-import { DialogUnavailableError, showConfirmationDialog } from "./dialog"
+import {
+  consumeConfirmation,
+  needsSmartAlertConfirmation,
+  rememberConfirmation,
+  smartAlertCancelOptions,
+  snapshotFingerprint,
+} from "./smartAlert"
 
 /** Wrap event.completed so it can run at most once. */
 function completeOnce(
@@ -64,18 +72,15 @@ export async function onMessageSendHandler(event: Office.AddinCommands.Event): P
     const item = Office.context.mailbox.item as Office.MessageCompose
     const snapshot = await collectSnapshot(item)
     const model = buildReviewModel(snapshot, config)
+    const fingerprint = snapshotFingerprint(snapshot)
 
-    const origin = window.location.origin
-    try {
-      const allow = await showConfirmationDialog(model, locale, config, origin)
-      complete(allow ? { allowEvent: true } : cancelOptions(locale))
-    } catch (error) {
-      if (error instanceof DialogUnavailableError) {
-        complete(cancelOptions(locale))
-      } else {
-        throw error
-      }
+    if (!needsSmartAlertConfirmation(model) || consumeConfirmation(fingerprint)) {
+      complete({ allowEvent: true })
+      return
     }
+
+    rememberConfirmation(fingerprint)
+    complete(smartAlertCancelOptions(model, locale))
   } catch (error) {
     // Last resort. Never send real mail without a confirmation.
     console.error("mail-lookout: unexpected error in send handler", error)

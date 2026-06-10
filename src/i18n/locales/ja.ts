@@ -58,6 +58,11 @@ export const ja: Messages = {
     forgottenAttachment: "本文は添付ファイルの記載がありますが、ファイルが添付されていません。",
     externalRecipients: count => `社外の宛先が ${count} 件あります。`,
   },
+  smartAlert: {
+    sendAgain: "内容を確認し、問題なければ変更せずにもう一度送信を押してください。",
+    warnings: "警告",
+    moreItems: count => `ほか ${count} 件`,
+  },
   cancel: {
     notSent: "メールは送信していません。下書きに戻って内容を確認してください。",
     returnLabel: "下書きに戻る",

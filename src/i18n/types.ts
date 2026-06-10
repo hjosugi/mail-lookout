@@ -60,6 +60,12 @@ export interface Messages {
     readonly forgottenAttachment: string
     readonly externalRecipients: (count: number) => string
   }
+  readonly smartAlert: {
+    /** Tell the user that the next unchanged send attempt confirms the review. */
+    readonly sendAgain: string
+    readonly warnings: string
+    readonly moreItems: (count: number) => string
+  }
   readonly cancel: {
     readonly notSent: string
     readonly returnLabel: string

@@ -2,11 +2,11 @@
 
 A send-confirmation add-in for new Outlook and Outlook on the web.
 
-It runs when you press Send. It shows a dialog with the recipients,
-the attachments, and a preview of the body. You check what you need
-to check, wait out a short delay, and then send. The goal is to stop
-the small mistakes: the wrong recipient, the forgotten attachment,
-the empty subject.
+It runs when you press Send. Outlook's built-in Smart Alerts dialog
+shows the recipients, the attachments, warnings, and a preview of the
+body. If everything is correct, you return to the draft and press
+Send again without changes. The goal is to stop the small mistakes:
+the wrong recipient, the forgotten attachment, the empty subject.
 
 The name is literal: a lookout for your outgoing mail — a quiet watch
 that flags problems before a message leaves.
@@ -18,14 +18,13 @@ that flags problems before a message leaves.
 This add-in does four things at send time.
 
 1. **Recipient check.** It lists every recipient by field (To, Cc,
-   Bcc) and marks external ones. It asks you to confirm each
-   recipient one by one.
-2. **Attachment check.** It lists every real attachment and asks
-   you to confirm each file one by one.
+   Bcc) and marks external ones.
+2. **Attachment check.** It lists every real attachment.
 3. **Body check.** It shows a preview of the body and asks you to
-   confirm you reviewed it.
-4. **Send delay.** It counts down a few seconds before the send
-   button turns on. This is a pause to think, not a scheduled send.
+   review it.
+4. **Second-send confirmation.** It blocks the first send attempt.
+   If the draft is unchanged, pressing Send again confirms the
+   review and sends the message.
 
 It also raises two warnings:
 
@@ -56,10 +55,10 @@ src/
   domain/    Pure logic. No Office, no DOM, no time. Fully tested.
   config/    The config shape and its defaults.
   i18n/      Type-safe messages. One file per language.
-  shared/    The message protocol between handler and dialog.
-  office/    The Office adapter. Reads the draft, runs the handler.
+  shared/    Shared message shapes used by the browser-only preview.
+  office/    The Office adapter. Reads the draft, runs the Smart Alerts handler.
   commands/  Registers the send handler with Office.
-  dialog/    Renders the confirmation dialog in the browser.
+  dialog/    Renders the browser-only confirmation preview.
 ```
 
 The `domain` layer is the core. It takes a plain snapshot of the
@@ -69,10 +68,10 @@ touches nothing from the host, every rule is tested with plain
 data. The tests are where the value is.
 
 The `office` layer is a thin adapter. It reads the draft through
-the Office APIs, hands a plain snapshot to `domain`, opens the
-dialog, and then allows or cancels the send. The core layers import
-nothing from Office, so the boundary holds by construction; keep any
-new host calls in the `office` layer.
+the Office APIs, hands a plain snapshot to `domain`, and then uses
+Outlook's built-in Smart Alerts dialog to cancel or allow the send.
+The core layers import nothing from Office, so the boundary holds by
+construction; keep any new host calls in the `office` layer.
 
 ## Setup
 
@@ -97,7 +96,9 @@ host:
   reached from Outlook on the web with the same account.
 
 After sideloading, open a new message, fill in a recipient, and
-press Send. The confirmation dialog should appear.
+press Send. Outlook's Smart Alerts dialog should appear with the
+review summary. If everything is correct, close it and press Send
+again without changing the draft.
 
 ### Local emulator without Outlook
 
@@ -212,12 +213,13 @@ All settings live in [`src/config/defaults.ts`](./src/config/defaults.ts).
 Fork that file. The main options:
 
 - `internalDomains`: domains treated as internal.
-- `sendDelaySeconds`: seconds to count down before send turns on.
-  Set `0` to disable.
-- `requireRecipientConfirmation`: check each recipient one by one.
-- `requireAttachmentConfirmation`: check each attachment one by
-  one.
-- `requireBodyConfirmation`: confirm the body was reviewed.
+- `sendDelaySeconds`: used only by the browser preview dialog.
+- `requireRecipientConfirmation`: include recipients in the
+  send-time confirmation.
+- `requireAttachmentConfirmation`: include attachments in the
+  send-time confirmation.
+- `requireBodyConfirmation`: include the body preview in the
+  send-time confirmation.
 - `attachmentKeywords`: words that hint the body refers to an
   attachment, used by the forgotten-attachment warning.
 - `warnOnEmptySubject`: warn when the subject is blank.
@@ -246,23 +248,25 @@ send, the user must go back and edit the draft. There is no one-click
 "send anyway" path. This is on purpose: a confirmation tool whose
 every cancel is one click to bypass does not confirm much.
 
-If the rich dialog cannot open after a few attempts, or if any
-unexpected error happens, the handler cancels the send. It never
-sends real mail without confirmation.
+The first send attempt shows the Smart Alerts dialog and cancels the
+send. If the draft is unchanged, the next Send confirms the review
+and the handler allows the message. If the user changes the subject,
+body, recipients, or attachments, the next attempt shows the review
+again. If any unexpected error happens, the handler cancels the send.
+It never sends real mail without confirmation.
 
 ## Limitations
 
 Be honest about what this is and is not.
 
-- **The send delay is a dialog countdown, not a scheduled send.**
-  The button is disabled for a few seconds while the dialog is
-  open. The mail is not held on a server and sent later. When you
-  click send, it sends.
-- **A "still working" notice may appear.** Outlook shows its own
-  notification if a send handler runs longer than five seconds.
-  Because this add-in opens a review dialog and waits for you, that
-  notice can appear. It is part of the host, and it cannot be
-  removed.
+- **Custom Office dialogs can't be opened from the send event.**
+  `OnMessageSend` runs through event-based activation, and Office UI
+  APIs such as `Office.context.ui.displayDialogAsync` are blocked
+  there. The production send flow therefore uses the built-in Smart
+  Alerts dialog instead of the browser preview dialog.
+- **The send delay is only used by the browser preview.** Outlook's
+  Smart Alerts send handler must stay short-running, so production
+  sends use the second unchanged Send as the confirmation step.
 - **Classic Outlook on Windows is not a target.** That host uses a
   JavaScript-only runtime for send handlers. This project builds an
   ES module that loads through an HTML page in a browser runtime,

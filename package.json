@@ -1,7 +1,7 @@
 {
   "name": "mail-lookout",
-  "version": "1.0.1",
-  "description": "A send-confirmation add-in for the new Outlook. It opens a review dialog before each send to help prevent misdelivery.",
+  "version": "1.0.2",
+  "description": "A send-confirmation add-in for the new Outlook. It uses Smart Alerts to help prevent misdelivery.",
   "type": "module",
   "license": "MIT",
   "repository": {

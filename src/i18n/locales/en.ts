@@ -59,6 +59,11 @@ export const en: Messages = {
     externalRecipients: count =>
       `There ${count === 1 ? "is" : "are"} ${count} external recipient${count === 1 ? "" : "s"}.`,
   },
+  smartAlert: {
+    sendAgain: "Review the details. If everything is correct, press Send again without changes.",
+    warnings: "Warnings",
+    moreItems: count => `${count} more`,
+  },
   cancel: {
     notSent: "The message was not sent. Return to your draft to review it.",
     returnLabel: "Back to draft",
