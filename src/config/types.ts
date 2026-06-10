@@ -7,6 +7,9 @@
  * behavior.
  */
 
+import { z } from "zod"
+
+import { supportedLocales } from "../i18n/catalog"
 import type { LocaleTag } from "../i18n/catalog"
 
 /** All settings the add-in reads at send time. */
@@ -43,3 +46,32 @@ export interface Config {
     readonly displayInIframe: boolean
   }
 }
+
+/**
+ * Runtime schema for {@link Config}.
+ *
+ * The config ships as code and is forked per organization, so a bad
+ * value — a percent over 100, a negative delay, an unknown locale — is
+ * a deployment mistake, not something the type system can catch.
+ * `defaults.ts` parses through this, so a broken fork fails loudly at
+ * load time instead of misbehaving at send time.
+ *
+ * Assigning `configSchema.parse(...)` to a `Config` (in defaults.ts) is
+ * itself the drift guard: if the schema drops a field or changes a
+ * type, that assignment stops compiling.
+ */
+export const configSchema = z.object({
+  internalDomains: z.array(z.string().min(1)).min(1),
+  sendDelaySeconds: z.number().int().min(0),
+  requireRecipientConfirmation: z.boolean(),
+  requireAttachmentConfirmation: z.boolean(),
+  requireBodyConfirmation: z.boolean(),
+  attachmentKeywords: z.array(z.string().min(1)),
+  warnOnEmptySubject: z.boolean(),
+  fallbackLocale: z.enum(supportedLocales as [LocaleTag, ...LocaleTag[]]),
+  dialog: z.object({
+    widthPercent: z.number().gt(0).max(100),
+    heightPercent: z.number().gt(0).max(100),
+    displayInIframe: z.boolean(),
+  }),
+})

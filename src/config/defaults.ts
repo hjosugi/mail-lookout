@@ -1,4 +1,4 @@
-import type { Config } from "./types"
+import { configSchema, type Config } from "./types"
 
 /**
  * The default configuration.
@@ -10,7 +10,7 @@ import type { Config } from "./types"
  * Replace "example.com" with your own internal domains before you
  * deploy. If the list is wrong, every recipient looks external.
  */
-export const defaultConfig: Config = {
+export const defaultConfig: Config = configSchema.parse({
   internalDomains: ["example.com"],
   sendDelaySeconds: 180,
   requireRecipientConfirmation: true,
@@ -33,4 +33,4 @@ export const defaultConfig: Config = {
     heightPercent: 60,
     displayInIframe: false,
   },
-}
+})

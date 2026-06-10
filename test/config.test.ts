@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import { defaultConfig } from "../src/config/defaults"
+import { configSchema } from "../src/config/types"
 import { isLocaleTag } from "../src/i18n/catalog"
 
 describe("defaultConfig", () => {
@@ -32,5 +33,32 @@ describe("defaultConfig", () => {
 
   it("uses the browser runtime by default, not an iframe", () => {
     expect(defaultConfig.dialog.displayInIframe).toBe(false)
+  })
+})
+
+describe("configSchema", () => {
+  it("accepts the default config", () => {
+    expect(configSchema.safeParse(defaultConfig).success).toBe(true)
+  })
+
+  it("rejects a negative send delay", () => {
+    expect(configSchema.safeParse({ ...defaultConfig, sendDelaySeconds: -1 }).success).toBe(false)
+  })
+
+  it("rejects a fractional send delay", () => {
+    expect(configSchema.safeParse({ ...defaultConfig, sendDelaySeconds: 1.5 }).success).toBe(false)
+  })
+
+  it("rejects a dialog width over 100 percent", () => {
+    const bad = { ...defaultConfig, dialog: { ...defaultConfig.dialog, widthPercent: 150 } }
+    expect(configSchema.safeParse(bad).success).toBe(false)
+  })
+
+  it("rejects an unknown fallback locale", () => {
+    expect(configSchema.safeParse({ ...defaultConfig, fallbackLocale: "de" }).success).toBe(false)
+  })
+
+  it("rejects an empty internal-domain list", () => {
+    expect(configSchema.safeParse({ ...defaultConfig, internalDomains: [] }).success).toBe(false)
   })
 })

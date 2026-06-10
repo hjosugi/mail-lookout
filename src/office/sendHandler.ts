@@ -19,6 +19,7 @@ import { defaultConfig } from "../config"
 import { buildReviewModel } from "../domain/review"
 import type { ReviewModel } from "../domain/review"
 import { collectSnapshot } from "./collect"
+import { buildFallbackMessage } from "./fallbackMessage"
 import { getMessages, resolveLocale } from "../i18n/catalog"
 import type { LocaleTag } from "../i18n/catalog"
 import { DialogUnavailableError, showConfirmationDialog } from "./dialog"
@@ -52,52 +53,6 @@ function cancelOptions(locale: LocaleTag): Office.SmartAlertsEventCompletedOptio
     errorMessage: messages.cancel.notSent,
     cancelLabel: messages.cancel.returnLabel,
   }
-}
-
-/** A plain-text and markdown pair for the fallback prompt. */
-interface FallbackMessage {
-  readonly text: string
-  readonly markdown: string
-}
-
-/**
- * Build the fallback message from the model.
- *
- * The built-in prompt is plain. Markdown supports only bold and
- * simple lists, where each item ends with a carriage return.
- */
-function buildFallbackMessage(model: ReviewModel, locale: LocaleTag): FallbackMessage {
-  const messages = getMessages(locale)
-  const f = messages.fallback
-
-  const lines: string[] = []
-  const mdLines: string[] = []
-
-  if (model.externalEmails.length > 0) {
-    lines.push(f.externalLine(model.externalEmails.length))
-    mdLines.push(`**${f.externalLine(model.externalEmails.length)}**`)
-    for (const email of model.externalEmails) {
-      lines.push(`  - ${email}`)
-      mdLines.push(`- ${email}\r`)
-    }
-  }
-
-  const hasForgotten = model.warnings.some(w => w.kind === "forgottenAttachment")
-  if (hasForgotten) {
-    lines.push(f.forgottenAttachmentLine)
-    mdLines.push(`**${f.forgottenAttachmentLine}**`)
-  }
-
-  const hasEmptySubject = model.warnings.some(w => w.kind === "emptySubject")
-  if (hasEmptySubject) {
-    lines.push(f.emptySubjectLine)
-    mdLines.push(`**${f.emptySubjectLine}**`)
-  }
-
-  lines.push(f.reviewLine)
-  mdLines.push(f.reviewLine)
-
-  return { text: lines.join("\n"), markdown: mdLines.join("\n") }
 }
 
 /**
