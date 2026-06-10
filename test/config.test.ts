@@ -31,8 +31,8 @@ describe("defaultConfig", () => {
     expect(defaultConfig.dialog.heightPercent).toBeLessThanOrEqual(100)
   })
 
-  it("uses the browser runtime by default, not an iframe", () => {
-    expect(defaultConfig.dialog.displayInIframe).toBe(false)
+  it("uses an iframe dialog by default for Outlook on the web", () => {
+    expect(defaultConfig.dialog.displayInIframe).toBe(true)
   })
 })
 

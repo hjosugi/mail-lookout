@@ -31,6 +31,6 @@ export const defaultConfig: Config = configSchema.parse({
   dialog: {
     widthPercent: 32,
     heightPercent: 60,
-    displayInIframe: false,
+    displayInIframe: true,
   },
 })

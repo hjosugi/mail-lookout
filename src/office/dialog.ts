@@ -4,15 +4,13 @@
  * Open the confirmation dialog and wait for a decision.
  *
  * The flow:
- *   1. Open dialog.html with displayDialogAsync.
- *   2. The dialog sends "ready" when it has set up its handler.
- *   3. We send "init" with the model and locale.
- *   4. The dialog sends "decision" with allow true or false.
- *   5. We close the dialog and resolve with that boolean.
+ *   1. Open dialog.html with the init message in the URL hash.
+ *   2. The dialog reads the hash and renders itself.
+ *   3. The dialog sends "decision" with allow true or false.
+ *   4. We close the dialog and resolve with that boolean.
  *
  * Opening the dialog is retried a few times because Outlook can be
- * briefly busy around send time. If it still cannot open, the caller
- * falls back to the host's built-in prompt.
+ * briefly busy around send time.
  *
  * Any close, error, or user dismissal resolves to false. A
  * cancel is always safe: the message is not sent.
@@ -34,12 +32,18 @@ export class DialogUnavailableError extends Error {
   }
 }
 
+function buildDialogUrl(origin: string, model: ReviewModel, locale: LocaleTag): string {
+  const url = new URL("dialog.html", `${origin}/`)
+  const init = encode({ type: MessageType.Init, model, locale })
+  url.hash = `init=${encodeURIComponent(init)}`
+  return url.toString()
+}
+
 /**
  * Show the confirmation dialog.
  *
  * Resolves true to send, false to cancel. Rejects with
- * DialogUnavailableError if the dialog cannot open after retries,
- * so the caller can fall back to the built-in prompt.
+ * DialogUnavailableError if the dialog cannot open after retries.
  */
 export function showConfirmationDialog(
   model: ReviewModel,
@@ -53,8 +57,10 @@ export function showConfirmationDialog(
     const openDialog = (): void => {
       attempts += 1
 
+      const dialogUrl = buildDialogUrl(origin, model, locale)
+
       Office.context.ui.displayDialogAsync(
-        `${origin}/dialog.html`,
+        dialogUrl,
         {
           width: config.dialog.widthPercent,
           height: config.dialog.heightPercent,
@@ -101,13 +107,8 @@ export function showConfirmationDialog(
             if (!message) {
               return
             }
-            switch (message.type) {
-              case MessageType.Ready:
-                dialog.messageChild(encode({ type: MessageType.Init, model, locale }))
-                break
-              case MessageType.Decision:
-                finish(message.allow)
-                break
+            if (message.type === MessageType.Decision) {
+              finish(message.allow)
             }
           })
 

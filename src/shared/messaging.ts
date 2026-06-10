@@ -20,7 +20,6 @@ import type { ReviewModel } from "../domain/review"
 /** Message type names shared by both sides of the dialog protocol. */
 export const MessageType = {
   Init: "init",
-  Ready: "ready",
   Decision: "decision",
 } as const
 
@@ -34,9 +33,7 @@ export interface ParentToDialog {
 }
 
 /** Messages sent from the dialog back to the parent handler. */
-export type DialogToParent =
-  | { readonly type: typeof MessageType.Ready }
-  | { readonly type: typeof MessageType.Decision; readonly allow: boolean }
+export type DialogToParent = { readonly type: typeof MessageType.Decision; readonly allow: boolean }
 
 // --- Schemas -------------------------------------------------------------
 //
@@ -87,7 +84,6 @@ const parentToDialogSchema = z.object({
 })
 
 const dialogToParentSchema = z.discriminatedUnion("type", [
-  z.object({ type: z.literal(MessageType.Ready) }),
   z.object({ type: z.literal(MessageType.Decision), allow: z.boolean() }),
 ])
 

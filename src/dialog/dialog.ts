@@ -4,14 +4,9 @@
  * The dialog controller.
  *
  * It runs inside the confirmation dialog. The flow:
- *   1. On ready, register the parent-message handler first.
- *   2. Tell the parent we are ready.
- *   3. Receive the init message with the model and locale.
- *   4. Render the UI. On Send, run a cancellable countdown.
- *   5. On send or back, message the decision to the parent.
- *
- * The handler is registered before "ready" is sent, so the parent
- * never messages us before we can listen.
+ *   1. Read the init message from the URL hash.
+ *   2. Render the UI. On Send, run a cancellable countdown.
+ *   3. On send or back, message the decision to the parent.
  */
 
 import { canSend, initialReviewState } from "../domain/review"
@@ -19,6 +14,7 @@ import type { ReviewModel, ReviewState } from "../domain/review"
 import { getMessages } from "../i18n/catalog"
 import type { LocaleTag } from "../i18n/catalog"
 import { MessageType, decodeParentToDialog, encode } from "../shared/messaging"
+import type { ParentToDialog } from "../shared/messaging"
 import { renderDialog } from "./render"
 
 /** Send a decision to the parent and stop. */
@@ -26,18 +22,13 @@ function sendDecision(allow: boolean): void {
   Office.context.ui.messageParent(encode({ type: MessageType.Decision, allow }))
 }
 
-/** Handle a message from the parent. */
-function onParentMessage(arg: { message: string } | { error: number }): void {
-  if (!("message" in arg)) {
-    return
+function readInitMessage(): ParentToDialog | null {
+  const params = new URLSearchParams(window.location.hash.slice(1))
+  const init = params.get("init")
+  if (!init) {
+    return null
   }
-  const message = decodeParentToDialog(arg.message)
-  if (!message) {
-    return
-  }
-  if (message.type === MessageType.Init) {
-    start(message.model, message.locale)
-  }
+  return decodeParentToDialog(init)
 }
 
 /** Build the UI, wire state, and run the countdown. */
@@ -135,17 +126,10 @@ function start(model: ReviewModel, locale: LocaleTag): void {
 
 // Office.onReady returns a promise we do not need to await here.
 void Office.onReady(() => {
-  // Register the handler before telling the parent we are ready.
-  Office.context.ui.addHandlerAsync(
-    Office.EventType.DialogParentMessageReceived,
-    onParentMessage,
-    result => {
-      if (result.status === Office.AsyncResultStatus.Succeeded) {
-        Office.context.ui.messageParent(encode({ type: MessageType.Ready }))
-      } else {
-        // We cannot receive the model, so cancel to stay safe.
-        Office.context.ui.messageParent(encode({ type: MessageType.Decision, allow: false }))
-      }
-    },
-  )
+  const message = readInitMessage()
+  if (message) {
+    start(message.model, message.locale)
+  } else {
+    sendDecision(false)
+  }
 })

@@ -65,13 +65,6 @@ export async function onMessageSendHandler(event: Office.AddinCommands.Event): P
     const snapshot = await collectSnapshot(item)
     const model = buildReviewModel(snapshot, config)
 
-    // The rich dialog needs messageChild, which is DialogApi 1.2.
-    // Without it, keep SoftBlock behavior and cancel the send.
-    if (!Office.context.requirements.isSetSupported("DialogApi", "1.2")) {
-      complete(cancelOptions(locale))
-      return
-    }
-
     const origin = window.location.origin
     try {
       const allow = await showConfirmationDialog(model, locale, config, origin)

@@ -42,11 +42,6 @@ describe("encode and decode round-trips", () => {
     expect(back).toEqual(message)
   })
 
-  it("round-trips a ready message from dialog to parent", () => {
-    const message: DialogToParent = { type: MessageType.Ready }
-    expect(decodeDialogToParent(encode(message))).toEqual(message)
-  })
-
   it("round-trips a decision message with allow true", () => {
     const message: DialogToParent = { type: MessageType.Decision, allow: true }
     expect(decodeDialogToParent(encode(message))).toEqual(message)
@@ -121,9 +116,7 @@ describe("decode rejects schema violations", () => {
   })
 
   it("rejects a message handed to the wrong decoder", () => {
-    // A ready message is not a valid parent-to-dialog message, and an
-    // init message is not a valid dialog-to-parent message.
-    expect(decodeParentToDialog(encode({ type: MessageType.Ready }))).toBeNull()
+    // An init message is not a valid dialog-to-parent message.
     const init: ParentToDialog = { type: MessageType.Init, model, locale: "en" }
     expect(decodeDialogToParent(encode(init))).toBeNull()
   })
