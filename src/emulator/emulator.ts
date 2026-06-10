@@ -5,7 +5,7 @@ import type { ReviewModel, ReviewState } from "../domain/review"
 import type { Attachment, FieldRecipient, MessageSnapshot, RecipientField } from "../domain/types"
 import { getMessages } from "../i18n/catalog"
 import type { LocaleTag } from "../i18n/catalog"
-import { renderDialog } from "../dialog/render"
+import { renderDialog, type DialogHandle } from "../dialog/render"
 import "./emulator.css"
 
 interface Scenario {
@@ -91,6 +91,13 @@ function firstScenario(): Scenario {
 }
 
 let currentTimer: number | null = null
+// The handle for the dialog currently mounted in the preview, so the
+// pending-send countdown can drive it into its cancel-only "sending"
+// state (and keep Send disabled, which is what stops a double send).
+let activeHandle: DialogHandle | null = null
+// Auto-dismiss timer for a terminal toast (accepted / cancelled), which
+// lingers a few seconds so the outcome is visible, then clears itself.
+let toastTimer: number | null = null
 
 function recipient(
   field: RecipientField,
@@ -235,6 +242,14 @@ function stopTimer(): void {
   }
 }
 
+/** Clear the auto-dismiss timer for a terminal toast. */
+function clearToastTimer(): void {
+  if (toastTimer !== null) {
+    window.clearTimeout(toastTimer)
+    toastTimer = null
+  }
+}
+
 function setStatus(text: string): void {
   query<HTMLElement>("#emu-status").textContent = text
 }
@@ -253,9 +268,7 @@ function showPendingToast(remaining: number, locale: LocaleTag): void {
     ? `あと ${formatCountdown(remaining)} で送信します`
     : `Sending in ${formatCountdown(remaining)}`
   query<HTMLButtonElement>("#emu-toast-details").textContent = ja ? "詳細" : "Details"
-  query<HTMLButtonElement>("#emu-toast-cancel").textContent = ja ? "キャンセル" : "Cancel"
   query<HTMLElement>("#emu-toast-details").hidden = false
-  query<HTMLElement>("#emu-toast-cancel").hidden = false
   query<HTMLElement>("#emu-toast-open").hidden = true
   query<HTMLElement>("#emu-toast").hidden = false
 }
@@ -266,7 +279,6 @@ function showSentToast(locale: LocaleTag): void {
   query<HTMLElement>("#emu-toast-text").textContent = ja ? "送信しました" : "Sent"
   query<HTMLButtonElement>("#emu-toast-open").textContent = ja ? "送信済みを開く" : "Open sent mail"
   query<HTMLElement>("#emu-toast-details").hidden = true
-  query<HTMLElement>("#emu-toast-cancel").hidden = true
   query<HTMLElement>("#emu-toast-open").hidden = false
   query<HTMLElement>("#emu-toast").hidden = false
 }
@@ -287,14 +299,24 @@ function startPendingSend(seconds: number, locale: LocaleTag): void {
   stopTimer()
   let remaining = seconds
   showPendingToast(remaining, locale)
+  // Drive the (hidden) dialog into its "sending" state so that, if the
+  // user re-opens it from the toast, Send is disabled and the back
+  // button is the cancel. That disabled Send is what prevents a second
+  // send while one is already pending.
+  activeHandle?.setSending(remaining)
   currentTimer = window.setInterval(() => {
     remaining -= 1
     if (remaining <= 0) {
       stopTimer()
+      activeHandle?.setSending(null)
+      // Dismiss the details view if it is open: the send is done, so
+      // there must be no live dialog left that could send again.
+      hideReview()
       showSentToast(locale)
       setStatus(locale === "ja" ? "送信を許可しました。" : "Send allowed.")
     } else {
       showPendingToast(remaining, locale)
+      activeHandle?.setSending(remaining)
     }
   }, 1000)
 }
@@ -303,9 +325,14 @@ function cancelPendingSend(locale: LocaleTag): void {
   if (currentTimer === null) {
     return
   }
-  stopTimer()
   hideToast()
-  setStatus(locale === "ja" ? "送信をキャンセルしました。" : "Send cancelled.")
+  // Cancel stops the send and returns to the draft to redo.
+  closeReview()
+  setStatus(
+    locale === "ja"
+      ? "送信をキャンセルしました。下書きに戻ります。"
+      : "Send cancelled. Back to draft.",
+  )
 }
 
 /**
@@ -325,6 +352,7 @@ function openSentMail(locale: LocaleTag): void {
 
 function closeReview(): void {
   stopTimer()
+  activeHandle?.setSending(null)
   query<HTMLElement>("#emu-dialog").hidden = true
   query<HTMLElement>("#emu-preview").replaceChildren()
 }
@@ -398,6 +426,7 @@ function mountReview(model: ReviewModel, locale: LocaleTag): void {
     },
   })
 
+  activeHandle = handle
   preview.replaceChildren(handle.element)
   openReview()
   handle.setSendEnabled(canSend(model, state))
@@ -510,7 +539,6 @@ function renderShell(): void {
       <div class="ml-toast-actions">
         <button id="emu-toast-details" class="ml-toast-button" type="button">Details</button>
         <button id="emu-toast-open" class="ml-toast-button" type="button" hidden>Open sent mail</button>
-        <button id="emu-toast-cancel" class="ml-toast-button" type="button">Cancel</button>
       </div>
     </div>
   `
@@ -534,12 +562,12 @@ function renderShell(): void {
     }
   })
   query<HTMLButtonElement>("#emu-review").addEventListener("click", runReview)
-  query<HTMLButtonElement>("#emu-close").addEventListener("click", closeReview)
-  query<HTMLElement>("[data-close-review]").addEventListener("click", closeReview)
+  // Close just dismisses the dialog; a pending countdown keeps running
+  // in the toast and can be re-opened with Details. Cancelling the send
+  // is the dialog's own (red) cancel button while it is sending.
+  query<HTMLButtonElement>("#emu-close").addEventListener("click", hideReview)
+  query<HTMLElement>("[data-close-review]").addEventListener("click", hideReview)
   query<HTMLButtonElement>("#emu-toast-details").addEventListener("click", openReview)
-  query<HTMLButtonElement>("#emu-toast-cancel").addEventListener("click", () => {
-    cancelPendingSend(query<HTMLSelectElement>("#emu-locale").value as LocaleTag)
-  })
   query<HTMLButtonElement>("#emu-toast-open").addEventListener("click", () => {
     openSentMail(query<HTMLSelectElement>("#emu-locale").value as LocaleTag)
   })

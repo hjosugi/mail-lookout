@@ -388,6 +388,16 @@ body {
   background: var(--so-surface);
 }
 
+.so-button-danger {
+  background: transparent;
+  color: var(--so-external-fg);
+  border-color: var(--so-external-fg);
+}
+
+.so-button-danger:hover {
+  background: var(--so-external-bg);
+}
+
 .so-button-primary {
   background: var(--so-accent);
   color: var(--so-accent-fg);

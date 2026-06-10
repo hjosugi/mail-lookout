@@ -411,6 +411,9 @@ export function renderDialog(
       ? messages.dialog.sendingInSeconds(sendingSeconds ?? 0)
       : messages.dialog.sendNow
     backBtn.textContent = sending ? messages.dialog.cancelSend : messages.dialog.backToEdit
+    // While sending, the back button is the cancel: make it read as a
+    // stop action, not a neutral one.
+    backBtn.classList.toggle("so-button-danger", sending)
   }
 
   sendBtn.addEventListener("click", () => {
