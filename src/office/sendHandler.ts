@@ -43,17 +43,15 @@ function completeOnce(
   }
 }
 
-/**
- * Options that cancel the send cleanly.
- *
- * Under SoftBlock this shows our message with a single "back to draft"
- * action. There is intentionally no "send anyway" path.
- */
-function cancelOptions(locale: LocaleTag): Office.SmartAlertsEventCompletedOptions {
+function failureOptions(
+  locale: LocaleTag,
+  error: unknown,
+): Office.SmartAlertsEventCompletedOptions {
   const messages = getMessages(locale)
+  const detail = error instanceof Error ? `${error.name}: ${error.message}` : String(error)
   return {
     allowEvent: false,
-    errorMessage: messages.cancel.notSent,
+    errorMessage: `${messages.cancel.notSent}\n\nmail-lookout error: ${detail.slice(0, 180)}`,
     cancelLabel: messages.cancel.returnLabel,
   }
 }
@@ -84,6 +82,6 @@ export async function onMessageSendHandler(event: Office.AddinCommands.Event): P
   } catch (error) {
     // Last resort. Never send real mail without a confirmation.
     console.error("mail-lookout: unexpected error in send handler", error)
-    complete(cancelOptions(locale))
+    complete(failureOptions(locale, error))
   }
 }

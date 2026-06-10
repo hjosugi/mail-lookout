@@ -4,8 +4,9 @@
  * Read the message being composed into a plain snapshot.
  *
  * This is the bridge from Office to the domain layer. Every read
- * runs in parallel with Promise.all, so the handler itself is
- * fast. The slow part is the user reviewing the dialog, not us.
+ * runs best-effort reads in parallel. Some Outlook clients fail a
+ * single compose read in event-based activation; one failed field
+ * should not prevent the Smart Alerts dialog from appearing.
  */
 
 import type { Attachment, FieldRecipient, MessageSnapshot, RecipientField } from "../domain/types"
@@ -34,19 +35,49 @@ function mapAttachments(details: readonly Office.AttachmentDetailsCompose[]): At
   }))
 }
 
+async function readOr<T>(label: string, read: () => Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await read()
+  } catch (error) {
+    console.warn(`mail-lookout: failed to read ${label}`, error)
+    return fallback
+  }
+}
+
 /**
  * Collect a full snapshot of the compose message.
  *
- * Reads subject, body, To, Cc, Bcc, and attachments at once.
+ * Reads subject, body, To, Cc, Bcc, and attachments at once. If a
+ * host read fails, it falls back to an empty value for that field.
  */
 export async function collectSnapshot(item: Office.MessageCompose): Promise<MessageSnapshot> {
   const [subject, body, to, cc, bcc, attachments] = await Promise.all([
-    promisify<string>(cb => item.subject.getAsync(cb)),
-    promisify<string>(cb => item.body.getAsync(Office.CoercionType.Text, cb)),
-    promisify<Office.EmailAddressDetails[]>(cb => item.to.getAsync(cb)),
-    promisify<Office.EmailAddressDetails[]>(cb => item.cc.getAsync(cb)),
-    promisify<Office.EmailAddressDetails[]>(cb => item.bcc.getAsync(cb)),
-    promisify<Office.AttachmentDetailsCompose[]>(cb => item.getAttachmentsAsync(cb)),
+    readOr("subject", () => promisify<string>(cb => item.subject.getAsync(cb)), ""),
+    readOr(
+      "body",
+      () => promisify<string>(cb => item.body.getAsync(Office.CoercionType.Text, cb)),
+      "",
+    ),
+    readOr(
+      "to recipients",
+      () => promisify<Office.EmailAddressDetails[]>(cb => item.to.getAsync(cb)),
+      [],
+    ),
+    readOr(
+      "cc recipients",
+      () => promisify<Office.EmailAddressDetails[]>(cb => item.cc.getAsync(cb)),
+      [],
+    ),
+    readOr(
+      "bcc recipients",
+      () => promisify<Office.EmailAddressDetails[]>(cb => item.bcc.getAsync(cb)),
+      [],
+    ),
+    readOr(
+      "attachments",
+      () => promisify<Office.AttachmentDetailsCompose[]>(cb => item.getAttachmentsAsync(cb)),
+      [],
+    ),
   ])
 
   const recipients: FieldRecipient[] = [
