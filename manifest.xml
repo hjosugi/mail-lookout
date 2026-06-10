@@ -29,7 +29,7 @@
   <Description DefaultValue="Confirm recipients, attachments, and body before an email is sent." />
   <IconUrl DefaultValue="https://localhost:3000/assets/icon-64.png" />
   <HighResolutionIconUrl DefaultValue="https://localhost:3000/assets/icon-128.png" />
-  <SupportUrl DefaultValue="https://github.com/your-org/mail-lookout" />
+  <SupportUrl DefaultValue="https://github.com/hjosugi/mail-lookout" />
 
   <AppDomains>
     <AppDomain>https://localhost:3000</AppDomain>

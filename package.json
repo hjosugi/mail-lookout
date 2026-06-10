@@ -4,6 +4,14 @@
   "description": "A send-confirmation add-in for the new Outlook. It opens a review dialog before each send to help prevent misdelivery.",
   "type": "module",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hjosugi/mail-lookout.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hjosugi/mail-lookout/issues"
+  },
+  "homepage": "https://github.com/hjosugi/mail-lookout#readme",
   "keywords": [
     "outlook",
     "office-addin",
