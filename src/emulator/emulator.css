@@ -150,6 +150,21 @@ textarea {
   min-height: 150px;
 }
 
+.ml-hint {
+  margin: 0;
+  color: var(--ml-muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.ml-hint code {
+  font-family: ui-monospace, "Cascadia Code", "Consolas", monospace;
+  background: var(--ml-page);
+  border: 1px solid var(--ml-border);
+  border-radius: 3px;
+  padding: 0 4px;
+}
+
 .ml-checks {
   margin: 0;
   padding: 10px;
@@ -338,4 +353,46 @@ textarea {
     max-height: calc(100vh - 16px);
     min-height: calc(100vh - 16px);
   }
+}
+
+.ml-toast {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: min(360px, calc(100vw - 32px));
+  padding: 10px 12px;
+  border: 1px solid var(--ml-border);
+  border-radius: 8px;
+  background: var(--ml-panel);
+  color: var(--ml-text);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 28%);
+  font-size: 13px;
+}
+
+.ml-toast[hidden] {
+  display: none;
+}
+
+.ml-toast-text {
+  font-variant-numeric: tabular-nums;
+}
+
+.ml-toast-cancel {
+  flex: 0 0 auto;
+  width: auto;
+  border: 1px solid var(--ml-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ml-accent);
+  cursor: pointer;
+  font-weight: 600;
+  padding: 5px 10px;
+}
+
+.ml-toast-cancel:hover {
+  background: var(--ml-page);
 }

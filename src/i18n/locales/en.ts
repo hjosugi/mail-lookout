@@ -7,7 +7,20 @@ export const en: Messages = {
     intro: "Check the recipients, attachments, and body before you send.",
     sendNow: "Send now",
     backToEdit: "Back to draft",
-    sendInSeconds: (seconds) => `Send in ${seconds}s`,
+    cancelSend: "Cancel",
+    sendingInSeconds: (seconds) => `Sending in ${seconds}s…`,
+    delayLabel: "Wait before sending",
+    delayValue: (seconds) => {
+      if (seconds <= 0) {
+        return "No delay"
+      }
+      if (seconds < 60) {
+        return `${seconds}s`
+      }
+      const minutes = Math.floor(seconds / 60)
+      const rest = seconds % 60
+      return rest === 0 ? `${minutes} min` : `${minutes} min ${rest}s`
+    },
   },
   sections: {
     recipients: "Recipients",

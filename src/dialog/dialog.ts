@@ -7,7 +7,7 @@
  *   1. On ready, register the parent-message handler first.
  *   2. Tell the parent we are ready.
  *   3. Receive the init message with the model and locale.
- *   4. Render the UI and run the send-delay countdown.
+ *   4. Render the UI. On Send, run a cancellable countdown.
  *   5. On send or back, message the decision to the parent.
  *
  * The handler is registered before "ready" is sent, so the parent
@@ -46,6 +46,18 @@ function start(model: ReviewModel, locale: LocaleTag): void {
   document.title = messages.dialog.title
 
   let state: ReviewState = initialReviewState(model)
+  let sendTimer: number | null = null
+  // The wait before sending. Seeded from config, but the user can
+  // change it on the confirmation screen, so it lives here, not in
+  // the immutable model.
+  let delaySeconds = model.sendDelaySeconds
+
+  function clearSendTimer(): void {
+    if (sendTimer !== null) {
+      window.clearInterval(sendTimer)
+      sendTimer = null
+    }
+  }
 
   // Re-check the send gate and update the button.
   function refresh(): void {
@@ -77,8 +89,31 @@ function start(model: ReviewModel, locale: LocaleTag): void {
       state = { ...state, bodyConfirmed: checked }
       refresh()
     },
+    onDelayChange(seconds) {
+      delaySeconds = seconds
+    },
     onSend() {
-      sendDecision(true)
+      // The delay runs here, after the user presses Send: a
+      // cancellable countdown, then the decision goes out.
+      if (delaySeconds <= 0) {
+        sendDecision(true)
+        return
+      }
+      let remaining = delaySeconds
+      handle.setSending(remaining)
+      sendTimer = window.setInterval(() => {
+        remaining -= 1
+        if (remaining <= 0) {
+          clearSendTimer()
+          sendDecision(true)
+        } else {
+          handle.setSending(remaining)
+        }
+      }, 1000)
+    },
+    onCancelSend() {
+      clearSendTimer()
+      handle.setSending(null)
     },
     onBack() {
       sendDecision(false)
@@ -92,24 +127,6 @@ function start(model: ReviewModel, locale: LocaleTag): void {
   }
 
   refresh()
-
-  // Run the send-delay countdown. The send button stays off until
-  // it reaches zero, then the rest of canSend applies.
-  let remaining = model.sendDelaySeconds
-  if (remaining > 0) {
-    handle.setCountdown(remaining)
-    const timer = window.setInterval(() => {
-      remaining -= 1
-      if (remaining <= 0) {
-        window.clearInterval(timer)
-        handle.setCountdown(null)
-        state = { ...state, delayElapsed: true }
-        refresh()
-      } else {
-        handle.setCountdown(remaining)
-      }
-    }, 1000)
-  }
 }
 
 // Office.onReady returns a promise we do not need to await here.

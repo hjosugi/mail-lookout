@@ -15,6 +15,24 @@ interface Scenario {
 
 const scenarios: readonly Scenario[] = [
   {
+    id: "multiple-recipients",
+    label: "Multiple recipients (To/Cc/Bcc)",
+    snapshot: {
+      subject: "Quarterly forecast review",
+      body: "Hi team,\n\nPlease see attached forecast before the 15:00 review.\n\nRegards,\nMail Lookout",
+      recipients: [
+        recipient("to", "Aki Tanaka", "aki@example.com"),
+        recipient("to", "Mina Sato", "mina@example.com"),
+        recipient("cc", "Jordan Lee", "jordan@partner.test"),
+        recipient("cc", "Sora Kim", "sora@vendor.test"),
+        recipient("bcc", "Riku Mori", "riku@example.com"),
+        recipient("bcc", "", "review@client.test"),
+      ],
+      attachments: [attachment("forecast.xlsx", 184320), attachment("notes.pdf", 94208)],
+      senderEmail: "sender@example.com",
+    },
+  },
+  {
     id: "external-attachment",
     label: "External recipient with attachment",
     snapshot: {
@@ -111,10 +129,17 @@ function parseRecipientLine(field: RecipientField, line: string): FieldRecipient
   return recipient(field, "", trimmed)
 }
 
+// Real mail clients let you list several recipients on one line,
+// separated by a comma or semicolon. Split on those as well as
+// newlines so multi-recipient entry is not awkward. (A display name
+// containing a comma is the price; bare addresses and "Name <email>"
+// both round-trip fine.)
+const RECIPIENT_SEPARATORS = /[\n,;]+/
+
 function parseRecipients(field: RecipientField, raw: string): readonly FieldRecipient[] {
   return raw
-    .split("\n")
-    .map((line) => parseRecipientLine(field, line))
+    .split(RECIPIENT_SEPARATORS)
+    .map((token) => parseRecipientLine(field, token))
     .filter((parsed): parsed is FieldRecipient => parsed !== null)
 }
 
@@ -207,6 +232,58 @@ function setStatus(text: string): void {
   query<HTMLElement>("#emu-status").textContent = text
 }
 
+/** Format a remaining duration as "M:SS" once past a minute, else "Ns". */
+function formatCountdown(totalSeconds: number): string {
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  return minutes > 0 ? `${minutes}:${String(seconds).padStart(2, "0")}` : `${seconds}s`
+}
+
+function showToast(remaining: number, locale: LocaleTag): void {
+  query<HTMLElement>("#emu-toast-text").textContent =
+    locale === "ja"
+      ? `あと ${formatCountdown(remaining)} で送信します`
+      : `Sending in ${formatCountdown(remaining)}`
+  query<HTMLButtonElement>("#emu-toast-cancel").textContent = locale === "ja" ? "キャンセル" : "Cancel"
+  query<HTMLElement>("#emu-toast").hidden = false
+}
+
+function hideToast(): void {
+  query<HTMLElement>("#emu-toast").hidden = true
+}
+
+/**
+ * Run the post-Send wait as a small corner toast.
+ *
+ * The dialog is already closed by the time this runs, so the user is
+ * free to keep editing. When the countdown reaches zero the send is
+ * allowed; the toast's Cancel button stops it.
+ */
+function startPendingSend(seconds: number, locale: LocaleTag): void {
+  stopTimer()
+  let remaining = seconds
+  showToast(remaining, locale)
+  currentTimer = window.setInterval(() => {
+    remaining -= 1
+    if (remaining <= 0) {
+      stopTimer()
+      hideToast()
+      setStatus(locale === "ja" ? "送信を許可しました。" : "Send allowed.")
+    } else {
+      showToast(remaining, locale)
+    }
+  }, 1000)
+}
+
+function cancelPendingSend(locale: LocaleTag): void {
+  if (currentTimer === null) {
+    return
+  }
+  stopTimer()
+  hideToast()
+  setStatus(locale === "ja" ? "送信をキャンセルしました。" : "Send cancelled.")
+}
+
 function closeReview(): void {
   stopTimer()
   query<HTMLElement>("#emu-dialog").hidden = true
@@ -219,9 +296,13 @@ function openReview(): void {
 
 function mountReview(model: ReviewModel, locale: LocaleTag): void {
   stopTimer()
+  hideToast()
   const preview = query<HTMLElement>("#emu-preview")
   const messages = getMessages(locale)
   let state: ReviewState = initialReviewState(model)
+  // The wait before sending starts from the model but can be changed
+  // on the dialog, so it lives in the controller.
+  let delaySeconds = model.sendDelaySeconds
 
   const handle = renderDialog(model, messages, {
     onRecipientToggle(index, checked) {
@@ -248,9 +329,22 @@ function mountReview(model: ReviewModel, locale: LocaleTag): void {
       state = { ...state, bodyConfirmed: checked }
       handle.setSendEnabled(canSend(model, state))
     },
+    onDelayChange(seconds) {
+      delaySeconds = seconds
+    },
     onSend() {
-      setStatus(locale === "ja" ? "送信を許可しました。" : "Send allowed.")
+      // Pressing Send closes the dialog right away, so the user is not
+      // blocked. The wait then runs as a small corner toast that can
+      // be cancelled; the send is allowed when it reaches zero.
       closeReview()
+      if (delaySeconds <= 0) {
+        setStatus(locale === "ja" ? "送信を許可しました。" : "Send allowed.")
+        return
+      }
+      startPendingSend(delaySeconds, locale)
+    },
+    onCancelSend() {
+      cancelPendingSend(locale)
     },
     onBack() {
       setStatus(locale === "ja" ? "編集に戻る判定です。" : "Back to draft selected.")
@@ -261,22 +355,6 @@ function mountReview(model: ReviewModel, locale: LocaleTag): void {
   preview.replaceChildren(handle.element)
   openReview()
   handle.setSendEnabled(canSend(model, state))
-
-  let remaining = model.sendDelaySeconds
-  if (remaining > 0) {
-    handle.setCountdown(remaining)
-    currentTimer = window.setInterval(() => {
-      remaining -= 1
-      if (remaining <= 0) {
-        stopTimer()
-        handle.setCountdown(null)
-        state = { ...state, delayElapsed: true }
-        handle.setSendEnabled(canSend(model, state))
-      } else {
-        handle.setCountdown(remaining)
-      }
-    }, 1000)
-  }
 }
 
 function runReview(): void {
@@ -314,7 +392,7 @@ function renderShell(): void {
           </label>
           <label>
             Delay seconds
-            <input id="emu-delay" type="number" min="0" max="30" step="1" value="${defaultConfig.sendDelaySeconds}" />
+            <input id="emu-delay" type="number" min="0" max="600" step="1" value="${defaultConfig.sendDelaySeconds}" />
           </label>
         </div>
 
@@ -329,17 +407,21 @@ function renderShell(): void {
           Subject
           <input id="emu-subject" type="text" />
         </label>
+        <p class="ml-hint">
+          Recipients: one per line, or separated by <code>,</code> or <code>;</code>. Use
+          <code>Name &lt;email&gt;</code> or a bare address.
+        </p>
         <label>
           To
-          <textarea id="emu-to" rows="3" spellcheck="false"></textarea>
+          <textarea id="emu-to" rows="3" spellcheck="false" placeholder="Aki Tanaka &lt;aki@example.com&gt;"></textarea>
         </label>
         <label>
           Cc
-          <textarea id="emu-cc" rows="2" spellcheck="false"></textarea>
+          <textarea id="emu-cc" rows="2" spellcheck="false" placeholder="jordan@partner.test; sora@vendor.test"></textarea>
         </label>
         <label>
           Bcc
-          <textarea id="emu-bcc" rows="2" spellcheck="false"></textarea>
+          <textarea id="emu-bcc" rows="2" spellcheck="false" placeholder="review@client.test"></textarea>
         </label>
         <label>
           Attachments
@@ -376,6 +458,11 @@ function renderShell(): void {
         <div id="emu-preview" class="ml-preview"></div>
       </section>
     </div>
+
+    <div id="emu-toast" class="ml-toast" role="status" aria-live="polite" hidden>
+      <span id="emu-toast-text" class="ml-toast-text"></span>
+      <button id="emu-toast-cancel" class="ml-toast-cancel" type="button">Cancel</button>
+    </div>
   `
 
   const scenarioSelect = query<HTMLSelectElement>("#emu-scenario")
@@ -399,6 +486,9 @@ function renderShell(): void {
   query<HTMLButtonElement>("#emu-review").addEventListener("click", runReview)
   query<HTMLButtonElement>("#emu-close").addEventListener("click", closeReview)
   query<HTMLElement>("[data-close-review]").addEventListener("click", closeReview)
+  query<HTMLButtonElement>("#emu-toast-cancel").addEventListener("click", () => {
+    cancelPendingSend(query<HTMLSelectElement>("#emu-locale").value as LocaleTag)
+  })
   for (const selector of ["#emu-subject", "#emu-to", "#emu-cc", "#emu-bcc", "#emu-attachments"]) {
     query<HTMLElement>(selector).addEventListener("input", updateDraftSummary)
   }

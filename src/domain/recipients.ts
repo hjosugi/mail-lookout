@@ -40,9 +40,7 @@ function normalizeDomains(internalDomains: readonly string[]): string[] {
  */
 export function isExternal(email: string, internalDomains: readonly string[]): boolean {
   const domain = domainOf(email)
-  if (domain === "") {
-    return true
-  }
+  if (domain === "") return true
   const internal = normalizeDomains(internalDomains)
   return !internal.includes(domain)
 }

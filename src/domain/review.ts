@@ -141,8 +141,9 @@ export function buildReviewModel(snapshot: MessageSnapshot, config: Config): Rev
 /**
  * The live state of the dialog.
  *
- * It tracks which boxes the user has checked and whether the
- * send delay has elapsed.
+ * It tracks which boxes the user has checked. The send delay is not
+ * part of this gate: it runs as a cancellable countdown after the
+ * user presses Send, not before.
  */
 export interface ReviewState {
   /** Indices of recipients the user has confirmed one by one. */
@@ -150,21 +151,18 @@ export interface ReviewState {
   /** Indices of attachments the user has confirmed one by one. */
   readonly confirmedAttachments: ReadonlySet<number>
   readonly bodyConfirmed: boolean
-  readonly delayElapsed: boolean
 }
 
 /**
  * Build the starting state for a model.
  *
- * If a confirmation is not required, it starts satisfied. If
- * there is no send delay, the delay starts elapsed.
+ * If a confirmation is not required, it starts satisfied.
  */
 export function initialReviewState(model: ReviewModel): ReviewState {
   return {
     confirmedRecipients: new Set<number>(),
     confirmedAttachments: new Set<number>(),
     bodyConfirmed: !model.requireBodyConfirmation,
-    delayElapsed: model.sendDelaySeconds === 0,
   }
 }
 
@@ -181,14 +179,12 @@ function allIndicesConfirmed(count: number, confirmed: ReadonlySet<number>): boo
 /**
  * Decide if the user may send now.
  *
- * The delay must be over, and every required confirmation must be
- * satisfied. When recipient or attachment confirmation is required,
- * every recipient and every attachment must be checked one by one.
+ * Every required confirmation must be satisfied. When recipient or
+ * attachment confirmation is required, every recipient and every
+ * attachment must be checked one by one. The send delay is not part
+ * of this gate; it runs after Send is pressed.
  */
 export function canSend(model: ReviewModel, state: ReviewState): boolean {
-  if (!state.delayElapsed) {
-    return false
-  }
   if (model.requireBodyConfirmation && !state.bodyConfirmed) {
     return false
   }

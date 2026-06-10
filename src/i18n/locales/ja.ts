@@ -7,7 +7,20 @@ export const ja: Messages = {
     intro: "送信前に、宛先・添付・本文を確認してください。",
     sendNow: "今すぐ送信",
     backToEdit: "編集に戻る",
-    sendInSeconds: (seconds) => `送信まで ${seconds} 秒`,
+    cancelSend: "キャンセル",
+    sendingInSeconds: (seconds) => `${seconds} 秒後に送信…`,
+    delayLabel: "送信までの待ち時間",
+    delayValue: (seconds) => {
+      if (seconds <= 0) {
+        return "遅延なし"
+      }
+      if (seconds < 60) {
+        return `${seconds}秒`
+      }
+      const minutes = Math.floor(seconds / 60)
+      const rest = seconds % 60
+      return rest === 0 ? `${minutes}分` : `${minutes}分${rest}秒`
+    },
   },
   sections: {
     recipients: "宛先",

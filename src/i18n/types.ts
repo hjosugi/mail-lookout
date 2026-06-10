@@ -15,7 +15,12 @@ export interface Messages {
     readonly intro: string
     readonly sendNow: string
     readonly backToEdit: string
-    readonly sendInSeconds: (seconds: number) => string
+    readonly cancelSend: string
+    readonly sendingInSeconds: (seconds: number) => string
+    /** Label for the send-delay control shown in the dialog. */
+    readonly delayLabel: string
+    /** Human-readable name for a delay duration, e.g. "3 min" or "遅延なし". */
+    readonly delayValue: (seconds: number) => string
   }
   readonly sections: {
     readonly recipients: string

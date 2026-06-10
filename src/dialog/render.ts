@@ -66,7 +66,10 @@ export interface DialogCallbacks {
   readonly onRecipientToggle: (index: number, checked: boolean) => void
   readonly onAttachmentToggle: (index: number, checked: boolean) => void
   readonly onBodyToggle: (checked: boolean) => void
+  /** The user picked a different wait time before sending. */
+  readonly onDelayChange: (seconds: number) => void
   readonly onSend: () => void
+  readonly onCancelSend: () => void
   readonly onBack: () => void
 }
 
@@ -74,7 +77,7 @@ export interface DialogCallbacks {
 export interface DialogHandle {
   readonly element: HTMLElement
   readonly setSendEnabled: (enabled: boolean) => void
-  readonly setCountdown: (seconds: number | null) => void
+  readonly setSending: (seconds: number | null) => void
 }
 
 /** Map a warning to its text. Exhaustive over WarningKind. */
@@ -340,6 +343,41 @@ function buildBodySection(
   return el("section", { className: "so-section" }, children)
 }
 
+/** The wait times offered in the dialog's delay control, in seconds. */
+const DELAY_PRESET_SECONDS: readonly number[] = [0, 30, 60, 120, 180, 300]
+
+/**
+ * Build the "wait before sending" control.
+ *
+ * It lets the user change the send delay right on the confirmation
+ * screen. The model's current delay is always one of the options,
+ * even if it is not a preset, and starts selected.
+ */
+function buildDelayControl(
+  model: ReviewModel,
+  messages: Messages,
+  callbacks: DialogCallbacks,
+): HTMLElement {
+  const options = [...new Set([...DELAY_PRESET_SECONDS, model.sendDelaySeconds])].sort(
+    (a, b) => a - b,
+  )
+  const select = el("select", { className: "so-delay-select" })
+  select.setAttribute("aria-label", messages.dialog.delayLabel)
+  for (const seconds of options) {
+    const option = el("option", { text: messages.dialog.delayValue(seconds) })
+    option.value = String(seconds)
+    option.selected = seconds === model.sendDelaySeconds
+    select.append(option)
+  }
+  select.addEventListener("change", () => {
+    callbacks.onDelayChange(Number(select.value))
+  })
+  return el("div", { className: "so-delay" }, [
+    el("span", { className: "so-delay-label", text: messages.dialog.delayLabel }),
+    select,
+  ])
+}
+
 /**
  * Render the dialog and return a handle.
  *
@@ -354,7 +392,10 @@ export function renderDialog(
   inputCounter = 0
 
   let baseEnabled = false
-  let countdownSeconds: number | null = model.sendDelaySeconds > 0 ? model.sendDelaySeconds : null
+  // Non-null while the post-click send countdown is running. Send is
+  // no longer gated by the delay; the countdown runs after the user
+  // presses Send and can be cancelled.
+  let sendingSeconds: number | null = null
 
   const sendBtn = el("button", {
     className: "so-button so-button-primary",
@@ -367,19 +408,26 @@ export function renderDialog(
     text: messages.dialog.backToEdit,
   })
 
-  const updateButton = (): void => {
-    const counting = countdownSeconds !== null && countdownSeconds > 0
-    sendBtn.disabled = !baseEnabled || counting
-    sendBtn.textContent = counting
-      ? messages.dialog.sendInSeconds(countdownSeconds ?? 0)
+  const updateButtons = (): void => {
+    const sending = sendingSeconds !== null
+    sendBtn.disabled = sending || !baseEnabled
+    sendBtn.textContent = sending
+      ? messages.dialog.sendingInSeconds(sendingSeconds ?? 0)
       : messages.dialog.sendNow
+    backBtn.textContent = sending ? messages.dialog.cancelSend : messages.dialog.backToEdit
   }
 
   sendBtn.addEventListener("click", () => {
-    callbacks.onSend()
+    if (sendingSeconds === null && baseEnabled) {
+      callbacks.onSend()
+    }
   })
   backBtn.addEventListener("click", () => {
-    callbacks.onBack()
+    if (sendingSeconds !== null) {
+      callbacks.onCancelSend()
+    } else {
+      callbacks.onBack()
+    }
   })
 
   const header = el("header", { className: "so-header" }, [
@@ -399,21 +447,24 @@ export function renderDialog(
     buildBodySection(model, messages, callbacks),
   )
 
-  const footer = el("footer", { className: "so-footer" }, [backBtn, sendBtn])
+  const footer = el("footer", { className: "so-footer" }, [
+    buildDelayControl(model, messages, callbacks),
+    el("div", { className: "so-footer-actions" }, [backBtn, sendBtn]),
+  ])
 
   const element = el("div", { className: "so-dialog" }, [header, body, footer])
 
-  updateButton()
+  updateButtons()
 
   return {
     element,
     setSendEnabled(enabled: boolean): void {
       baseEnabled = enabled
-      updateButton()
+      updateButtons()
     },
-    setCountdown(seconds: number | null): void {
-      countdownSeconds = seconds
-      updateButton()
+    setSending(seconds: number | null): void {
+      sendingSeconds = seconds
+      updateButtons()
     },
   }
 }
