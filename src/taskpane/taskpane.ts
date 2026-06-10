@@ -6,23 +6,12 @@ import { defaultConfig } from "../config"
 import { canSend, initialReviewState } from "../domain/review"
 import type { ReviewModel, ReviewState } from "../domain/review"
 import { getMessages, resolveLocale } from "../i18n/catalog"
-import type { LocaleTag, Messages } from "../i18n"
+import type { LocaleTag } from "../i18n"
 import { renderDialog } from "../dialog/render"
+import { taskPaneMessages, taskPaneRenderOptions } from "../dialog/taskPaneView"
 import { buildReviewModel } from "../domain/review"
 import { collectSnapshot } from "../office/collect"
 import { rememberConfirmation, snapshotFingerprint } from "../office/smartAlert"
-
-function taskPaneMessages(messages: Messages): Messages {
-  return {
-    ...messages,
-    dialog: {
-      ...messages.dialog,
-      title: messages.taskPane.title,
-      intro: messages.taskPane.intro,
-      sendNow: messages.taskPane.confirm,
-    },
-  }
-}
 
 function showStatus(text: string): HTMLElement {
   const status = document.createElement("p")
@@ -102,7 +91,7 @@ function start(model: ReviewModel, fingerprint: string, locale: LocaleTag): void
         status.textContent = ""
       },
     },
-    { showBackButton: false, showDelayControl: false },
+    taskPaneRenderOptions,
   )
 
   const root = document.getElementById("root")
