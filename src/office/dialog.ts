@@ -17,7 +17,7 @@
 import type { Config } from "../config"
 import type { ReviewModel } from "../domain/review"
 import type { LocaleTag } from "../i18n/catalog"
-import { decodeDialogToParent, encode } from "../shared/messaging"
+import { MessageType, decodeDialogToParent, encode } from "../shared/messaging"
 
 /** Thrown when the dialog cannot be opened at all. */
 export class DialogUnavailableError extends Error {
@@ -85,10 +85,13 @@ export function showConfirmationDialog(
           if (!message) {
             return
           }
-          if (message.type === "ready") {
-            dialog.messageChild(encode({ type: "init", model, locale }))
-          } else if (message.type === "decision") {
-            finish(message.allow)
+          switch (message.type) {
+            case MessageType.Ready:
+              dialog.messageChild(encode({ type: MessageType.Init, model, locale }))
+              break
+            case MessageType.Decision:
+              finish(message.allow)
+              break
           }
         })
 

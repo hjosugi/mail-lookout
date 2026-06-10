@@ -17,17 +17,26 @@ import { supportedLocales } from "../i18n/catalog"
 import type { LocaleTag } from "../i18n/catalog"
 import type { ReviewModel } from "../domain/review"
 
+/** Message type names shared by both sides of the dialog protocol. */
+export const MessageType = {
+  Init: "init",
+  Ready: "ready",
+  Decision: "decision",
+} as const
+
+export type MessageType = (typeof MessageType)[keyof typeof MessageType]
+
 /** Messages sent from the parent handler to the dialog. */
 export interface ParentToDialog {
-  readonly type: "init"
+  readonly type: typeof MessageType.Init
   readonly model: ReviewModel
   readonly locale: LocaleTag
 }
 
 /** Messages sent from the dialog back to the parent handler. */
 export type DialogToParent =
-  | { readonly type: "ready" }
-  | { readonly type: "decision"; readonly allow: boolean }
+  | { readonly type: typeof MessageType.Ready }
+  | { readonly type: typeof MessageType.Decision; readonly allow: boolean }
 
 // --- Schemas -------------------------------------------------------------
 //
@@ -71,14 +80,14 @@ const reviewModelSchema = z.object({
 })
 
 const parentToDialogSchema = z.object({
-  type: z.literal("init"),
+  type: z.literal(MessageType.Init),
   model: reviewModelSchema,
   locale: localeTagSchema,
 })
 
 const dialogToParentSchema = z.discriminatedUnion("type", [
-  z.object({ type: z.literal("ready") }),
-  z.object({ type: z.literal("decision"), allow: z.boolean() }),
+  z.object({ type: z.literal(MessageType.Ready) }),
+  z.object({ type: z.literal(MessageType.Decision), allow: z.boolean() }),
 ])
 
 // --- Compile-time agreement checks --------------------------------------

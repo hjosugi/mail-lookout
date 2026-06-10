@@ -18,12 +18,12 @@ import { canSend, initialReviewState } from "../domain/review"
 import type { ReviewModel, ReviewState } from "../domain/review"
 import { getMessages } from "../i18n/catalog"
 import type { LocaleTag } from "../i18n/catalog"
-import { decodeParentToDialog, encode } from "../shared/messaging"
+import { MessageType, decodeParentToDialog, encode } from "../shared/messaging"
 import { renderDialog } from "./render"
 
 /** Send a decision to the parent and stop. */
 function sendDecision(allow: boolean): void {
-  Office.context.ui.messageParent(encode({ type: "decision", allow }))
+  Office.context.ui.messageParent(encode({ type: MessageType.Decision, allow }))
 }
 
 /** Handle a message from the parent. */
@@ -35,7 +35,7 @@ function onParentMessage(arg: { message: string } | { error: number }): void {
   if (!message) {
     return
   }
-  if (message.type === "init") {
+  if (message.type === MessageType.Init) {
     start(message.model, message.locale)
   }
 }
@@ -137,10 +137,10 @@ void Office.onReady(() => {
     onParentMessage,
     result => {
       if (result.status === Office.AsyncResultStatus.Succeeded) {
-        Office.context.ui.messageParent(encode({ type: "ready" }))
+        Office.context.ui.messageParent(encode({ type: MessageType.Ready }))
       } else {
         // We cannot receive the model, so cancel to stay safe.
-        Office.context.ui.messageParent(encode({ type: "decision", allow: false }))
+        Office.context.ui.messageParent(encode({ type: MessageType.Decision, allow: false }))
       }
     },
   )

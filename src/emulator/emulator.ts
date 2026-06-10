@@ -6,6 +6,7 @@ import type { Attachment, FieldRecipient, MessageSnapshot, RecipientField } from
 import { getMessages } from "../i18n/catalog"
 import type { LocaleTag } from "../i18n/catalog"
 import { renderDialog, type DialogHandle } from "../dialog/render"
+import { getEmulatorMessages, type EmulatorMessages } from "./messages"
 import "./emulator.css"
 
 interface Scenario {
@@ -117,6 +118,11 @@ function query<T extends HTMLElement>(selector: string, root: ParentNode = docum
     throw new Error(`Missing emulator element: ${selector}`)
   }
   return node
+}
+
+/** The locale currently selected in the emulator form. */
+function currentLocale(): LocaleTag {
+  return query<HTMLSelectElement>("#emu-locale").value as LocaleTag
 }
 
 function parseRecipientLine(field: RecipientField, line: string): FieldRecipient | null {
@@ -261,29 +267,71 @@ function formatCountdown(totalSeconds: number): string {
   return minutes > 0 ? `${minutes}:${String(seconds).padStart(2, "0")}` : `${seconds}s`
 }
 
-/** Show the toast counting down: countdown text + Details + Cancel. */
-function showPendingToast(remaining: number, locale: LocaleTag): void {
-  const ja = locale === "ja"
-  query<HTMLElement>("#emu-toast-text").textContent = ja
-    ? `あと ${formatCountdown(remaining)} で送信します`
-    : `Sending in ${formatCountdown(remaining)}`
-  query<HTMLButtonElement>("#emu-toast-details").textContent = ja ? "詳細" : "Details"
-  query<HTMLElement>("#emu-toast-details").hidden = false
-  query<HTMLElement>("#emu-toast-open").hidden = true
-  query<HTMLElement>("#emu-toast").hidden = false
+// The toast is driven by a single state value. Adding a state is a new
+// variant plus one `toastView` case — no new show/hide function.
+type ToastState =
+  | { readonly kind: "pending"; readonly remaining: number }
+  | { readonly kind: "accepted" }
+  | { readonly kind: "cancelled" }
+
+/** The toast's action buttons, each mapped to the element it drives. */
+type ToastAction = "details" | "open"
+const TOAST_ACTIONS: readonly ToastAction[] = ["details", "open"]
+const TOAST_ACTION_ELEMENT: Record<ToastAction, string> = {
+  details: "#emu-toast-details",
+  open: "#emu-toast-open",
 }
 
-/** Show the toast after sending: a confirmation + a link to the sent mail. */
-function showSentToast(locale: LocaleTag): void {
-  const ja = locale === "ja"
-  query<HTMLElement>("#emu-toast-text").textContent = ja ? "送信しました" : "Sent"
-  query<HTMLButtonElement>("#emu-toast-open").textContent = ja ? "送信済みを開く" : "Open sent mail"
-  query<HTMLElement>("#emu-toast-details").hidden = true
-  query<HTMLElement>("#emu-toast-open").hidden = false
+/** What the toast shows for a state: its text, which buttons, and whether it self-dismisses. */
+interface ToastView {
+  readonly text: string
+  readonly actions: readonly ToastAction[]
+  readonly autoDismissMs: number | null
+}
+
+function toastView(state: ToastState, messages: EmulatorMessages): ToastView {
+  switch (state.kind) {
+    case "pending":
+      return {
+        text: messages.toast.sendingIn(formatCountdown(state.remaining)),
+        actions: ["details"],
+        autoDismissMs: null,
+      }
+    case "accepted":
+      return { text: messages.toast.accepted, actions: ["open"], autoDismissMs: null }
+    case "cancelled":
+      return { text: messages.toast.cancelled, actions: [], autoDismissMs: 4000 }
+  }
+}
+
+function toastActionLabel(action: ToastAction, messages: EmulatorMessages): string {
+  switch (action) {
+    case "details":
+      return messages.toast.details
+    case "open":
+      return messages.toast.openSent
+  }
+}
+
+/** Render the toast for a state; buttons not in the state's actions are hidden. */
+function showToast(state: ToastState, locale: LocaleTag): void {
+  clearToastTimer()
+  const messages = getEmulatorMessages(locale)
+  const view = toastView(state, messages)
+  query<HTMLElement>("#emu-toast-text").textContent = view.text
+  for (const action of TOAST_ACTIONS) {
+    const button = query<HTMLElement>(TOAST_ACTION_ELEMENT[action])
+    button.textContent = toastActionLabel(action, messages)
+    button.hidden = !view.actions.includes(action)
+  }
   query<HTMLElement>("#emu-toast").hidden = false
+  if (view.autoDismissMs !== null) {
+    toastTimer = window.setTimeout(hideToast, view.autoDismissMs)
+  }
 }
 
 function hideToast(): void {
+  clearToastTimer()
   query<HTMLElement>("#emu-toast").hidden = true
 }
 
@@ -298,7 +346,7 @@ function hideToast(): void {
 function startPendingSend(seconds: number, locale: LocaleTag): void {
   stopTimer()
   let remaining = seconds
-  showPendingToast(remaining, locale)
+  showToast({ kind: "pending", remaining }, locale)
   // Drive the (hidden) dialog into its "sending" state so that, if the
   // user re-opens it from the toast, Send is disabled and the back
   // button is the cancel. That disabled Send is what prevents a second
@@ -312,10 +360,10 @@ function startPendingSend(seconds: number, locale: LocaleTag): void {
       // Dismiss the details view if it is open: the send is done, so
       // there must be no live dialog left that could send again.
       hideReview()
-      showSentToast(locale)
-      setStatus(locale === "ja" ? "送信を許可しました。" : "Send allowed.")
+      showToast({ kind: "accepted" }, locale)
+      setStatus(getEmulatorMessages(locale).status.accepted)
     } else {
-      showPendingToast(remaining, locale)
+      showToast({ kind: "pending", remaining }, locale)
       activeHandle?.setSending(remaining)
     }
   }, 1000)
@@ -325,14 +373,11 @@ function cancelPendingSend(locale: LocaleTag): void {
   if (currentTimer === null) {
     return
   }
-  hideToast()
-  // Cancel stops the send and returns to the draft to redo.
+  // Cancel stops the send and returns to the draft to redo, with a brief
+  // toast so the cancel is visibly confirmed.
   closeReview()
-  setStatus(
-    locale === "ja"
-      ? "送信をキャンセルしました。下書きに戻ります。"
-      : "Send cancelled. Back to draft.",
-  )
+  showToast({ kind: "cancelled" }, locale)
+  setStatus(getEmulatorMessages(locale).status.cancelled)
 }
 
 /**
@@ -343,11 +388,7 @@ function cancelPendingSend(locale: LocaleTag): void {
  */
 function openSentMail(locale: LocaleTag): void {
   hideToast()
-  setStatus(
-    locale === "ja"
-      ? "送信済みメールを開きます(エミュレータではスタブ)。"
-      : "Opening the sent message (stub in the emulator).",
-  )
+  setStatus(getEmulatorMessages(locale).status.openingSentStub)
 }
 
 function closeReview(): void {
@@ -412,7 +453,7 @@ function mountReview(model: ReviewModel, locale: LocaleTag): void {
       hideReview()
       if (delaySeconds <= 0) {
         showSentToast(locale)
-        setStatus(locale === "ja" ? "送信を許可しました。" : "Send allowed.")
+        setStatus(locale === "ja" ? "送信を受け付けました。" : "Send accepted.")
         return
       }
       startPendingSend(delaySeconds, locale)
