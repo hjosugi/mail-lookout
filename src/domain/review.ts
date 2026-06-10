@@ -89,15 +89,13 @@ function toAttachmentView(attachment: Attachment): AttachmentView {
  * and which confirmations are required.
  */
 export function buildReviewModel(snapshot: MessageSnapshot, config: Config): ReviewModel {
-  const recipients = snapshot.recipients.map((recipient) =>
+  const recipients = snapshot.recipients.map(recipient =>
     toRecipientView(recipient, config.internalDomains),
   )
 
   const externalEmails = [
     ...new Set(
-      recipients
-        .filter((recipient) => recipient.isExternal)
-        .map((recipient) => recipient.emailAddress),
+      recipients.filter(recipient => recipient.isExternal).map(recipient => recipient.emailAddress),
     ),
   ]
 

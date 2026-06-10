@@ -139,7 +139,7 @@ const RECIPIENT_SEPARATORS = /[\n,;]+/
 function parseRecipients(field: RecipientField, raw: string): readonly FieldRecipient[] {
   return raw
     .split(RECIPIENT_SEPARATORS)
-    .map((token) => parseRecipientLine(field, token))
+    .map(token => parseRecipientLine(field, token))
     .filter((parsed): parsed is FieldRecipient => parsed !== null)
 }
 
@@ -169,8 +169,8 @@ function parseAttachments(raw: string): readonly Attachment[] {
 
 function recipientText(snapshot: MessageSnapshot, field: RecipientField): string {
   return snapshot.recipients
-    .filter((item) => item.field === field)
-    .map((item) =>
+    .filter(item => item.field === field)
+    .map(item =>
       item.displayName.length > 0
         ? `${item.displayName} <${item.emailAddress}>`
         : item.emailAddress,
@@ -180,8 +180,8 @@ function recipientText(snapshot: MessageSnapshot, field: RecipientField): string
 
 function attachmentText(snapshot: MessageSnapshot): string {
   return snapshot.attachments
-    .filter((item) => !item.isInline)
-    .map((item) => `${item.name}${item.size === null ? "" : `, ${item.size}`}`)
+    .filter(item => !item.isInline)
+    .map(item => `${item.name}${item.size === null ? "" : `, ${item.size}`}`)
     .join("\n")
 }
 
@@ -244,7 +244,8 @@ function showToast(remaining: number, locale: LocaleTag): void {
     locale === "ja"
       ? `あと ${formatCountdown(remaining)} で送信します`
       : `Sending in ${formatCountdown(remaining)}`
-  query<HTMLButtonElement>("#emu-toast-cancel").textContent = locale === "ja" ? "キャンセル" : "Cancel"
+  query<HTMLButtonElement>("#emu-toast-cancel").textContent =
+    locale === "ja" ? "キャンセル" : "Cancel"
   query<HTMLElement>("#emu-toast").hidden = false
 }
 
@@ -477,7 +478,7 @@ function renderShell(): void {
   fillForm(initialScenario.snapshot)
   updateDraftSummary()
   scenarioSelect.addEventListener("change", () => {
-    const selected = scenarios.find((scenario) => scenario.id === scenarioSelect.value)
+    const selected = scenarios.find(scenario => scenario.id === scenarioSelect.value)
     if (selected) {
       fillForm(selected.snapshot)
       updateDraftSummary()

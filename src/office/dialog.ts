@@ -49,7 +49,7 @@ export function showConfirmationDialog(
         displayInIframe: config.dialog.displayInIframe,
         promptBeforeOpen: false,
       },
-      (result) => {
+      result => {
         if (result.status !== Office.AsyncResultStatus.Succeeded) {
           reject(
             new DialogUnavailableError(
@@ -77,7 +77,7 @@ export function showConfirmationDialog(
           resolve(allow)
         }
 
-        dialog.addEventHandler(Office.EventType.DialogMessageReceived, (arg) => {
+        dialog.addEventHandler(Office.EventType.DialogMessageReceived, arg => {
           if (!("message" in arg)) {
             return
           }

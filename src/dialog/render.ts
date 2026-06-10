@@ -128,7 +128,7 @@ function buildWarnings(warnings: readonly Warning[], messages: Messages): HTMLEl
   if (warnings.length === 0) {
     return null
   }
-  const list = warnings.map((warning) =>
+  const list = warnings.map(warning =>
     el("li", { className: "so-warning", text: warningText(warning, messages) }),
   )
   return el("ul", { className: "so-warnings" }, list)
@@ -171,7 +171,7 @@ function buildRecipientRow(
 ): HTMLElement {
   const content = recipientContent(entry.recipient, messages)
   if (model.requireRecipientConfirmation) {
-    return buildCheckboxRow("so-recipient so-recipient-check", content, (checked) => {
+    return buildCheckboxRow("so-recipient so-recipient-check", content, checked => {
       callbacks.onRecipientToggle(entry.index, checked)
     })
   }
@@ -186,11 +186,11 @@ function buildFieldGroup(
   messages: Messages,
   callbacks: DialogCallbacks,
 ): HTMLElement | null {
-  const inField = indexed.filter((entry) => entry.recipient.field === field)
+  const inField = indexed.filter(entry => entry.recipient.field === field)
   if (inField.length === 0) {
     return null
   }
-  const rows = inField.map((entry) => buildRecipientRow(entry, model, messages, callbacks))
+  const rows = inField.map(entry => buildRecipientRow(entry, model, messages, callbacks))
   return el("div", { className: "so-field-group" }, [
     el("div", { className: "so-field-label", text: fieldLabel(field, messages) }),
     el("div", { className: "so-field-rows" }, rows),
@@ -294,7 +294,7 @@ function buildAttachmentsSection(
         content.push(el("span", { className: "so-attachment-size", text: size }))
       }
       if (model.requireAttachmentConfirmation) {
-        return buildCheckboxRow("so-attachment so-attachment-check", content, (checked) => {
+        return buildCheckboxRow("so-attachment so-attachment-check", content, checked => {
           callbacks.onAttachmentToggle(index, checked)
         })
       }
@@ -335,7 +335,7 @@ function buildBodySection(
   ]
   if (model.requireBodyConfirmation) {
     children.push(
-      buildCheckbox(messages.body.confirm, (checked) => {
+      buildCheckbox(messages.body.confirm, checked => {
         callbacks.onBodyToggle(checked)
       }),
     )

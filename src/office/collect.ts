@@ -16,7 +16,7 @@ function mapRecipients(
   details: readonly Office.EmailAddressDetails[],
   field: RecipientField,
 ): FieldRecipient[] {
-  return details.map((detail) => ({
+  return details.map(detail => ({
     field,
     displayName: detail.displayName ?? "",
     emailAddress: (detail.emailAddress ?? "").trim().toLowerCase(),
@@ -25,7 +25,7 @@ function mapRecipients(
 
 /** Map host attachment details to our attachment type. */
 function mapAttachments(details: readonly Office.AttachmentDetailsCompose[]): Attachment[] {
-  return details.map((detail) => ({
+  return details.map(detail => ({
     id: detail.id,
     name: detail.name,
     size: typeof detail.size === "number" ? detail.size : null,
@@ -40,12 +40,12 @@ function mapAttachments(details: readonly Office.AttachmentDetailsCompose[]): At
  */
 export async function collectSnapshot(item: Office.MessageCompose): Promise<MessageSnapshot> {
   const [subject, body, to, cc, bcc, attachments] = await Promise.all([
-    promisify<string>((cb) => item.subject.getAsync(cb)),
-    promisify<string>((cb) => item.body.getAsync(Office.CoercionType.Text, cb)),
-    promisify<Office.EmailAddressDetails[]>((cb) => item.to.getAsync(cb)),
-    promisify<Office.EmailAddressDetails[]>((cb) => item.cc.getAsync(cb)),
-    promisify<Office.EmailAddressDetails[]>((cb) => item.bcc.getAsync(cb)),
-    promisify<Office.AttachmentDetailsCompose[]>((cb) => item.getAttachmentsAsync(cb)),
+    promisify<string>(cb => item.subject.getAsync(cb)),
+    promisify<string>(cb => item.body.getAsync(Office.CoercionType.Text, cb)),
+    promisify<Office.EmailAddressDetails[]>(cb => item.to.getAsync(cb)),
+    promisify<Office.EmailAddressDetails[]>(cb => item.cc.getAsync(cb)),
+    promisify<Office.EmailAddressDetails[]>(cb => item.bcc.getAsync(cb)),
+    promisify<Office.AttachmentDetailsCompose[]>(cb => item.getAttachmentsAsync(cb)),
   ])
 
   const recipients: FieldRecipient[] = [

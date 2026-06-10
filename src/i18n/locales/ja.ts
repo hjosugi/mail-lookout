@@ -8,9 +8,9 @@ export const ja: Messages = {
     sendNow: "今すぐ送信",
     backToEdit: "編集に戻る",
     cancelSend: "キャンセル",
-    sendingInSeconds: (seconds) => `${seconds} 秒後に送信…`,
+    sendingInSeconds: seconds => `${seconds} 秒後に送信…`,
     delayLabel: "送信までの待ち時間",
-    delayValue: (seconds) => {
+    delayValue: seconds => {
       if (seconds <= 0) {
         return "遅延なし"
       }
@@ -50,11 +50,11 @@ export const ja: Messages = {
   warnings: {
     emptySubject: "件名が空です。",
     forgottenAttachment: "本文は添付ファイルの記載がありますが、ファイルが添付されていません。",
-    externalRecipients: (count) => `社外の宛先が ${count} 件あります。`,
+    externalRecipients: count => `社外の宛先が ${count} 件あります。`,
   },
   fallback: {
     title: "送信前の確認",
-    externalLine: (count) => `社外の宛先が ${count} 件あります。`,
+    externalLine: count => `社外の宛先が ${count} 件あります。`,
     forgottenAttachmentLine: "本文は添付ファイルの記載がありますが、ファイルが添付されていません。",
     emptySubjectLine: "件名が空です。",
     reviewLine: "宛先と内容を確認してから送信してください。",

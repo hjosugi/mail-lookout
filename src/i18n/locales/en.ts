@@ -8,9 +8,9 @@ export const en: Messages = {
     sendNow: "Send now",
     backToEdit: "Back to draft",
     cancelSend: "Cancel",
-    sendingInSeconds: (seconds) => `Sending in ${seconds}s…`,
+    sendingInSeconds: seconds => `Sending in ${seconds}s…`,
     delayLabel: "Wait before sending",
-    delayValue: (seconds) => {
+    delayValue: seconds => {
       if (seconds <= 0) {
         return "No delay"
       }
@@ -50,12 +50,12 @@ export const en: Messages = {
   warnings: {
     emptySubject: "The subject is empty.",
     forgottenAttachment: "The body mentions an attachment, but no file is attached.",
-    externalRecipients: (count) =>
+    externalRecipients: count =>
       `There ${count === 1 ? "is" : "are"} ${count} external recipient${count === 1 ? "" : "s"}.`,
   },
   fallback: {
     title: "Confirm before sending",
-    externalLine: (count) =>
+    externalLine: count =>
       `There ${count === 1 ? "is" : "are"} ${count} external recipient${count === 1 ? "" : "s"}.`,
     forgottenAttachmentLine: "The body mentions an attachment, but no file is attached.",
     emptySubjectLine: "The subject is empty.",

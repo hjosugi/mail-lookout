@@ -135,7 +135,7 @@ void Office.onReady(() => {
   Office.context.ui.addHandlerAsync(
     Office.EventType.DialogParentMessageReceived,
     onParentMessage,
-    (result) => {
+    result => {
       if (result.status === Office.AsyncResultStatus.Succeeded) {
         Office.context.ui.messageParent(encode({ type: "ready" }))
       } else {

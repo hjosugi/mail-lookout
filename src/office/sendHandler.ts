@@ -28,7 +28,7 @@ function completeOnce(
   event: Office.AddinCommands.Event,
 ): (options: Office.SmartAlertsEventCompletedOptions) => void {
   let done = false
-  return (options) => {
+  return options => {
     if (done) {
       return
     }
@@ -82,13 +82,13 @@ function buildFallbackMessage(model: ReviewModel, locale: LocaleTag): FallbackMe
     }
   }
 
-  const hasForgotten = model.warnings.some((w) => w.kind === "forgottenAttachment")
+  const hasForgotten = model.warnings.some(w => w.kind === "forgottenAttachment")
   if (hasForgotten) {
     lines.push(f.forgottenAttachmentLine)
     mdLines.push(`**${f.forgottenAttachmentLine}**`)
   }
 
-  const hasEmptySubject = model.warnings.some((w) => w.kind === "emptySubject")
+  const hasEmptySubject = model.warnings.some(w => w.kind === "emptySubject")
   if (hasEmptySubject) {
     lines.push(f.emptySubjectLine)
     mdLines.push(`**${f.emptySubjectLine}**`)

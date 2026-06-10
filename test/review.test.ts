@@ -41,9 +41,7 @@ describe("buildReviewModel", () => {
       snapshot({ recipients: [internal, externalA, externalB] }),
       defaultConfig,
     )
-    expect(model.recipients.find((r) => r.emailAddress === "in@example.com")?.isExternal).toBe(
-      false,
-    )
+    expect(model.recipients.find(r => r.emailAddress === "in@example.com")?.isExternal).toBe(false)
     expect(model.externalEmails).toEqual(["a@other.com", "b@other.com"])
   })
 
@@ -64,7 +62,7 @@ describe("buildReviewModel", () => {
 
   it("raises an empty-subject warning when enabled and the subject is blank", () => {
     const model = buildReviewModel(snapshot({ subject: "  " }), defaultConfig)
-    expect(model.warnings.some((w) => w.kind === "emptySubject")).toBe(true)
+    expect(model.warnings.some(w => w.kind === "emptySubject")).toBe(true)
   })
 
   it("does not raise an empty-subject warning when disabled", () => {
@@ -72,7 +70,7 @@ describe("buildReviewModel", () => {
       snapshot({ subject: "  " }),
       config({ warnOnEmptySubject: false }),
     )
-    expect(model.warnings.some((w) => w.kind === "emptySubject")).toBe(false)
+    expect(model.warnings.some(w => w.kind === "emptySubject")).toBe(false)
   })
 
   it("raises a forgotten-attachment warning", () => {
@@ -80,12 +78,12 @@ describe("buildReviewModel", () => {
       snapshot({ body: "see attached", attachments: [] }),
       defaultConfig,
     )
-    expect(model.warnings.some((w) => w.kind === "forgottenAttachment")).toBe(true)
+    expect(model.warnings.some(w => w.kind === "forgottenAttachment")).toBe(true)
   })
 
   it("raises an external-recipients warning with a count", () => {
     const model = buildReviewModel(snapshot({ recipients: [externalA, externalB] }), defaultConfig)
-    const warning = model.warnings.find((w) => w.kind === "externalRecipients")
+    const warning = model.warnings.find(w => w.kind === "externalRecipients")
     expect(warning?.count).toBe(2)
   })
 
@@ -128,18 +126,6 @@ describe("initialReviewState", () => {
     const state = initialReviewState(model)
     expect(state.bodyConfirmed).toBe(true)
   })
-
-  it("starts the delay elapsed when there is no send delay", () => {
-    const model = buildReviewModel(snapshot({}), config({ sendDelaySeconds: 0 }))
-    const state = initialReviewState(model)
-    expect(state.delayElapsed).toBe(true)
-  })
-
-  it("starts the delay not elapsed when there is a send delay", () => {
-    const model = buildReviewModel(snapshot({}), config({ sendDelaySeconds: 5 }))
-    const state = initialReviewState(model)
-    expect(state.delayElapsed).toBe(false)
-  })
 })
 
 describe("canSend", () => {
@@ -147,13 +133,13 @@ describe("canSend", () => {
     return buildReviewModel(snapshot(overrides), cfg)
   }
 
-  it("blocks while the delay has not elapsed", () => {
-    const model = modelWith({}, config({ sendDelaySeconds: 5, requireBodyConfirmation: false }))
+  it("does not gate on the send delay; the countdown runs after Send", () => {
+    const model = modelWith({}, config({ sendDelaySeconds: 180, requireBodyConfirmation: false }))
     const state = initialReviewState(model)
-    expect(canSend(model, state)).toBe(false)
+    expect(canSend(model, state)).toBe(true)
   })
 
-  it("allows a plain message once the delay elapses and body is confirmed", () => {
+  it("allows a plain message once the body is confirmed", () => {
     const model = modelWith({}, config({ sendDelaySeconds: 0 }))
     const state = { ...initialReviewState(model), bodyConfirmed: true }
     expect(canSend(model, state)).toBe(true)

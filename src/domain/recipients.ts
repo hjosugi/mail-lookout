@@ -28,8 +28,8 @@ export function domainOf(email: string): string {
 /** Normalize a list of internal domains: lowercase, trim, drop empties. */
 function normalizeDomains(internalDomains: readonly string[]): string[] {
   return internalDomains
-    .map((domain) => domain.trim().toLowerCase())
-    .filter((domain) => domain.length > 0)
+    .map(domain => domain.trim().toLowerCase())
+    .filter(domain => domain.length > 0)
 }
 
 /**

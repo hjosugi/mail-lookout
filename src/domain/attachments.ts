@@ -10,7 +10,7 @@ import type { Attachment, MessageSnapshot } from "./types"
 
 /** Keep only real attachments. Inline images are dropped. */
 export function realAttachments(attachments: readonly Attachment[]): readonly Attachment[] {
-  return attachments.filter((attachment) => !attachment.isInline)
+  return attachments.filter(attachment => !attachment.isInline)
 }
 
 /**
@@ -21,7 +21,7 @@ export function realAttachments(attachments: readonly Attachment[]): readonly At
  */
 export function mentionsAttachment(text: string, keywords: readonly string[]): boolean {
   const haystack = text.toLowerCase()
-  return keywords.some((keyword) => {
+  return keywords.some(keyword => {
     const needle = keyword.trim().toLowerCase()
     if (needle.length === 0) {
       return false

@@ -18,7 +18,7 @@ export function promisify<T>(
   call: (callback: (result: Office.AsyncResult<T>) => void) => void,
 ): Promise<T> {
   return new Promise<T>((resolve, reject) => {
-    call((result) => {
+    call(result => {
       if (result.status === Office.AsyncResultStatus.Succeeded) {
         resolve(result.value)
       } else {

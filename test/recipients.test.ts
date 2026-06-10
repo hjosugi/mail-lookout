@@ -48,8 +48,8 @@ describe("classifyRecipients", () => {
 
   it("splits into internal and external", () => {
     const result = classifyRecipients(recipients, ["example.com"])
-    expect(result.internal.map((r) => r.emailAddress)).toEqual(["a@example.com", "c@example.com"])
-    expect(result.external.map((r) => r.emailAddress)).toEqual(["b@other.com"])
+    expect(result.internal.map(r => r.emailAddress)).toEqual(["a@example.com", "c@example.com"])
+    expect(result.external.map(r => r.emailAddress)).toEqual(["b@other.com"])
   })
 
   it("puts everyone external when the internal list is empty", () => {
