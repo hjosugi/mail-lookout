@@ -8,7 +8,6 @@ import type { LocaleTag, Messages } from "../i18n"
 const CONFIRMATION_STORAGE_KEY = "mail-lookout:send-confirmation"
 const CONFIRMATION_TTL_MS = 10 * 60 * 1000
 const MAX_ALERT_MESSAGE_LENGTH = 500
-const LIST_PREVIEW_COUNT = 3
 export const REVIEW_PANE_COMMAND_ID = "ReviewPaneButton"
 
 interface StoredConfirmation {
@@ -102,35 +101,15 @@ export function buildSmartAlertMessage(
   messages: Messages,
   markdown: boolean,
 ): string {
-  const subject = model.subject.trim() || messages.subject.empty
+  // Keep the built-in alert short: a prompt to open the review plus a line
+  // for any warnings. The recipient, attachment, subject, and body detail
+  // lives in the review pane, not here.
   const warnings = model.warnings.map(warning => warningText(warning, messages))
-  const recipients = summarize(
-    model.recipients.map(recipient => {
-      const name = recipient.displayName
-        ? `${recipient.displayName} <${recipient.emailAddress}>`
-        : recipient.emailAddress
-      const external = recipient.isExternal ? ` ${messages.recipients.externalBadge}` : ""
-      return `${messages.fields[recipient.field]}: ${name}${external}`
-    }),
-    messages,
-    messages.recipients.none,
-  )
-  const attachments = summarize(
-    model.attachments.map(attachment => attachment.name),
-    messages,
-    messages.attachments.none,
-  )
-  const body = model.bodyPreview.trim() || messages.body.empty
-
   const title = markdown ? strong(messages.dialog.title) : messages.dialog.title
   const lines = [
     title,
     messages.smartAlert.sendAgain,
     warnings.length > 0 ? `${messages.smartAlert.warnings}: ${warnings.join(" / ")}` : "",
-    `${messages.sections.recipients}: ${recipients}`,
-    `${messages.sections.attachments}: ${attachments}`,
-    `${messages.sections.subject}: ${subject}`,
-    `${messages.sections.body}: ${body}`,
   ].filter(line => line.length > 0)
 
   const escaped = markdown ? lines.map(escapeMarkdown) : lines
@@ -138,17 +117,6 @@ export function buildSmartAlertMessage(
     escaped[0] = title
   }
   return truncate(escaped.join("\n\n"), MAX_ALERT_MESSAGE_LENGTH)
-}
-
-function summarize(items: readonly string[], messages: Messages, empty: string): string {
-  if (items.length === 0) {
-    return empty
-  }
-  const shown = items.slice(0, LIST_PREVIEW_COUNT)
-  const remaining = items.length - shown.length
-  return remaining > 0
-    ? `${shown.join(", ")} (${messages.smartAlert.moreItems(remaining)})`
-    : shown.join(", ")
 }
 
 function warningText(warning: ReviewModel["warnings"][number], messages: Messages): string {

@@ -11,10 +11,15 @@
 import type { DialogRenderOptions } from "./render"
 import type { Messages } from "../i18n/types"
 
-/** Render options that match how the Outlook task pane mounts the dialog. */
+/**
+ * Render options for the Outlook task pane.
+ *
+ * The delay control lets the user set the wait for this send; the back
+ * button doubles as Cancel once the post-confirm countdown is running.
+ */
 export const taskPaneRenderOptions: DialogRenderOptions = {
-  showBackButton: false,
-  showDelayControl: false,
+  showBackButton: true,
+  showDelayControl: true,
 }
 
 /**

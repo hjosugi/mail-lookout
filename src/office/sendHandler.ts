@@ -24,7 +24,6 @@ import type { LocaleTag } from "../i18n/catalog"
 import {
   consumeConfirmation,
   needsSmartAlertConfirmation,
-  rememberConfirmation,
   smartAlertCancelOptions,
   snapshotFingerprint,
 } from "./smartAlert"
@@ -77,7 +76,10 @@ export async function onMessageSendHandler(event: Office.AddinCommands.Event): P
       return
     }
 
-    rememberConfirmation(fingerprint)
+    // Block the send and open the review. The confirmation is recorded
+    // only when the user completes the review (and its countdown) in the
+    // task pane — not here — so closing the pane or sending again without
+    // reviewing stays blocked.
     complete(smartAlertCancelOptions(model, locale))
   } catch (error) {
     // Last resort. Never send real mail without a confirmation.

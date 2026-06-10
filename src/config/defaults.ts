@@ -12,7 +12,7 @@ import { configSchema, type Config } from "./types"
  */
 export const defaultConfig: Config = configSchema.parse({
   internalDomains: ["example.com"],
-  sendDelaySeconds: 180,
+  sendDelaySeconds: 60,
   requireRecipientConfirmation: true,
   requireAttachmentConfirmation: true,
   requireBodyConfirmation: true,

@@ -37,8 +37,10 @@ function start(model: ReviewModel, fingerprint: string, locale: LocaleTag): void
   let state: ReviewState = initialReviewState(model)
   const status = showStatus("")
 
-  // A single timer drives the pre-confirm countdown. The hold is floored
-  // so confirming is never instant.
+  // The wait before confirming. Seeded from the model (the configured
+  // default) and changeable on the delay control for this send.
+  let delaySeconds = model.sendDelaySeconds
+  // A single timer drives the pre-confirm countdown.
   let timer: number | null = null
   const stopTimer = (): void => {
     if (timer !== null) {
@@ -87,8 +89,8 @@ function start(model: ReviewModel, fingerprint: string, locale: LocaleTag): void
         status.textContent = ""
         refresh()
       },
-      onDelayChange() {
-        // The task pane shows no delay control; the hold comes from config.
+      onDelayChange(seconds) {
+        delaySeconds = seconds
       },
       onSend() {
         // Record the review so the user's next unchanged Send passes the
@@ -98,11 +100,11 @@ function start(model: ReviewModel, fingerprint: string, locale: LocaleTag): void
           rememberConfirmation(fingerprint)
           status.textContent = baseMessages.taskPane.confirmed
         }
-        if (model.sendDelaySeconds <= 0) {
+        if (delaySeconds <= 0) {
           confirm()
           return
         }
-        let remaining = model.sendDelaySeconds
+        let remaining = delaySeconds
         handle.setSending(remaining)
         timer = window.setInterval(() => {
           remaining -= 1

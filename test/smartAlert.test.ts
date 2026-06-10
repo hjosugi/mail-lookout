@@ -103,8 +103,9 @@ describe("Smart Alerts message", () => {
 
     expect(message.length).toBeLessThanOrEqual(500)
     expect(message).toContain("もう一度送信")
-    expect(message).toContain("件名")
-    expect(message).toContain("宛先")
+    // The alert stays short: message body detail lives in the review pane,
+    // so it must not dump the subject or body into the built-in dialog.
+    expect(message).not.toContain("本文:")
   })
 
   it("creates completed options with plaintext and markdown messages", () => {
