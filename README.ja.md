@@ -141,15 +141,25 @@ npm run validate       # office-addin-manifest validate
 
 ## 本番デプロイ
 
-マニフェストはプレースホルダ値で出荷されます。デプロイ前に置き換えて
-ください。
+一番簡単な公開プレビューは Netlify です。このリポジトリには
+`netlify.toml` が含まれているため、Netlify 側では `npm run build` で
+ビルドし、`dist/` を公開できます。そのビルド中に
+`scripts/generate-manifest.js` が Netlify のサイトURLを埋め込んだ
+`dist/manifest.xml` を生成します。
+
+手順は [NETLIFY.md](./NETLIFY.md) を参照してください。
+
+元のマニフェストはプレースホルダ値で出荷されます。本番運用や
+Marketplace 公開の前には置き換えてください。
 
 1. **GUID。** `manifest.xml` の `<Id>` を自分の GUID に置き換える。
-2. **URL。** `manifest.xml` 内のすべての `https://localhost:3000`
-   を自分のホストに置き換える。`npm run build` でビルドし、`dist/`
-   フォルダをそのホストの HTTPS で配信する。エントリ JS は安定した
-   名前（`/assets/commands.js`）を保つため、ビルドごとにマニフェスト
-   の URL は変わらない。
+2. **URL。** Netlify では、独自ドメインなどでサイトURLを上書きしたい
+   ときだけ `DEPLOY_URL` を設定する。ほかのホストでは、
+   `manifest.xml` 内のすべての `https://localhost:3000` を自分の
+   ホストに置き換えるか、`DEPLOY_URL=https://example.com npm run
+   build` を実行する。`dist/` フォルダをそのホストの HTTPS で
+   配信する。エントリ JS は安定した名前（`/assets/commands.js`）を
+   保つため、ビルドごとにマニフェストの URL は変わらない。
 3. **社内ドメイン。** `src/config/defaults.ts` の `internalDomains`
    を編集する。このリストが間違っていると、すべての宛先が社外に
    見える。
@@ -158,6 +168,10 @@ npm run validate       # office-addin-manifest validate
 
 そのうえで、組織向けに Microsoft 365 管理センターから公開するか、
 個人向けにサイドロードします。
+
+Outlook 内から通常のアドインとして検索・インストールできる一般公開を
+目指す場合は、ホストしたプレビューが安定してから Microsoft Marketplace
+/ AppSource への申請を進めます。
 
 ## 設定
 

@@ -19,7 +19,7 @@
     "dev": "vite",
     "dev:emulator": "vite --open /emulator.html",
     "dev:outlook": "vite --port 3000 --strictPort",
-    "build": "tsc -p tsconfig.json --noEmit && vite build",
+    "build": "tsc -p tsconfig.json --noEmit && vite build && node scripts/generate-manifest.js",
     "preview": "vite preview --port 3000",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.node.json --noEmit",
     "lint": "biome lint .",

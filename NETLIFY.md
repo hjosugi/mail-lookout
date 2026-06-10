@@ -1,0 +1,55 @@
+# Netlify デプロイガイド
+
+このアドインプロジェクトを Netlify で公開し、Outlook にサイドロード（追加）するための手順です。
+
+---
+
+## 1. 準備
+
+1. プロジェクトを GitHub にプッシュします（パブリックリポジトリを推奨）。
+2. [Netlify](https://www.netlify.com/) にログイン（または新規登録）します。GitHubアカウントでログインするとスムーズです。
+
+---
+
+## 2. Netlify でのサイト作成とデプロイ設定
+
+1. Netlify ダッシュボードで **[Add new site]** -> **[Import an existing project]** を選択します。
+2. Git プロバイダーとして **GitHub** を選択し、本リポジトリを選択します。
+3. デプロイ設定は `netlify.toml` から自動で読み込まれます。画面に入力欄が出た場合は以下になっていることを確認します。
+
+   - **Build command**: `npm run build`
+   - **Publish directory**: `dist`
+   - **Production branch**: `main` (または `master`)
+
+4. **[Deploy]** ボタンをクリックしてデプロイを実行します。
+
+ビルド時に Netlify の環境変数 `URL` が読み込まれ、`dist/manifest.xml` 内の `https://localhost:3000` が本番URLに置き換わります。
+
+サイト名や独自ドメインを後から変えた場合は、Netlify で再デプロイしてください。マニフェスト内のURLはビルド時に埋め込まれます。
+
+独自ドメインを先に使いたい場合は、Netlify の **Environment variables** に `DEPLOY_URL=https://your-domain.example` を設定すると、そのURLが優先されます。
+
+---
+
+## 3. マニフェストファイルの入手と Outlook への登録
+
+デプロイが完了すると、`https://<あなたのサイト名>.netlify.app` のような公開用URLが割り当てられます。
+
+### マニフェストのダウンロード
+1. ブラウザで `https://<あなたのサイト名>.netlify.app/manifest.xml` にアクセスします。
+2. 画面に表示されるXMLデータを右クリックして **「名前を付けて保存」** でPCに保存します（ファイル名: `manifest.xml`）。
+   > **【注意】**
+   > このマニフェストファイルには、すでに Netlify の公開URLがすべて埋め込まれています。
+
+### Outlook へのサイドロード（インストール）
+1. **Outlook on the web** または **新しい Outlook** にサインインします。
+2. メール新規作成画面などの「アドインを取得」メニュー、または **[設定] -> [アドイン]** に移動します。
+3. **「カスタム アドインを追加」** -> **「ファイルから追加」** を選択します。
+4. 先ほどダウンロードした `manifest.xml` を選択してアップロードします。
+5. インストールが成功したら、新規メールを作成して送信テストを行ってください。
+
+## 4. 一般公開について
+
+Netlify で公開されるのは、アドイン本体のWebファイルと配布用マニフェストです。README で `manifest.xml` のURLを案内すれば、試してもらうことはできます。
+
+ただし、Outlook 内から通常のアドインとして検索・インストールできる状態にするには、最終的に Microsoft Marketplace / AppSource への申請が必要です。最初は Netlify で公開して反応を見る、広げる段階で Marketplace 申請に進む、という流れが現実的です。

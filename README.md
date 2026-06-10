@@ -142,16 +142,26 @@ npm run validate       # office-addin-manifest validate
 
 ## Production deployment
 
-The manifest ships with placeholder values. Replace them before you
-deploy.
+For the simplest public preview, deploy this repository to Netlify.
+The repository includes `netlify.toml`, so Netlify can build with
+`npm run build` and publish `dist/` automatically. During that build,
+`scripts/generate-manifest.js` writes `dist/manifest.xml` with the
+Netlify site URL embedded.
+
+See [NETLIFY.md](./NETLIFY.md) for the step-by-step flow.
+
+The source manifest still ships with placeholder values. Replace
+them before a production or marketplace release.
 
 1. **GUID.** Replace the `<Id>` in `manifest.xml` with your own
    GUID.
-2. **URLs.** Replace every `https://localhost:3000` in
-   `manifest.xml` with your host. Build with `npm run build` and
-   serve the `dist/` folder over HTTPS at that host. The entry JS
-   keeps a stable name (`/assets/commands.js`), so the manifest
-   URLs do not change between builds.
+2. **URLs.** For Netlify, set `DEPLOY_URL` only if you need to
+   override the site URL, for example for a custom domain. For other
+   hosts, replace every `https://localhost:3000` in `manifest.xml`
+   with your host or run `DEPLOY_URL=https://example.com npm run
+   build`. Serve the `dist/` folder over HTTPS at that host. The
+   entry JS keeps a stable name (`/assets/commands.js`), so the
+   manifest URLs do not change between builds.
 3. **Internal domains.** Edit `internalDomains` in
    `src/config/defaults.ts`. If this list is wrong, every recipient
    looks external.
@@ -160,6 +170,10 @@ deploy.
 
 Then publish through the Microsoft 365 admin center for your
 organization, or sideload for a single user.
+
+For a broader public release where users can install the add-in from
+Outlook itself, plan on a Microsoft Marketplace / AppSource
+submission after the hosted preview is stable.
 
 ## Configuration
 
