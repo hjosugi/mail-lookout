@@ -452,8 +452,8 @@ function mountReview(model: ReviewModel, locale: LocaleTag): void {
       // it reaches zero. 0 means send immediately.
       hideReview()
       if (delaySeconds <= 0) {
-        showSentToast(locale)
-        setStatus(locale === "ja" ? "送信を受け付けました。" : "Send accepted.")
+        showToast({ kind: "accepted" }, locale)
+        setStatus(getEmulatorMessages(locale).status.accepted)
         return
       }
       startPendingSend(delaySeconds, locale)
@@ -462,7 +462,7 @@ function mountReview(model: ReviewModel, locale: LocaleTag): void {
       cancelPendingSend(locale)
     },
     onBack() {
-      setStatus(locale === "ja" ? "編集に戻る判定です。" : "Back to draft selected.")
+      setStatus(getEmulatorMessages(locale).status.backToDraft)
       closeReview()
     },
   })
@@ -476,7 +476,7 @@ function mountReview(model: ReviewModel, locale: LocaleTag): void {
 function runReview(): void {
   const config = configFromForm()
   const model = buildReviewModel(snapshotFromForm(), config)
-  setStatus(config.fallbackLocale === "ja" ? "確認中です。" : "Reviewing draft.")
+  setStatus(getEmulatorMessages(config.fallbackLocale).status.reviewing)
   mountReview(model, config.fallbackLocale)
 }
 
@@ -595,6 +595,7 @@ function renderShell(): void {
   scenarioSelect.value = initialScenario.id
   fillForm(initialScenario.snapshot)
   updateDraftSummary()
+  setStatus(getEmulatorMessages(currentLocale()).status.ready)
   scenarioSelect.addEventListener("change", () => {
     const selected = scenarios.find(scenario => scenario.id === scenarioSelect.value)
     if (selected) {
@@ -603,6 +604,8 @@ function renderShell(): void {
     }
   })
   query<HTMLButtonElement>("#emu-review").addEventListener("click", runReview)
+  // Re-localise the draft summary when the language changes.
+  query<HTMLSelectElement>("#emu-locale").addEventListener("change", updateDraftSummary)
   // Close just dismisses the dialog; a pending countdown keeps running
   // in the toast and can be re-opened with Details. Cancelling the send
   // is the dialog's own (red) cancel button while it is sending.
@@ -610,7 +613,7 @@ function renderShell(): void {
   query<HTMLElement>("[data-close-review]").addEventListener("click", hideReview)
   query<HTMLButtonElement>("#emu-toast-details").addEventListener("click", openReview)
   query<HTMLButtonElement>("#emu-toast-open").addEventListener("click", () => {
-    openSentMail(query<HTMLSelectElement>("#emu-locale").value as LocaleTag)
+    openSentMail(currentLocale())
   })
   for (const selector of ["#emu-subject", "#emu-to", "#emu-cc", "#emu-bcc", "#emu-attachments"]) {
     query<HTMLElement>(selector).addEventListener("input", updateDraftSummary)
@@ -618,11 +621,14 @@ function renderShell(): void {
 }
 
 function updateDraftSummary(): void {
+  const messages = getEmulatorMessages(currentLocale())
   const snapshot = snapshotFromForm()
-  const subject = snapshot.subject.trim().length > 0 ? snapshot.subject : "(No subject)"
+  const subject = snapshot.subject.trim().length > 0 ? snapshot.subject : messages.draft.noSubject
   query<HTMLElement>("#emu-result-subject").textContent = subject
-  query<HTMLElement>("#emu-result-meta").textContent =
-    `${snapshot.recipients.length} recipients, ${snapshot.attachments.length} attachments`
+  query<HTMLElement>("#emu-result-meta").textContent = messages.draft.summary(
+    snapshot.recipients.length,
+    snapshot.attachments.length,
+  )
 }
 
 renderShell()
