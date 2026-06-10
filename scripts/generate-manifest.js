@@ -6,7 +6,13 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootDir = path.resolve(__dirname, "..")
 
 function resolveDeployUrl() {
-  return process.env.DEPLOY_URL ?? process.env.URL ?? "https://localhost:3000"
+  return (
+    process.env.ADDIN_HOST_URL ??
+    process.env.URL ??
+    process.env.DEPLOY_PRIME_URL ??
+    process.env.DEPLOY_URL ??
+    "https://localhost:3000"
+  )
 }
 
 function generateManifest() {

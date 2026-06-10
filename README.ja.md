@@ -159,9 +159,9 @@ Marketplace 公開の前には置き換えてください。
 
 1. **GUID。** `manifest.xml` の `<Id>` を自分の GUID に置き換える。
 2. **URL。** Netlify では、独自ドメインなどでサイトURLを上書きしたい
-   ときだけ `DEPLOY_URL` を設定する。ほかのホストでは、
+   ときだけ `ADDIN_HOST_URL` を設定する。ほかのホストでは、
    `manifest.xml` 内のすべての `https://localhost:3000` を自分の
-   ホストに置き換えるか、`DEPLOY_URL=https://example.com npm run
+   ホストに置き換えるか、`ADDIN_HOST_URL=https://example.com npm run
    build` を実行する。`dist/` フォルダをそのホストの HTTPS で
    配信する。エントリ JS は安定した名前（`/assets/commands.js`）を
    保つため、ビルドごとにマニフェストの URL は変わらない。

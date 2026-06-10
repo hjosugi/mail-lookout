@@ -159,10 +159,10 @@ them before a production or marketplace release.
 
 1. **GUID.** Replace the `<Id>` in `manifest.xml` with your own
    GUID.
-2. **URLs.** For Netlify, set `DEPLOY_URL` only if you need to
+2. **URLs.** For Netlify, set `ADDIN_HOST_URL` only if you need to
    override the site URL, for example for a custom domain. For other
    hosts, replace every `https://localhost:3000` in `manifest.xml`
-   with your host or run `DEPLOY_URL=https://example.com npm run
+   with your host or run `ADDIN_HOST_URL=https://example.com npm run
    build`. Serve the `dist/` folder over HTTPS at that host. The
    entry JS keeps a stable name (`/assets/commands.js`), so the
    manifest URLs do not change between builds.

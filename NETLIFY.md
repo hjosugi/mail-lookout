@@ -27,7 +27,7 @@
 
 サイト名や独自ドメインを後から変えた場合は、Netlify で再デプロイしてください。マニフェスト内のURLはビルド時に埋め込まれます。
 
-独自ドメインを先に使いたい場合は、Netlify の **Environment variables** に `DEPLOY_URL=https://your-domain.example` を設定すると、そのURLが優先されます。
+独自ドメインを先に使いたい場合は、Netlify の **Environment variables** に `ADDIN_HOST_URL=https://your-domain.example` を設定すると、そのURLが優先されます。
 
 ### IaC で管理できる範囲
 
@@ -41,6 +41,8 @@
 つまり、Netlify に GitHub repo を一度 import すれば、その後のビルド設定は IaC 的に管理できます。
 
 サイト作成、独自ドメイン、環境変数まで完全にコード化したい場合は Terraform の Netlify provider でも可能です。ただし `NETLIFY_TOKEN` などの管理が必要になり、最初の個人公開には少し重いです。まずは `netlify.toml` + GitHub 連携で始めるのが一番ラクです。
+
+注意: Netlify には `DEPLOY_URL` という deploy ごとの固有URLが自動で存在します。マニフェストには通常、固定のサイトURLを入れたいので、このプロジェクトでは手動上書き用の変数名を `ADDIN_HOST_URL` にしています。
 
 ---
 
