@@ -7,9 +7,7 @@ export function normalizeForCaseInsensitiveMatch(value: string): string {
 
 /** Normalize a list of values and drop empty results. */
 export function normalizeNonEmptyForCaseInsensitiveMatch(values: readonly string[]): string[] {
-  return values
-    .map(normalizeForCaseInsensitiveMatch)
-    .filter(value => value.length > 0)
+  return values.map(normalizeForCaseInsensitiveMatch).filter(value => value.length > 0)
 }
 
 /** Return true when text contains any non-empty candidate, case-insensitively. */

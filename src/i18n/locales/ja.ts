@@ -21,6 +21,8 @@ export const ja: Messages = {
       const rest = seconds % 60
       return rest === 0 ? `${minutes}分` : `${minutes}分${rest}秒`
     },
+    delayUnitMinutes: "分",
+    delayImmediateHint: "0 で即時送信",
   },
   sections: {
     recipients: "宛先",

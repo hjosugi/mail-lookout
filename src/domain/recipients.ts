@@ -7,10 +7,7 @@
  */
 
 import type { FieldRecipient } from "./types"
-import {
-  normalizeForCaseInsensitiveMatch,
-  normalizeNonEmptyForCaseInsensitiveMatch,
-} from "./text"
+import { normalizeForCaseInsensitiveMatch, normalizeNonEmptyForCaseInsensitiveMatch } from "./text"
 
 /** Normalize an email address for storage and comparison. */
 export function normalizeEmailAddress(email: string): string {

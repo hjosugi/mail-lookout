@@ -21,6 +21,8 @@ export const en: Messages = {
       const rest = seconds % 60
       return rest === 0 ? `${minutes} min` : `${minutes} min ${rest}s`
     },
+    delayUnitMinutes: "min",
+    delayImmediateHint: "0 = send immediately",
   },
   sections: {
     recipients: "Recipients",

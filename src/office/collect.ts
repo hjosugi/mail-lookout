@@ -55,7 +55,9 @@ export async function collectSnapshot(item: Office.MessageCompose): Promise<Mess
     ...mapRecipients(bcc, "bcc"),
   ]
 
-  const senderEmail = normalizeEmailAddress(Office.context.mailbox.userProfile.emailAddress ?? "")
+  const senderEmail: string = normalizeEmailAddress(
+    Office.context.mailbox.userProfile.emailAddress ?? "",
+  )
 
   return {
     subject,

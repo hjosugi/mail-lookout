@@ -21,6 +21,10 @@ export interface Messages {
     readonly delayLabel: string
     /** Human-readable name for a delay duration, e.g. "3 min" or "遅延なし". */
     readonly delayValue: (seconds: number) => string
+    /** Unit shown next to the minutes delay input, e.g. "min" or "分". */
+    readonly delayUnitMinutes: string
+    /** Hint that entering 0 sends immediately. */
+    readonly delayImmediateHint: string
   }
   readonly sections: {
     readonly recipients: string

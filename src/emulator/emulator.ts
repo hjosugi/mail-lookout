@@ -202,10 +202,16 @@ function snapshotFromForm(): MessageSnapshot {
   }
 }
 
+/** Read a minutes field as a non-negative whole number of seconds. */
+function minutesToSeconds(raw: string): number {
+  const minutes = Number(raw)
+  return Number.isFinite(minutes) ? Math.max(0, Math.floor(minutes)) * 60 : 0
+}
+
 function configFromForm() {
   return {
     ...defaultConfig,
-    sendDelaySeconds: Number(query<HTMLInputElement>("#emu-delay").value),
+    sendDelaySeconds: minutesToSeconds(query<HTMLInputElement>("#emu-delay").value),
     requireRecipientConfirmation: query<HTMLInputElement>("#emu-require-recipients").checked,
     requireAttachmentConfirmation: query<HTMLInputElement>("#emu-require-attachments").checked,
     requireBodyConfirmation: query<HTMLInputElement>("#emu-require-body").checked,
@@ -240,13 +246,28 @@ function formatCountdown(totalSeconds: number): string {
   return minutes > 0 ? `${minutes}:${String(seconds).padStart(2, "0")}` : `${seconds}s`
 }
 
-function showToast(remaining: number, locale: LocaleTag): void {
-  query<HTMLElement>("#emu-toast-text").textContent =
-    locale === "ja"
-      ? `あと ${formatCountdown(remaining)} で送信します`
-      : `Sending in ${formatCountdown(remaining)}`
-  query<HTMLButtonElement>("#emu-toast-cancel").textContent =
-    locale === "ja" ? "キャンセル" : "Cancel"
+/** Show the toast counting down: countdown text + Details + Cancel. */
+function showPendingToast(remaining: number, locale: LocaleTag): void {
+  const ja = locale === "ja"
+  query<HTMLElement>("#emu-toast-text").textContent = ja
+    ? `あと ${formatCountdown(remaining)} で送信します`
+    : `Sending in ${formatCountdown(remaining)}`
+  query<HTMLButtonElement>("#emu-toast-details").textContent = ja ? "詳細" : "Details"
+  query<HTMLButtonElement>("#emu-toast-cancel").textContent = ja ? "キャンセル" : "Cancel"
+  query<HTMLElement>("#emu-toast-details").hidden = false
+  query<HTMLElement>("#emu-toast-cancel").hidden = false
+  query<HTMLElement>("#emu-toast-open").hidden = true
+  query<HTMLElement>("#emu-toast").hidden = false
+}
+
+/** Show the toast after sending: a confirmation + a link to the sent mail. */
+function showSentToast(locale: LocaleTag): void {
+  const ja = locale === "ja"
+  query<HTMLElement>("#emu-toast-text").textContent = ja ? "送信しました" : "Sent"
+  query<HTMLButtonElement>("#emu-toast-open").textContent = ja ? "送信済みを開く" : "Open sent mail"
+  query<HTMLElement>("#emu-toast-details").hidden = true
+  query<HTMLElement>("#emu-toast-cancel").hidden = true
+  query<HTMLElement>("#emu-toast-open").hidden = false
   query<HTMLElement>("#emu-toast").hidden = false
 }
 
@@ -257,22 +278,23 @@ function hideToast(): void {
 /**
  * Run the post-Send wait as a small corner toast.
  *
- * The dialog is already closed by the time this runs, so the user is
- * free to keep editing. When the countdown reaches zero the send is
- * allowed; the toast's Cancel button stops it.
+ * The dialog is hidden by the time this runs, so the user is free to
+ * keep editing. The toast counts down with a Details button (re-open
+ * the dialog) and a Cancel button; when it reaches zero the send is
+ * allowed and the toast offers a link to the sent mail.
  */
 function startPendingSend(seconds: number, locale: LocaleTag): void {
   stopTimer()
   let remaining = seconds
-  showToast(remaining, locale)
+  showPendingToast(remaining, locale)
   currentTimer = window.setInterval(() => {
     remaining -= 1
     if (remaining <= 0) {
       stopTimer()
-      hideToast()
+      showSentToast(locale)
       setStatus(locale === "ja" ? "送信を許可しました。" : "Send allowed.")
     } else {
-      showToast(remaining, locale)
+      showPendingToast(remaining, locale)
     }
   }, 1000)
 }
@@ -286,10 +308,30 @@ function cancelPendingSend(locale: LocaleTag): void {
   setStatus(locale === "ja" ? "送信をキャンセルしました。" : "Send cancelled.")
 }
 
+/**
+ * Stand-in for jumping to the sent message.
+ *
+ * The emulator has no real mailbox, so this only reports the intent.
+ * In the Outlook host this would open the item in Sent Items.
+ */
+function openSentMail(locale: LocaleTag): void {
+  hideToast()
+  setStatus(
+    locale === "ja"
+      ? "送信済みメールを開きます(エミュレータではスタブ)。"
+      : "Opening the sent message (stub in the emulator).",
+  )
+}
+
 function closeReview(): void {
   stopTimer()
   query<HTMLElement>("#emu-dialog").hidden = true
   query<HTMLElement>("#emu-preview").replaceChildren()
+}
+
+/** Hide the dialog without discarding it, so Details can re-open it. */
+function hideReview(): void {
+  query<HTMLElement>("#emu-dialog").hidden = true
 }
 
 function openReview(): void {
@@ -335,11 +377,13 @@ function mountReview(model: ReviewModel, locale: LocaleTag): void {
       delaySeconds = seconds
     },
     onSend() {
-      // Pressing Send closes the dialog right away, so the user is not
-      // blocked. The wait then runs as a small corner toast that can
-      // be cancelled; the send is allowed when it reaches zero.
-      closeReview()
+      // Pressing Send hides the dialog right away, so the user is not
+      // blocked. The wait then runs as a small corner toast that can be
+      // cancelled or expanded back to details; the send is allowed when
+      // it reaches zero. 0 means send immediately.
+      hideReview()
       if (delaySeconds <= 0) {
+        showSentToast(locale)
         setStatus(locale === "ja" ? "送信を許可しました。" : "Send allowed.")
         return
       }
@@ -393,8 +437,8 @@ function renderShell(): void {
             </select>
           </label>
           <label>
-            Delay seconds
-            <input id="emu-delay" type="number" min="0" max="600" step="1" value="${defaultConfig.sendDelaySeconds}" />
+            Delay minutes
+            <input id="emu-delay" type="number" min="0" max="60" step="1" value="${defaultConfig.sendDelaySeconds / 60}" />
           </label>
         </div>
 
@@ -463,7 +507,11 @@ function renderShell(): void {
 
     <div id="emu-toast" class="ml-toast" role="status" aria-live="polite" hidden>
       <span id="emu-toast-text" class="ml-toast-text"></span>
-      <button id="emu-toast-cancel" class="ml-toast-cancel" type="button">Cancel</button>
+      <div class="ml-toast-actions">
+        <button id="emu-toast-details" class="ml-toast-button" type="button">Details</button>
+        <button id="emu-toast-open" class="ml-toast-button" type="button" hidden>Open sent mail</button>
+        <button id="emu-toast-cancel" class="ml-toast-button" type="button">Cancel</button>
+      </div>
     </div>
   `
 
@@ -488,8 +536,12 @@ function renderShell(): void {
   query<HTMLButtonElement>("#emu-review").addEventListener("click", runReview)
   query<HTMLButtonElement>("#emu-close").addEventListener("click", closeReview)
   query<HTMLElement>("[data-close-review]").addEventListener("click", closeReview)
+  query<HTMLButtonElement>("#emu-toast-details").addEventListener("click", openReview)
   query<HTMLButtonElement>("#emu-toast-cancel").addEventListener("click", () => {
     cancelPendingSend(query<HTMLSelectElement>("#emu-locale").value as LocaleTag)
+  })
+  query<HTMLButtonElement>("#emu-toast-open").addEventListener("click", () => {
+    openSentMail(query<HTMLSelectElement>("#emu-locale").value as LocaleTag)
   })
   for (const selector of ["#emu-subject", "#emu-to", "#emu-cc", "#emu-bcc", "#emu-attachments"]) {
     query<HTMLElement>(selector).addEventListener("input", updateDraftSummary)

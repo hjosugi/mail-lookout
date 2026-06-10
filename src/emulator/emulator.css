@@ -378,10 +378,17 @@ textarea {
 }
 
 .ml-toast-text {
+  flex: 1 1 auto;
   font-variant-numeric: tabular-nums;
 }
 
-.ml-toast-cancel {
+.ml-toast-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.ml-toast-button {
   flex: 0 0 auto;
   width: auto;
   border: 1px solid var(--ml-border);
@@ -393,6 +400,10 @@ textarea {
   padding: 5px 10px;
 }
 
-.ml-toast-cancel:hover {
+.ml-toast-button:hover {
   background: var(--ml-page);
+}
+
+.ml-toast-button[hidden] {
+  display: none;
 }

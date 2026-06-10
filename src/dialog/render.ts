@@ -343,38 +343,34 @@ function buildBodySection(
   return el("section", { className: "so-section" }, children)
 }
 
-/** The wait times offered in the dialog's delay control, in seconds. */
-const DELAY_PRESET_SECONDS: readonly number[] = [0, 30, 60, 120, 180, 300]
-
 /**
- * Build the "wait before sending" control.
+ * Build the "wait before sending" control: a free-form minutes input.
  *
- * It lets the user change the send delay right on the confirmation
- * screen. The model's current delay is always one of the options,
- * even if it is not a preset, and starts selected.
+ * The user types how many minutes to wait, right on the confirmation
+ * screen; 0 means send immediately. The model stores seconds, so we
+ * convert minutes on the way in and out.
  */
 function buildDelayControl(
   model: ReviewModel,
   messages: Messages,
   callbacks: DialogCallbacks,
 ): HTMLElement {
-  const options = [...new Set([...DELAY_PRESET_SECONDS, model.sendDelaySeconds])].sort(
-    (a, b) => a - b,
-  )
-  const select = el("select", { className: "so-delay-select" })
-  select.setAttribute("aria-label", messages.dialog.delayLabel)
-  for (const seconds of options) {
-    const option = el("option", { text: messages.dialog.delayValue(seconds) })
-    option.value = String(seconds)
-    option.selected = seconds === model.sendDelaySeconds
-    select.append(option)
-  }
-  select.addEventListener("change", () => {
-    callbacks.onDelayChange(Number(select.value))
+  const input = el("input", { type: "number", className: "so-delay-input" })
+  input.min = "0"
+  input.step = "1"
+  input.value = String(Math.round(model.sendDelaySeconds / 60))
+  input.setAttribute("aria-label", messages.dialog.delayLabel)
+  input.title = messages.dialog.delayImmediateHint
+  input.addEventListener("change", () => {
+    const raw = Number(input.value)
+    const minutes = Number.isFinite(raw) ? Math.max(0, Math.floor(raw)) : 0
+    input.value = String(minutes)
+    callbacks.onDelayChange(minutes * 60)
   })
   return el("div", { className: "so-delay" }, [
     el("span", { className: "so-delay-label", text: messages.dialog.delayLabel }),
-    select,
+    input,
+    el("span", { className: "so-delay-unit", text: messages.dialog.delayUnitMinutes }),
   ])
 }
 
