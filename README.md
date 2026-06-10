@@ -235,15 +235,23 @@ Be honest about what this is and is not.
 - **Outlook mobile is not supported.** Smart Alerts on send do not
   run there.
 
+## Disclaimer
+
+Use this add-in at your own risk. The authors and contributors are
+not responsible for any damages, losses, misdelivery, business
+interruption, or other liability arising from the use of, inability
+to use, deployment of, or modification of this software. Review the
+configuration and behavior before using it in a production
+environment.
+
 ### Relation to OutlookOkan
 
-[OutlookOkan](https://github.com/0xww/OutlookOkan) is a popular
-send-confirmation tool for classic Outlook. It is a VSTO/COM add-in
-that hooks the desktop application directly. That mechanism does
-**not** work on new Outlook, which is a different application built
-on web technology. A web Office Add-in, like this one, is the
-supported way to add send-time checks to new Outlook. The two tools
-solve the same problem for different hosts.
+[OutlookOkan](https://github.com/0xww/OutlookOkan) is an existing
+send-confirmation tool for Outlook. mail-lookout respects the work
+and the problem it addresses.
+
+mail-lookout is an independent project. It is not affiliated with,
+endorsed by, or sponsored by OutlookOkan or its author.
 
 ## Migrating to the unified manifest
 

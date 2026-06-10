@@ -231,15 +231,20 @@ npm run validate       # office-addin-manifest validate
 - **Outlook モバイルは非対応。** 送信時の Smart Alerts はそこでは
   動きません。
 
+## 免責
+
+本アドインは自己責任で使用してください。本ソフトウェアの使用、使用不能、
+導入、または改変に関連して生じたいかなる損害、損失、誤送信、業務中断、
+その他の責任についても、作者およびコントリビューターは責任を負いません。
+本番環境で使用する前に、設定と挙動を十分に確認してください。
+
 ### OutlookOkan との関係
 
-[OutlookOkan](https://github.com/0xww/OutlookOkan) はクラシック
-Outlook 向けの有名な送信確認ツールです。デスクトップアプリを直接
-フックする VSTO/COM アドインです。その仕組みは、Web 技術で作られた
-別アプリである新しい Outlook では**動きません**。本アドインのような
-Web の Office アドインが、新しい Outlook に送信時チェックを足す
-ための、サポートされた方法です。2 つのツールは、異なるホストで
-同じ問題を解いています。
+[OutlookOkan](https://github.com/0xww/OutlookOkan) は Outlook 向けの
+既存の送信確認ツールです。mail-lookout はそのツールの目的に敬意を持っています。
+
+mail-lookout は独立したプロジェクトです。OutlookOkan およびその作者と
+提携、関係、承認、後援を受けているものではありません。
 
 ## 統合マニフェストへの移行
 
