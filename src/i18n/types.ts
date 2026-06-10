@@ -51,6 +51,10 @@ export interface Messages {
     readonly confirm: string
     readonly empty: string
   }
+  readonly subject: {
+    readonly empty: string
+    readonly confirmEmpty: string
+  }
   readonly warnings: {
     readonly emptySubject: string
     readonly forgottenAttachment: string

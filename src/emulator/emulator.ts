@@ -438,6 +438,10 @@ function mountReview(model: ReviewModel, locale: LocaleTag): void {
       state = { ...state, confirmedAttachments: next }
       handle.setSendEnabled(canSend(model, state))
     },
+    onSubjectToggle(checked) {
+      state = { ...state, subjectConfirmed: checked }
+      handle.setSendEnabled(canSend(model, state))
+    },
     onBodyToggle(checked) {
       state = { ...state, bodyConfirmed: checked }
       handle.setSendEnabled(canSend(model, state))

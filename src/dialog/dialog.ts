@@ -85,6 +85,10 @@ function start(model: ReviewModel, locale: LocaleTag): void {
       state = { ...state, confirmedAttachments: next }
       refresh()
     },
+    onSubjectToggle(checked) {
+      state = { ...state, subjectConfirmed: checked }
+      refresh()
+    },
     onBodyToggle(checked) {
       state = { ...state, bodyConfirmed: checked }
       refresh()

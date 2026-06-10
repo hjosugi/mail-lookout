@@ -27,6 +27,7 @@ const model: ReviewModel = {
   externalEmails: ["ann@other.com", "cara@partner.test"],
   warnings: [{ kind: "externalRecipients", count: 2 }],
   sendDelaySeconds: 5,
+  requireSubjectConfirmation: false,
   requireRecipientConfirmation: true,
   requireAttachmentConfirmation: true,
   requireBodyConfirmation: true,

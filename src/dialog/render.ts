@@ -65,6 +65,7 @@ function el<K extends keyof HTMLElementTagNameMap>(
 export interface DialogCallbacks {
   readonly onRecipientToggle: (index: number, checked: boolean) => void
   readonly onAttachmentToggle: (index: number, checked: boolean) => void
+  readonly onSubjectToggle: (checked: boolean) => void
   readonly onBodyToggle: (checked: boolean) => void
   /** The user picked a different wait time before sending. */
   readonly onDelayChange: (seconds: number) => void
@@ -307,11 +308,24 @@ function buildAttachmentsSection(
 }
 
 /** Build the subject section. */
-function buildSubjectSection(model: ReviewModel, messages: Messages): HTMLElement {
-  return el("section", { className: "so-section" }, [
+function buildSubjectSection(
+  model: ReviewModel,
+  messages: Messages,
+  callbacks: DialogCallbacks,
+): HTMLElement {
+  const subjectText = model.subject.trim().length > 0 ? model.subject : messages.subject.empty
+  const children: Node[] = [
     el("h2", { className: "so-section-title", text: messages.sections.subject }),
-    el("p", { className: "so-subject", text: model.subject }),
-  ])
+    el("p", { className: "so-subject", text: subjectText }),
+  ]
+  if (model.requireSubjectConfirmation) {
+    children.push(
+      buildCheckbox(messages.subject.confirmEmpty, checked => {
+        callbacks.onSubjectToggle(checked)
+      }),
+    )
+  }
+  return el("section", { className: "so-section" }, children)
 }
 
 /** Build the body section. */
@@ -442,7 +456,7 @@ export function renderDialog(
   body.append(
     buildRecipientsSection(model, messages, callbacks),
     buildAttachmentsSection(model, messages, callbacks),
-    buildSubjectSection(model, messages),
+    buildSubjectSection(model, messages, callbacks),
     buildBodySection(model, messages, callbacks),
   )
 

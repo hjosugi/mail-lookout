@@ -27,9 +27,9 @@ This add-in does four things at send time.
 4. **Send delay.** It counts down a few seconds before the send
    button turns on. This is a pause to think, not a scheduled send.
 
-It also raises two soft warnings:
+It also raises two warnings:
 
-- **Empty subject.** A warning when the subject is blank.
+- **Empty subject.** Requires an explicit check when the subject is blank.
 - **Forgotten attachment.** A warning when the body mentions an
   attachment ("see attached", "添付") but no file is attached.
 

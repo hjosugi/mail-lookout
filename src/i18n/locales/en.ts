@@ -49,6 +49,10 @@ export const en: Messages = {
     confirm: "I checked the body",
     empty: "(No body text)",
   },
+  subject: {
+    empty: "(No subject)",
+    confirmEmpty: "Send without a subject",
+  },
   warnings: {
     emptySubject: "The subject is empty.",
     forgottenAttachment: "The body mentions an attachment, but no file is attached.",

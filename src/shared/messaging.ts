@@ -74,6 +74,7 @@ const reviewModelSchema = z.object({
   externalEmails: z.array(z.string()),
   warnings: z.array(warningSchema),
   sendDelaySeconds: z.number(),
+  requireSubjectConfirmation: z.boolean(),
   requireRecipientConfirmation: z.boolean(),
   requireAttachmentConfirmation: z.boolean(),
   requireBodyConfirmation: z.boolean(),

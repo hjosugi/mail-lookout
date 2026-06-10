@@ -63,6 +63,7 @@ describe("buildReviewModel", () => {
   it("raises an empty-subject warning when enabled and the subject is blank", () => {
     const model = buildReviewModel(snapshot({ subject: "  " }), defaultConfig)
     expect(model.warnings.some(w => w.kind === "emptySubject")).toBe(true)
+    expect(model.requireSubjectConfirmation).toBe(true)
   })
 
   it("does not raise an empty-subject warning when disabled", () => {
@@ -71,6 +72,7 @@ describe("buildReviewModel", () => {
       config({ warnOnEmptySubject: false }),
     )
     expect(model.warnings.some(w => w.kind === "emptySubject")).toBe(false)
+    expect(model.requireSubjectConfirmation).toBe(false)
   })
 
   it("raises a forgotten-attachment warning", () => {
@@ -124,6 +126,7 @@ describe("initialReviewState", () => {
   it("starts confirmations satisfied when they are not required", () => {
     const model = buildReviewModel(snapshot({}), config({ requireBodyConfirmation: false }))
     const state = initialReviewState(model)
+    expect(state.subjectConfirmed).toBe(true)
     expect(state.bodyConfirmed).toBe(true)
   })
 })
@@ -149,6 +152,15 @@ describe("canSend", () => {
     const model = modelWith({}, config({ sendDelaySeconds: 0 }))
     const state = initialReviewState(model)
     expect(canSend(model, state)).toBe(false)
+  })
+
+  it("allows an empty subject after explicit confirmation", () => {
+    const model = modelWith({ subject: " " }, config({ sendDelaySeconds: 0 }))
+    const initial = { ...initialReviewState(model), bodyConfirmed: true }
+    expect(canSend(model, initial)).toBe(false)
+
+    const confirmed = { ...initial, subjectConfirmed: true }
+    expect(canSend(model, confirmed)).toBe(true)
   })
 
   it("blocks until every attachment is confirmed one by one", () => {

@@ -59,6 +59,7 @@ export interface ReviewModel {
   readonly externalEmails: readonly string[]
   readonly warnings: readonly Warning[]
   readonly sendDelaySeconds: number
+  readonly requireSubjectConfirmation: boolean
   readonly requireRecipientConfirmation: boolean
   readonly requireAttachmentConfirmation: boolean
   readonly requireBodyConfirmation: boolean
@@ -103,7 +104,9 @@ export function buildReviewModel(snapshot: MessageSnapshot, config: Config): Rev
   const attachments = realAttachments(snapshot.attachments).map(toAttachmentView)
 
   const warnings: Warning[] = []
-  if (config.warnOnEmptySubject && isSubjectEmpty(snapshot)) {
+  const requireSubjectConfirmation = config.warnOnEmptySubject && isSubjectEmpty(snapshot)
+
+  if (requireSubjectConfirmation) {
     warnings.push({ kind: "emptySubject", count: 0 })
   }
   if (detectForgottenAttachment(snapshot, config.attachmentKeywords)) {
@@ -131,6 +134,7 @@ export function buildReviewModel(snapshot: MessageSnapshot, config: Config): Rev
     externalEmails,
     warnings,
     sendDelaySeconds,
+    requireSubjectConfirmation,
     requireRecipientConfirmation,
     requireAttachmentConfirmation,
     requireBodyConfirmation,
@@ -149,6 +153,7 @@ export interface ReviewState {
   readonly confirmedRecipients: ReadonlySet<number>
   /** Indices of attachments the user has confirmed one by one. */
   readonly confirmedAttachments: ReadonlySet<number>
+  readonly subjectConfirmed: boolean
   readonly bodyConfirmed: boolean
 }
 
@@ -161,6 +166,7 @@ export function initialReviewState(model: ReviewModel): ReviewState {
   return {
     confirmedRecipients: new Set<number>(),
     confirmedAttachments: new Set<number>(),
+    subjectConfirmed: !model.requireSubjectConfirmation,
     bodyConfirmed: !model.requireBodyConfirmation,
   }
 }
@@ -184,6 +190,9 @@ function allIndicesConfirmed(count: number, confirmed: ReadonlySet<number>): boo
  * of this gate; it runs after Send is pressed.
  */
 export function canSend(model: ReviewModel, state: ReviewState): boolean {
+  if (model.requireSubjectConfirmation && !state.subjectConfirmed) {
+    return false
+  }
   if (model.requireBodyConfirmation && !state.bodyConfirmed) {
     return false
   }

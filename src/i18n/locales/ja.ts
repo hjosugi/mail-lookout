@@ -49,6 +49,10 @@ export const ja: Messages = {
     confirm: "本文を確認しました",
     empty: "(本文がありません)",
   },
+  subject: {
+    empty: "(件名なし)",
+    confirmEmpty: "件名なしで送信する",
+  },
   warnings: {
     emptySubject: "件名が空です。",
     forgottenAttachment: "本文は添付ファイルの記載がありますが、ファイルが添付されていません。",
