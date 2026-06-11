@@ -347,6 +347,27 @@ body {
   font-weight: 600;
 }
 
+/* The compact pane shown while the review dialog is open or counting down. */
+.so-mini {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+
+.so-mini .so-taskpane-status {
+  padding: 0;
+  border-top: 0;
+  color: var(--so-fg);
+  font-variant-numeric: tabular-nums;
+}
+
+.so-mini-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .so-delay {
   display: flex;
   align-items: center;
