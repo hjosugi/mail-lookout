@@ -73,7 +73,10 @@ export interface Messages {
     readonly confirm: string
     /** Shown while the post-confirm countdown is running. */
     readonly holding: string
-    readonly confirmed: string
+    /** Shown when the add-in programmatically sends the item. */
+    readonly sending: string
+    /** Shown when the programmatic send fails. */
+    readonly sendFailed: string
     readonly loadFailed: string
   }
   readonly cancel: {

@@ -68,9 +68,10 @@ export const en: Messages = {
   taskPane: {
     title: "Confirm before sending",
     intro: "Check the required items. After confirming, press Outlook's Send button again.",
-    confirm: "Mark as reviewed",
+    confirm: "Confirm & send",
     holding: "Waiting to send…",
-    confirmed: "Reviewed. Press Outlook's Send button again.",
+    sending: "Sending…",
+    sendFailed: "Couldn't send. Please try again.",
     loadFailed: "The review pane could not load. Return to your draft and review it.",
   },
   cancel: {

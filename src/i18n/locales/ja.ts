@@ -67,9 +67,10 @@ export const ja: Messages = {
   taskPane: {
     title: "送信前の確認",
     intro: "必要な項目をチェックしてください。確認後、Outlook の送信ボタンをもう一度押します。",
-    confirm: "確認済みにする",
+    confirm: "確認して送信",
     holding: "送信待機中です…",
-    confirmed: "確認済みです。Outlook の送信ボタンをもう一度押してください。",
+    sending: "送信しています…",
+    sendFailed: "送信できませんでした。もう一度お試しください。",
     loadFailed: "確認画面を読み込めませんでした。下書きに戻って内容を確認してください。",
   },
   cancel: {

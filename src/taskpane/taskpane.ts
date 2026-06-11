@@ -72,15 +72,23 @@ function start(model: ReviewModel, fingerprint: string, locale: LocaleTag, root:
     handle?.setSendEnabled(canSend(model, state))
   }
 
-  // Confirm the review: stop the wait, record it so the next unchanged
-  // Send passes the Smart Alerts check, and drop the saved progress.
+  // Confirm the review and send. Everything that mutates state must run
+  // before sendAsync: that call re-fires OnMessageSend, which sees the
+  // recorded confirmation and allows the send through. Per the API, code
+  // after sendAsync is not guaranteed to run, so only handle failure.
   const confirmReview = (): void => {
     stopTimer()
     deadline = null
     handle?.setSending(null)
     rememberConfirmation(fingerprint)
     clearProgress()
-    status.textContent = baseMessages.taskPane.confirmed
+    status.textContent = baseMessages.taskPane.sending
+    const item = Office.context.mailbox.item as Office.MessageCompose
+    item.sendAsync({}, result => {
+      if (result.status === Office.AsyncResultStatus.Failed) {
+        status.textContent = baseMessages.taskPane.sendFailed
+      }
+    })
   }
 
   // One countdown step, driven by the wall-clock deadline so closing and
