@@ -102,7 +102,7 @@ describe("Smart Alerts message", () => {
     const message = buildSmartAlertMessage(model, locales.ja, true)
 
     expect(message.length).toBeLessThanOrEqual(500)
-    expect(message).toContain("もう一度送信")
+    expect(message).toContain(locales.ja.dialog.title)
     // The alert stays short: message body detail lives in the review pane,
     // so it must not dump the subject or body into the built-in dialog.
     expect(message).not.toContain("本文:")
@@ -113,9 +113,9 @@ describe("Smart Alerts message", () => {
     const options = smartAlertCancelOptions(model, "en")
 
     expect(options.allowEvent).toBe(false)
-    expect(options.errorMessage).toContain("press Send again")
+    expect(options.errorMessage).toContain("Confirm before sending")
     expect(options.errorMessageMarkdown).toContain("**Confirm before sending**")
-    expect(options.cancelLabel).toBe("Open review")
+    expect(options.cancelLabel).toBe("Review")
     expect(options.commandId).toBe(REVIEW_PANE_COMMAND_ID)
   })
 

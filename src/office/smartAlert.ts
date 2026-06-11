@@ -108,7 +108,6 @@ export function buildSmartAlertMessage(
   const title = markdown ? strong(messages.dialog.title) : messages.dialog.title
   const lines = [
     title,
-    messages.smartAlert.sendAgain,
     warnings.length > 0 ? `${messages.smartAlert.warnings}: ${warnings.join(" / ")}` : "",
   ].filter(line => line.length > 0)
 

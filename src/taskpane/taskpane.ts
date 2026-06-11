@@ -105,6 +105,7 @@ function start(model: ReviewModel, fingerprint: string, locale: LocaleTag): void
           return
         }
         let remaining = delaySeconds
+        status.textContent = baseMessages.taskPane.holding
         handle.setSending(remaining)
         timer = window.setInterval(() => {
           remaining -= 1

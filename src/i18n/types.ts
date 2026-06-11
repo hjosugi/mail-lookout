@@ -71,6 +71,8 @@ export interface Messages {
     readonly title: string
     readonly intro: string
     readonly confirm: string
+    /** Shown while the post-confirm countdown is running. */
+    readonly holding: string
     readonly confirmed: string
     readonly loadFailed: string
   }

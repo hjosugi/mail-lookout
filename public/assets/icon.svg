@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  mail-lookout add-in icon source.
+
+  A black rounded tile with a white check. Black (not blue) so the icon
+  reads as a mark, not a clickable button. Rasterized to the icon-*.png
+  sizes the manifest references with: rsvg-convert -w N -h N icon.svg.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
+  <rect x="3" y="3" width="74" height="74" rx="16" fill="#1f1f1f"/>
+  <path d="M22 41.5 L34 53 L58 27.5" fill="none" stroke="#ffffff"
+        stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

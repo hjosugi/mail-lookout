@@ -84,6 +84,12 @@ export interface DialogHandle {
 export interface DialogRenderOptions {
   readonly showBackButton?: boolean
   readonly showDelayControl?: boolean
+  /**
+   * Show the back button only while the countdown is running (as Cancel),
+   * not at rest. The task pane uses this: "back to edit" has nowhere to go
+   * there, but a cancel during the wait does.
+   */
+  readonly cancelDuringSendOnly?: boolean
 }
 
 /** Map a warning to its text. Exhaustive over WarningKind. */
@@ -408,6 +414,7 @@ export function renderDialog(
   inputCounter = 0
   const showBackButton = options.showBackButton ?? true
   const showDelayControl = options.showDelayControl ?? true
+  const cancelDuringSendOnly = options.cancelDuringSendOnly ?? false
 
   let baseEnabled = false
   // Non-null while the post-click send countdown is running. Send is
@@ -436,6 +443,9 @@ export function renderDialog(
     // While sending, the back button is the cancel: make it read as a
     // stop action, not a neutral one.
     backBtn.classList.toggle("so-button-danger", sending)
+    // In cancel-only mode the back button is hidden until the countdown
+    // runs, so it never shows a pointless "back to edit" at rest.
+    backBtn.hidden = cancelDuringSendOnly && !sending
   }
 
   sendBtn.addEventListener("click", () => {

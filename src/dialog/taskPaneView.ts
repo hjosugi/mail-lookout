@@ -20,6 +20,7 @@ import type { Messages } from "../i18n/types"
 export const taskPaneRenderOptions: DialogRenderOptions = {
   showBackButton: true,
   showDelayControl: true,
+  cancelDuringSendOnly: true,
 }
 
 /**
