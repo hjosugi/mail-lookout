@@ -10,17 +10,6 @@ export const en: Messages = {
     cancelSend: "Cancel",
     sendingInSeconds: seconds => `Sending in ${seconds}s…`,
     delayLabel: "Wait before sending",
-    delayValue: seconds => {
-      if (seconds <= 0) {
-        return "No delay"
-      }
-      if (seconds < 60) {
-        return `${seconds}s`
-      }
-      const minutes = Math.floor(seconds / 60)
-      const rest = seconds % 60
-      return rest === 0 ? `${minutes} min` : `${minutes} min ${rest}s`
-    },
     delayUnitMinutes: "min",
     delayImmediateHint: "0 = send immediately",
   },
@@ -62,7 +51,6 @@ export const en: Messages = {
   smartAlert: {
     sendAgain: "Open the review pane and check the required items. Then press Send again.",
     warnings: "Warnings",
-    moreItems: count => `${count} more`,
     openReview: "Review",
   },
   taskPane: {

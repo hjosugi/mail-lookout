@@ -101,7 +101,6 @@ describe("locale completeness", () => {
       const messages = getMessages(tag)
 
       expect(messages.dialog.sendingInSeconds(7)).toContain("7")
-      expect(messages.dialog.delayValue(180)).toContain("3")
 
       for (const count of [1, 3]) {
         const external = messages.warnings.externalRecipients(count)

@@ -19,8 +19,6 @@ export interface Messages {
     readonly sendingInSeconds: (seconds: number) => string
     /** Label for the send-delay control shown in the dialog. */
     readonly delayLabel: string
-    /** Human-readable name for a delay duration, e.g. "3 min" or "遅延なし". */
-    readonly delayValue: (seconds: number) => string
     /** Unit shown next to the minutes delay input, e.g. "min" or "分". */
     readonly delayUnitMinutes: string
     /** Hint that entering 0 sends immediately. */
@@ -64,7 +62,6 @@ export interface Messages {
     /** Tell the user that the next unchanged send attempt confirms the review. */
     readonly sendAgain: string
     readonly warnings: string
-    readonly moreItems: (count: number) => string
     readonly openReview: string
   }
   readonly taskPane: {

@@ -10,17 +10,6 @@ export const ja: Messages = {
     cancelSend: "キャンセル",
     sendingInSeconds: seconds => `${seconds} 秒後に送信…`,
     delayLabel: "送信までの待ち時間",
-    delayValue: seconds => {
-      if (seconds <= 0) {
-        return "遅延なし"
-      }
-      if (seconds < 60) {
-        return `${seconds}秒`
-      }
-      const minutes = Math.floor(seconds / 60)
-      const rest = seconds % 60
-      return rest === 0 ? `${minutes}分` : `${minutes}分${rest}秒`
-    },
     delayUnitMinutes: "分",
     delayImmediateHint: "0 で即時送信",
   },
@@ -61,7 +50,6 @@ export const ja: Messages = {
   smartAlert: {
     sendAgain: "確認を開いて必要な項目をチェックしてください。確認後、もう一度送信を押します。",
     warnings: "警告",
-    moreItems: count => `ほか ${count} 件`,
     openReview: "確認する",
   },
   taskPane: {
