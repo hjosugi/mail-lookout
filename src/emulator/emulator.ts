@@ -5,13 +5,10 @@ import type { ReviewModel, ReviewState } from "../domain/review"
 import type { Attachment, FieldRecipient, MessageSnapshot, RecipientField } from "../domain/types"
 import { getMessages } from "../i18n/catalog"
 import type { LocaleTag } from "../i18n/catalog"
-import { renderDialog, type DialogHandle } from "../dialog/render"
+import { renderDialog } from "../dialog/render"
 import { taskPaneMessages } from "../dialog/taskPaneView"
-import { getEmulatorMessages, type EmulatorMessages } from "./messages"
+import { getEmulatorMessages } from "./messages"
 import "./emulator.css"
-
-/** How the review UI is presented: the popup dialog or the Outlook task pane. */
-type Presentation = "dialog" | "taskpane"
 
 interface Scenario {
   readonly id: string
@@ -95,14 +92,8 @@ function firstScenario(): Scenario {
   return scenario
 }
 
+// Drives the post-confirm countdown shown in the result panel.
 let currentTimer: number | null = null
-// The handle for the dialog currently mounted in the preview, so the
-// pending-send countdown can drive it into its cancel-only "sending"
-// state (and keep Send disabled, which is what stops a double send).
-let activeHandle: DialogHandle | null = null
-// Auto-dismiss timer for a terminal toast (accepted / cancelled), which
-// lingers a few seconds so the outcome is visible, then clears itself.
-let toastTimer: number | null = null
 
 function recipient(
   field: RecipientField,
@@ -127,11 +118,6 @@ function query<T extends HTMLElement>(selector: string, root: ParentNode = docum
 /** The locale currently selected in the emulator form. */
 function currentLocale(): LocaleTag {
   return query<HTMLSelectElement>("#emu-locale").value as LocaleTag
-}
-
-/** The presentation currently selected in the emulator form. */
-function currentPresentation(): Presentation {
-  return query<HTMLSelectElement>("#emu-presentation").value as Presentation
 }
 
 function parseRecipientLine(field: RecipientField, line: string): FieldRecipient | null {
@@ -258,13 +244,6 @@ function stopTimer(): void {
 }
 
 /** Clear the auto-dismiss timer for a terminal toast. */
-function clearToastTimer(): void {
-  if (toastTimer !== null) {
-    window.clearTimeout(toastTimer)
-    toastTimer = null
-  }
-}
-
 function setStatus(text: string): void {
   query<HTMLElement>("#emu-status").textContent = text
 }
@@ -276,222 +255,179 @@ function formatCountdown(totalSeconds: number): string {
   return minutes > 0 ? `${minutes}:${String(seconds).padStart(2, "0")}` : `${seconds}s`
 }
 
-// The toast is driven by a single state value. Adding a state is a new
-// variant plus one `toastView` case — no new show/hide function.
-type ToastState =
-  | { readonly kind: "pending"; readonly remaining: number }
-  | { readonly kind: "accepted" }
-  | { readonly kind: "cancelled" }
-
-/** The toast's action buttons, each mapped to the element it drives. */
-type ToastAction = "details" | "open"
-const TOAST_ACTIONS: readonly ToastAction[] = ["details", "open"]
-const TOAST_ACTION_ELEMENT: Record<ToastAction, string> = {
-  details: "#emu-toast-details",
-  open: "#emu-toast-open",
+/** Replace the result panel with the draft summary card. */
+function renderDraft(): void {
+  const messages = getEmulatorMessages(currentLocale())
+  const card = document.createElement("div")
+  card.className = "ml-result-card"
+  const label = document.createElement("span")
+  label.className = "ml-result-label"
+  label.textContent = messages.draft.label
+  const subject = document.createElement("strong")
+  subject.id = "emu-result-subject"
+  const meta = document.createElement("span")
+  meta.id = "emu-result-meta"
+  card.append(label, subject, meta)
+  query<HTMLElement>("#emu-result-body").replaceChildren(card)
+  updateDraftSummary()
 }
 
-/** What the toast shows for a state: its text, which buttons, and whether it self-dismisses. */
-interface ToastView {
-  readonly text: string
-  readonly actions: readonly ToastAction[]
-  readonly autoDismissMs: number | null
+/** A button shown under the mini countdown. */
+interface MiniButton {
+  readonly label: string
+  readonly kind: "secondary" | "danger"
+  readonly onClick: () => void
 }
 
-function toastView(state: ToastState, messages: EmulatorMessages): ToastView {
-  switch (state.kind) {
-    case "pending":
-      return {
-        text: messages.toast.sendingIn(formatCountdown(state.remaining)),
-        actions: ["details"],
-        autoDismissMs: null,
-      }
-    case "accepted":
-      return { text: messages.toast.accepted, actions: ["open"], autoDismissMs: null }
-    case "cancelled":
-      return { text: messages.toast.cancelled, actions: [], autoDismissMs: 4000 }
-  }
-}
-
-function toastActionLabel(action: ToastAction, messages: EmulatorMessages): string {
-  switch (action) {
-    case "details":
-      return messages.toast.details
-    case "open":
-      return messages.toast.openSent
-  }
-}
-
-/** Render the toast for a state; buttons not in the state's actions are hidden. */
-function showToast(state: ToastState, locale: LocaleTag): void {
-  clearToastTimer()
-  const messages = getEmulatorMessages(locale)
-  const view = toastView(state, messages)
-  query<HTMLElement>("#emu-toast-text").textContent = view.text
-  for (const action of TOAST_ACTIONS) {
-    const button = query<HTMLElement>(TOAST_ACTION_ELEMENT[action])
-    button.textContent = toastActionLabel(action, messages)
-    button.hidden = !view.actions.includes(action)
-  }
-  query<HTMLElement>("#emu-toast").hidden = false
-  if (view.autoDismissMs !== null) {
-    toastTimer = window.setTimeout(hideToast, view.autoDismissMs)
-  }
-}
-
-function hideToast(): void {
-  clearToastTimer()
-  query<HTMLElement>("#emu-toast").hidden = true
-}
-
-/**
- * Run the post-Send wait as a small corner toast.
- *
- * The dialog is hidden by the time this runs, so the user is free to
- * keep editing. The toast counts down with a Details button (re-open
- * the dialog) and a Cancel button; when it reaches zero the send is
- * allowed and the toast offers a link to the sent mail.
- */
-function startPendingSend(seconds: number, locale: LocaleTag): void {
-  stopTimer()
-  let remaining = seconds
-  showToast({ kind: "pending", remaining }, locale)
-  // Drive the (hidden) dialog into its "sending" state so that, if the
-  // user re-opens it from the toast, Send is disabled and the back
-  // button is the cancel. That disabled Send is what prevents a second
-  // send while one is already pending.
-  activeHandle?.setSending(remaining)
-  currentTimer = window.setInterval(() => {
-    remaining -= 1
-    if (remaining <= 0) {
-      stopTimer()
-      activeHandle?.setSending(null)
-      // Dismiss the details view if it is open: the send is done, so
-      // there must be no live dialog left that could send again.
-      hideReview()
-      showToast({ kind: "accepted" }, locale)
-      setStatus(getEmulatorMessages(locale).status.accepted)
-    } else {
-      showToast({ kind: "pending", remaining }, locale)
-      activeHandle?.setSending(remaining)
+/** Replace the result panel with a status line and optional buttons. */
+function renderMini(text: string, buttons: readonly MiniButton[]): void {
+  const wrap = document.createElement("div")
+  wrap.className = "so-mini"
+  const status = document.createElement("p")
+  status.className = "so-taskpane-status"
+  status.textContent = text
+  wrap.append(status)
+  if (buttons.length > 0) {
+    const row = document.createElement("div")
+    row.className = "so-mini-actions"
+    for (const button of buttons) {
+      const node = document.createElement("button")
+      node.type = "button"
+      node.className = `so-button so-button-${button.kind}`
+      node.textContent = button.label
+      node.addEventListener("click", button.onClick)
+      row.append(node)
     }
-  }, 1000)
-}
-
-function cancelPendingSend(locale: LocaleTag): void {
-  if (currentTimer === null) {
-    return
+    wrap.append(row)
   }
-  // Cancel stops the send and returns to the draft to redo, with a brief
-  // toast so the cancel is visibly confirmed.
-  closeReview()
-  showToast({ kind: "cancelled" }, locale)
-  setStatus(getEmulatorMessages(locale).status.cancelled)
+  query<HTMLElement>("#emu-result-body").replaceChildren(wrap)
 }
 
-/**
- * Stand-in for jumping to the sent message.
- *
- * The emulator has no real mailbox, so this only reports the intent.
- * In the Outlook host this would open the item in Sent Items.
- */
-function openSentMail(locale: LocaleTag): void {
-  hideToast()
-  setStatus(getEmulatorMessages(locale).status.openingSentStub)
+function openModal(): void {
+  query<HTMLElement>("#emu-dialog").hidden = false
 }
 
-function closeReview(): void {
-  stopTimer()
-  activeHandle?.setSending(null)
+function closeModal(): void {
   query<HTMLElement>("#emu-dialog").hidden = true
   query<HTMLElement>("#emu-preview").replaceChildren()
 }
 
-/** Hide the dialog without discarding it, so Details can re-open it. */
-function hideReview(): void {
-  query<HTMLElement>("#emu-dialog").hidden = true
-}
-
-function openReview(): void {
-  query<HTMLElement>("#emu-dialog").hidden = false
+/**
+ * Run the post-confirm countdown in the result panel.
+ *
+ * This stands in for the Outlook task pane: the review dialog has closed,
+ * the wait counts down here, and at zero the message is "sent" (the real
+ * add-in calls item.sendAsync). Cancel abandons it; Back reopens review.
+ */
+function startMini(seconds: number, model: ReviewModel, locale: LocaleTag): void {
+  stopTimer()
+  const emu = getEmulatorMessages(locale)
+  if (seconds <= 0) {
+    setStatus(emu.mini.sent)
+    renderMini(emu.mini.sent, [])
+    return
+  }
+  let remaining = seconds
+  const show = (): void => {
+    renderMini(emu.mini.holding(formatCountdown(remaining)), [
+      {
+        label: emu.mini.backToReview,
+        kind: "secondary",
+        onClick: () => {
+          stopTimer()
+          openReviewModal(model, locale)
+        },
+      },
+      {
+        label: emu.mini.cancel,
+        kind: "danger",
+        onClick: () => {
+          stopTimer()
+          setStatus(emu.status.ready)
+          renderDraft()
+        },
+      },
+    ])
+  }
+  show()
+  currentTimer = window.setInterval(() => {
+    remaining -= 1
+    if (remaining <= 0) {
+      stopTimer()
+      setStatus(emu.mini.sent)
+      renderMini(emu.mini.sent, [])
+    } else {
+      show()
+    }
+  }, 1000)
 }
 
 /**
- * Mount the review.
- *
- * Both presentations run the same flow — checklist, send-delay control,
- * and a cancellable countdown that runs in a corner toast after Send so
- * the surface closes right away. The task pane only differs in its narrow
- * window styling and task-pane heading copy.
+ * Open the review in the roomy modal — the emulator's stand-in for the
+ * Outlook dialog the task pane launches. Confirming closes it and hands
+ * off to the result-panel countdown.
  */
-function mountReview(model: ReviewModel, locale: LocaleTag, asTaskPane: boolean): void {
+function openReviewModal(model: ReviewModel, locale: LocaleTag): void {
   stopTimer()
-  hideToast()
-  const preview = query<HTMLElement>("#emu-preview")
-  query<HTMLElement>(".ml-dialog-window").classList.toggle("ml-dialog-window--taskpane", asTaskPane)
-  const messages = asTaskPane ? taskPaneMessages(getMessages(locale)) : getMessages(locale)
+  const messages = taskPaneMessages(getMessages(locale))
   let state: ReviewState = initialReviewState(model)
-  // The wait before sending starts from the model but can be changed
-  // on the dialog, so it lives in the controller.
   let delaySeconds = model.sendDelaySeconds
 
-  const handle = renderDialog(model, messages, {
-    onRecipientToggle(index, checked) {
-      const next = new Set(state.confirmedRecipients)
-      if (checked) {
-        next.add(index)
-      } else {
-        next.delete(index)
-      }
-      state = { ...state, confirmedRecipients: next }
-      handle.setSendEnabled(canSend(model, state))
+  const handle = renderDialog(
+    model,
+    messages,
+    {
+      onRecipientToggle(index, checked) {
+        const next = new Set(state.confirmedRecipients)
+        if (checked) {
+          next.add(index)
+        } else {
+          next.delete(index)
+        }
+        state = { ...state, confirmedRecipients: next }
+        handle.setSendEnabled(canSend(model, state))
+      },
+      onAttachmentToggle(index, checked) {
+        const next = new Set(state.confirmedAttachments)
+        if (checked) {
+          next.add(index)
+        } else {
+          next.delete(index)
+        }
+        state = { ...state, confirmedAttachments: next }
+        handle.setSendEnabled(canSend(model, state))
+      },
+      onSubjectToggle(checked) {
+        state = { ...state, subjectConfirmed: checked }
+        handle.setSendEnabled(canSend(model, state))
+      },
+      onBodyToggle(checked) {
+        state = { ...state, bodyConfirmed: checked }
+        handle.setSendEnabled(canSend(model, state))
+      },
+      onDelayChange(seconds) {
+        delaySeconds = seconds
+      },
+      onSend() {
+        // Confirm: close the dialog and run the countdown in the result
+        // panel, which "sends" when it reaches zero.
+        closeModal()
+        startMini(delaySeconds, model, locale)
+      },
+      onCancelSend() {
+        // No countdown runs inside the dialog.
+      },
+      onBack() {
+        closeModal()
+        setStatus(getEmulatorMessages(locale).status.ready)
+        renderDraft()
+      },
     },
-    onAttachmentToggle(index, checked) {
-      const next = new Set(state.confirmedAttachments)
-      if (checked) {
-        next.add(index)
-      } else {
-        next.delete(index)
-      }
-      state = { ...state, confirmedAttachments: next }
-      handle.setSendEnabled(canSend(model, state))
-    },
-    onSubjectToggle(checked) {
-      state = { ...state, subjectConfirmed: checked }
-      handle.setSendEnabled(canSend(model, state))
-    },
-    onBodyToggle(checked) {
-      state = { ...state, bodyConfirmed: checked }
-      handle.setSendEnabled(canSend(model, state))
-    },
-    onDelayChange(seconds) {
-      delaySeconds = seconds
-    },
-    onSend() {
-      // Pressing Send hides the dialog right away, so the user is not
-      // blocked. The wait then runs as a small corner toast that can be
-      // cancelled or expanded back to details; the send is allowed when
-      // it reaches zero. 0 means send immediately.
-      hideReview()
-      if (delaySeconds <= 0) {
-        showToast({ kind: "accepted" }, locale)
-        setStatus(getEmulatorMessages(locale).status.accepted)
-        return
-      }
-      startPendingSend(delaySeconds, locale)
-    },
-    onCancelSend() {
-      cancelPendingSend(locale)
-    },
-    onBack() {
-      setStatus(getEmulatorMessages(locale).status.backToDraft)
-      closeReview()
-    },
-  })
+    { showDelayControl: true, showBackButton: true, initialState: state },
+  )
 
-  activeHandle = handle
-  preview.replaceChildren(handle.element)
-  openReview()
+  query<HTMLElement>("#emu-preview").replaceChildren(handle.element)
+  openModal()
   handle.setSendEnabled(canSend(model, state))
 }
 
@@ -499,7 +435,7 @@ function runReview(): void {
   const config = configFromForm()
   const model = buildReviewModel(snapshotFromForm(), config)
   setStatus(getEmulatorMessages(config.fallbackLocale).status.reviewing)
-  mountReview(model, config.fallbackLocale, currentPresentation() === "taskpane")
+  openReviewModal(model, config.fallbackLocale)
 }
 
 function renderShell(): void {
@@ -526,13 +462,6 @@ function renderShell(): void {
             <select id="emu-locale">
               <option value="en">English</option>
               <option value="ja">日本語</option>
-            </select>
-          </label>
-          <label>
-            Presentation
-            <select id="emu-presentation">
-              <option value="dialog">Dialog (popup)</option>
-              <option value="taskpane">Task pane</option>
             </select>
           </label>
           <label>
@@ -583,13 +512,7 @@ function renderShell(): void {
           <h2 id="emu-preview-title">Result</h2>
           <div id="emu-status" class="ml-status" role="status">Ready.</div>
         </header>
-        <div class="ml-result-body">
-          <div class="ml-result-card">
-            <span class="ml-result-label">Current draft</span>
-            <strong id="emu-result-subject"></strong>
-            <span id="emu-result-meta"></span>
-          </div>
-        </div>
+        <div class="ml-result-body" id="emu-result-body"></div>
       </section>
     </main>
 
@@ -603,14 +526,6 @@ function renderShell(): void {
         <div id="emu-preview" class="ml-preview"></div>
       </section>
     </div>
-
-    <div id="emu-toast" class="ml-toast" role="status" aria-live="polite" hidden>
-      <span id="emu-toast-text" class="ml-toast-text"></span>
-      <div class="ml-toast-actions">
-        <button id="emu-toast-details" class="ml-toast-button" type="button">Details</button>
-        <button id="emu-toast-open" class="ml-toast-button" type="button" hidden>Open sent mail</button>
-      </div>
-    </div>
   `
 
   const scenarioSelect = query<HTMLSelectElement>("#emu-scenario")
@@ -623,41 +538,46 @@ function renderShell(): void {
 
   scenarioSelect.value = initialScenario.id
   fillForm(initialScenario.snapshot)
-  updateDraftSummary()
+  renderDraft()
   setStatus(getEmulatorMessages(currentLocale()).status.ready)
+
+  // Closing the dialog (button or backdrop) abandons the review and goes
+  // back to the draft.
+  const closeToDraft = (): void => {
+    stopTimer()
+    closeModal()
+    setStatus(getEmulatorMessages(currentLocale()).status.ready)
+    renderDraft()
+  }
+
   scenarioSelect.addEventListener("change", () => {
     const selected = scenarios.find(scenario => scenario.id === scenarioSelect.value)
     if (selected) {
       fillForm(selected.snapshot)
-      updateDraftSummary()
+      renderDraft()
     }
   })
   query<HTMLButtonElement>("#emu-review").addEventListener("click", runReview)
-  // Re-localise the draft summary when the language changes.
-  query<HTMLSelectElement>("#emu-locale").addEventListener("change", updateDraftSummary)
-  // Close just dismisses the dialog; a pending countdown keeps running
-  // in the toast and can be re-opened with Details. Cancelling the send
-  // is the dialog's own (red) cancel button while it is sending.
-  query<HTMLButtonElement>("#emu-close").addEventListener("click", hideReview)
-  query<HTMLElement>("[data-close-review]").addEventListener("click", hideReview)
-  query<HTMLButtonElement>("#emu-toast-details").addEventListener("click", openReview)
-  query<HTMLButtonElement>("#emu-toast-open").addEventListener("click", () => {
-    openSentMail(currentLocale())
-  })
+  query<HTMLSelectElement>("#emu-locale").addEventListener("change", renderDraft)
+  query<HTMLButtonElement>("#emu-close").addEventListener("click", closeToDraft)
+  query<HTMLElement>("[data-close-review]").addEventListener("click", closeToDraft)
   for (const selector of ["#emu-subject", "#emu-to", "#emu-cc", "#emu-bcc", "#emu-attachments"]) {
     query<HTMLElement>(selector).addEventListener("input", updateDraftSummary)
   }
 }
 
+/** Refresh the draft card's text, if it's the panel currently shown. */
 function updateDraftSummary(): void {
+  const subjectEl = document.getElementById("emu-result-subject")
+  const metaEl = document.getElementById("emu-result-meta")
+  if (!subjectEl || !metaEl) {
+    return
+  }
   const messages = getEmulatorMessages(currentLocale())
   const snapshot = snapshotFromForm()
-  const subject = snapshot.subject.trim().length > 0 ? snapshot.subject : messages.draft.noSubject
-  query<HTMLElement>("#emu-result-subject").textContent = subject
-  query<HTMLElement>("#emu-result-meta").textContent = messages.draft.summary(
-    snapshot.recipients.length,
-    snapshot.attachments.length,
-  )
+  subjectEl.textContent =
+    snapshot.subject.trim().length > 0 ? snapshot.subject : messages.draft.noSubject
+  metaEl.textContent = messages.draft.summary(snapshot.recipients.length, snapshot.attachments.length)
 }
 
 renderShell()

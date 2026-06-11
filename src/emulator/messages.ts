@@ -14,24 +14,24 @@ export interface EmulatorMessages {
   readonly status: {
     readonly ready: string
     readonly reviewing: string
-    readonly accepted: string
-    readonly cancelled: string
-    readonly backToDraft: string
-    readonly openingSentStub: string
   }
   /** The draft summary card. */
   readonly draft: {
+    readonly label: string
     readonly noSubject: string
     readonly summary: (recipients: number, attachments: number) => string
   }
-  /** The post-send corner toast. */
-  readonly toast: {
+  /**
+   * The mini countdown shown in the result panel after the review is
+   * confirmed — the emulator's stand-in for the Outlook task pane that
+   * counts down and then sends with item.sendAsync.
+   */
+  readonly mini: {
     /** Countdown line; the value is a pre-formatted "M:SS" or "Ns". */
-    readonly sendingIn: (remaining: string) => string
-    readonly details: string
-    readonly accepted: string
-    readonly openSent: string
-    readonly cancelled: string
+    readonly holding: (remaining: string) => string
+    readonly sent: string
+    readonly cancel: string
+    readonly backToReview: string
   }
 }
 
@@ -39,21 +39,17 @@ const en: EmulatorMessages = {
   status: {
     ready: "Ready.",
     reviewing: "Reviewing draft.",
-    accepted: "Send accepted.",
-    cancelled: "Send cancelled. Back to draft.",
-    backToDraft: "Back to draft selected.",
-    openingSentStub: "Opening the sent message (stub in the emulator).",
   },
   draft: {
+    label: "Current draft",
     noSubject: "(No subject)",
     summary: (recipients, attachments) => `${recipients} recipients, ${attachments} attachments`,
   },
-  toast: {
-    sendingIn: remaining => `Sending in ${remaining}`,
-    details: "Details",
-    accepted: "Send accepted",
-    openSent: "Open sent mail",
-    cancelled: "Send cancelled",
+  mini: {
+    holding: remaining => `Waiting to send… ${remaining}`,
+    sent: "Sent.",
+    cancel: "Cancel",
+    backToReview: "Back to review",
   },
 }
 
@@ -61,21 +57,17 @@ const ja: EmulatorMessages = {
   status: {
     ready: "準備完了。",
     reviewing: "確認中です。",
-    accepted: "送信を受け付けました。",
-    cancelled: "送信をキャンセルしました。下書きに戻ります。",
-    backToDraft: "編集に戻る判定です。",
-    openingSentStub: "送信済みメールを開きます(エミュレータではスタブ)。",
   },
   draft: {
+    label: "現在の下書き",
     noSubject: "(件名なし)",
     summary: (recipients, attachments) => `宛先 ${recipients} 件、添付 ${attachments} 件`,
   },
-  toast: {
-    sendingIn: remaining => `あと ${remaining} で送信します`,
-    details: "詳細",
-    accepted: "送信を受け付けました",
-    openSent: "送信済みを開く",
-    cancelled: "送信をキャンセルしました",
+  mini: {
+    holding: remaining => `送信待機中… ${remaining}`,
+    sent: "送信しました。",
+    cancel: "キャンセル",
+    backToReview: "確認に戻る",
   },
 }
 
