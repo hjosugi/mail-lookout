@@ -101,13 +101,16 @@ export function buildSmartAlertMessage(
   messages: Messages,
   markdown: boolean,
 ): string {
-  // Keep the built-in alert short: a prompt to open the review plus a line
-  // for any warnings. The recipient, attachment, subject, and body detail
-  // lives in the review pane, not here.
+  // Keep the built-in alert short: a one-line prompt to open the review,
+  // plus a line for any warnings. The recipient, attachment, subject, and
+  // body detail lives in the review pane, not here. The prompt line must
+  // stay: a title-only message makes Outlook drop the "Review" action
+  // button, leaving only "Don't send".
   const warnings = model.warnings.map(warning => warningText(warning, messages))
   const title = markdown ? strong(messages.dialog.title) : messages.dialog.title
   const lines = [
     title,
+    messages.smartAlert.sendAgain,
     warnings.length > 0 ? `${messages.smartAlert.warnings}: ${warnings.join(" / ")}` : "",
   ].filter(line => line.length > 0)
 
