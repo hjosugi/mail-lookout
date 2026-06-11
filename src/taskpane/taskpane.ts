@@ -3,15 +3,11 @@
 /**
  * The review task pane.
  *
- * The pane is a narrow, persistent surface. It opens the roomy review
- * dialog (dialog.html) with displayDialogAsync, takes the user's decision
- * back, then runs the send-delay countdown itself and finally sends the
- * message with item.sendAsync. Keeping the countdown and the send here —
- * not in the dialog — lets the dialog close while the countdown stays
- * visible in the pane, and survives the pane being closed and reopened.
- *
- * If the dialog can't open (older host, blocked), the pane falls back to
- * rendering the review inline.
+ * Smart Alerts blocks the send and opens this pane. The whole flow lives
+ * here: the user works through the checklist, confirms, the pane runs the
+ * send-delay countdown, and at zero it sends the message with
+ * item.sendAsync — no second manual Send. Ticked boxes and the countdown
+ * deadline are persisted, so closing and reopening the pane resumes.
  */
 
 import "../dialog/dialog.css"
@@ -24,8 +20,6 @@ import type { LocaleTag } from "../i18n"
 import { renderDialog } from "../dialog/render"
 import type { DialogCallbacks, DialogHandle } from "../dialog/render"
 import { taskPaneMessages, taskPaneRenderOptions } from "../dialog/taskPaneView"
-import type { DialogInit } from "../dialog/dialogMessaging"
-import { decodeMessage, encodeInit, fromSerializable, toSerializable } from "../dialog/dialogMessaging"
 import { collectSnapshot } from "../office/collect"
 import { clearProgress, loadProgress, saveProgress } from "../office/reviewProgress"
 import { rememberConfirmation, snapshotFingerprint } from "../office/smartAlert"
@@ -36,7 +30,7 @@ interface MiniAction {
   readonly onClick: () => void
 }
 
-/** Build the compact pane view: a status line and optional action buttons. */
+/** Build the compact countdown view: a status line and action buttons. */
 function buildMini(statusText: string, actions: readonly MiniAction[]): HTMLElement {
   const wrap = document.createElement("div")
   wrap.className = "so-mini"
@@ -94,7 +88,7 @@ function start(model: ReviewModel, fingerprint: string, locale: LocaleTag, root:
   let deadline: number | null = restored?.deadline ?? null
   let delaySeconds = model.sendDelaySeconds
   let timer: number | null = null
-  let dialog: Office.Dialog | null = null
+  let handle: DialogHandle | null = null
 
   const stopTimer = (): void => {
     if (timer !== null) {
@@ -107,22 +101,11 @@ function start(model: ReviewModel, fingerprint: string, locale: LocaleTag, root:
     saveProgress(fingerprint, { state, deadline })
   }
 
-  const closeDialog = (): void => {
-    if (dialog) {
-      try {
-        dialog.close()
-      } catch {
-        // Already closed; nothing to do.
-      }
-      dialog = null
-    }
-  }
-
   const remaining = (): number =>
     deadline === null ? 0 : Math.max(0, Math.ceil((deadline - Date.now()) / 1000))
 
-  // Confirm and send. Everything that mutates state runs before sendAsync,
-  // since the re-fired OnMessageSend sees the recorded confirmation and
+  // Confirm and send. Everything that mutates state runs before sendAsync:
+  // it re-fires OnMessageSend, which sees the recorded confirmation, and
   // code after sendAsync is not guaranteed to run.
   const confirmAndSend = (): void => {
     stopTimer()
@@ -143,14 +126,6 @@ function start(model: ReviewModel, fingerprint: string, locale: LocaleTag, root:
       buildMini(`${messages.taskPane.holding} ${formatRemaining(remaining())}`, [
         { label: messages.dialog.cancelSend, kind: "danger", onClick: cancelAll },
         { label: messages.dialog.backToEdit, kind: "secondary", onClick: backToReview },
-      ]),
-    )
-  }
-
-  const showIdle = (): void => {
-    root.replaceChildren(
-      buildMini(messages.taskPane.intro, [
-        { label: messages.taskPane.confirm, kind: "primary", onClick: openReview },
       ]),
     )
   }
@@ -184,65 +159,29 @@ function start(model: ReviewModel, fingerprint: string, locale: LocaleTag, root:
     runCountdown()
   }
 
-  // Abandon the review entirely: clear progress and return to idle.
+  // Abandon the review entirely: clear progress and start fresh.
   function cancelAll(): void {
     stopTimer()
     deadline = null
     clearProgress()
     state = initialReviewState(model)
-    closeDialog()
-    showIdle()
+    renderReview()
   }
 
-  // Stop the countdown and reopen the review, keeping the ticked boxes.
+  // Stop the countdown and return to the checklist, keeping the ticks.
   function backToReview(): void {
     stopTimer()
     deadline = null
     persist()
-    openReview()
+    renderReview()
   }
 
-  function onDialogMessage(arg: { message: string; origin: string | undefined } | { error: number }): void {
-    if (!("message" in arg)) {
-      return
-    }
-    const message = decodeMessage(arg.message)
-    if (!message) {
-      return
-    }
-    if (message.type === "state") {
-      state = fromSerializable(message.state, model)
-      persist()
-      return
-    }
-    // decision
-    state = fromSerializable(message.state, model)
-    closeDialog()
-    if (message.confirm) {
-      startCountdown(message.delaySeconds)
-    } else {
-      cancelAll()
-    }
-  }
-
-  function onDialogClosed(): void {
-    // The dialog window was closed or unloaded without a decision message.
-    dialog = null
-    if (deadline !== null) {
-      runCountdown()
-    } else {
-      showIdle()
-    }
-  }
-
-  // Render the review inline in the pane. Used when the dialog can't open.
-  let inlineHandle: DialogHandle | null = null
-  function renderInlineReview(): void {
+  function renderReview(): void {
     const callbacks: DialogCallbacks = {
       onRecipientToggle(index, checked) {
         state = { ...state, confirmedRecipients: withIndex(state.confirmedRecipients, index, checked) }
         persist()
-        inlineHandle?.setSendEnabled(canSend(model, state))
+        handle?.setSendEnabled(canSend(model, state))
       },
       onAttachmentToggle(index, checked) {
         state = {
@@ -250,17 +189,17 @@ function start(model: ReviewModel, fingerprint: string, locale: LocaleTag, root:
           confirmedAttachments: withIndex(state.confirmedAttachments, index, checked),
         }
         persist()
-        inlineHandle?.setSendEnabled(canSend(model, state))
+        handle?.setSendEnabled(canSend(model, state))
       },
       onSubjectToggle(checked) {
         state = { ...state, subjectConfirmed: checked }
         persist()
-        inlineHandle?.setSendEnabled(canSend(model, state))
+        handle?.setSendEnabled(canSend(model, state))
       },
       onBodyToggle(checked) {
         state = { ...state, bodyConfirmed: checked }
         persist()
-        inlineHandle?.setSendEnabled(canSend(model, state))
+        handle?.setSendEnabled(canSend(model, state))
       },
       onDelayChange(seconds) {
         delaySeconds = seconds
@@ -271,38 +210,12 @@ function start(model: ReviewModel, fingerprint: string, locale: LocaleTag, root:
       onCancelSend: cancelAll,
       onBack: cancelAll,
     }
-    inlineHandle = renderDialog(model, messages, callbacks, {
+    handle = renderDialog(model, messages, callbacks, {
       ...taskPaneRenderOptions,
       initialState: state,
     })
-    root.replaceChildren(inlineHandle.element)
-    inlineHandle.setSendEnabled(canSend(model, state))
-  }
-
-  function openReview(): void {
-    closeDialog()
-    const init: DialogInit = { model, locale, state: toSerializable(state) }
-    const url = `${new URL("dialog.html", window.location.href).href}#init=${encodeInit(init)}`
-    // While the dialog is open the pane sits behind it; keep a reopen path
-    // in case the dialog is dismissed.
-    root.replaceChildren(
-      buildMini(messages.taskPane.title, [
-        { label: messages.taskPane.confirm, kind: "primary", onClick: openReview },
-      ]),
-    )
-    try {
-      Office.context.ui.displayDialogAsync(url, { height: 75, width: 50 }, result => {
-        if (result.status === Office.AsyncResultStatus.Failed) {
-          renderInlineReview()
-          return
-        }
-        dialog = result.value
-        dialog.addEventHandler(Office.EventType.DialogMessageReceived, onDialogMessage)
-        dialog.addEventHandler(Office.EventType.DialogEventReceived, onDialogClosed)
-      })
-    } catch {
-      renderInlineReview()
-    }
+    root.replaceChildren(handle.element)
+    handle.setSendEnabled(canSend(model, state))
   }
 
   root.classList.remove("loading")
@@ -310,7 +223,7 @@ function start(model: ReviewModel, fingerprint: string, locale: LocaleTag, root:
     // A countdown was running when the pane last closed; resume it.
     runCountdown()
   } else {
-    openReview()
+    renderReview()
   }
 }
 
