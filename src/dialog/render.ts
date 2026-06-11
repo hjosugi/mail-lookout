@@ -17,9 +17,11 @@ import type {
   AttachmentView,
   RecipientView,
   ReviewModel,
+  ReviewState,
   Warning,
   WarningKind,
 } from "../domain/review"
+import { initialReviewState } from "../domain/review"
 import type { RecipientField } from "../domain/types"
 
 /** Props accepted by the element helper. */
@@ -90,6 +92,8 @@ export interface DialogRenderOptions {
    * there, but a cancel during the wait does.
    */
   readonly cancelDuringSendOnly?: boolean
+  /** Pre-tick the confirmation checkboxes from restored review progress. */
+  readonly initialState?: ReviewState
 }
 
 /** Map a warning to its text. Exhaustive over WarningKind. */
@@ -180,12 +184,18 @@ function buildRecipientRow(
   model: ReviewModel,
   messages: Messages,
   callbacks: DialogCallbacks,
+  initial: ReviewState,
 ): HTMLElement {
   const content = recipientContent(entry.recipient, messages)
   if (model.requireRecipientConfirmation) {
-    return buildCheckboxRow("so-recipient so-recipient-check", content, checked => {
-      callbacks.onRecipientToggle(entry.index, checked)
-    })
+    return buildCheckboxRow(
+      "so-recipient so-recipient-check",
+      content,
+      initial.confirmedRecipients.has(entry.index),
+      checked => {
+        callbacks.onRecipientToggle(entry.index, checked)
+      },
+    )
   }
   return el("div", { className: "so-recipient" }, content)
 }
@@ -197,12 +207,13 @@ function buildFieldGroup(
   model: ReviewModel,
   messages: Messages,
   callbacks: DialogCallbacks,
+  initial: ReviewState,
 ): HTMLElement | null {
   const inField = indexed.filter(entry => entry.recipient.field === field)
   if (inField.length === 0) {
     return null
   }
-  const rows = inField.map(entry => buildRecipientRow(entry, model, messages, callbacks))
+  const rows = inField.map(entry => buildRecipientRow(entry, model, messages, callbacks, initial))
   return el("div", { className: "so-field-group" }, [
     el("div", { className: "so-field-label", text: fieldLabel(field, messages) }),
     el("div", { className: "so-field-rows" }, rows),
@@ -213,10 +224,15 @@ function buildFieldGroup(
 let inputCounter = 0
 
 /** Build a checkbox row bound to a change handler. */
-function buildCheckbox(labelText: string, onToggle: (checked: boolean) => void): HTMLElement {
+function buildCheckbox(
+  labelText: string,
+  initialChecked: boolean,
+  onToggle: (checked: boolean) => void,
+): HTMLElement {
   inputCounter += 1
   const id = `so-check-${inputCounter}`
   const input = el("input", { type: "checkbox", id })
+  input.checked = initialChecked
   input.addEventListener("change", () => {
     onToggle(input.checked)
   })
@@ -233,11 +249,13 @@ function buildCheckbox(labelText: string, onToggle: (checked: boolean) => void):
 function buildCheckboxRow(
   className: string,
   content: readonly Node[],
+  initialChecked: boolean,
   onToggle: (checked: boolean) => void,
 ): HTMLElement {
   inputCounter += 1
   const id = `so-check-${inputCounter}`
   const input = el("input", { type: "checkbox", id })
+  input.checked = initialChecked
   input.addEventListener("change", () => {
     onToggle(input.checked)
   })
@@ -250,6 +268,7 @@ function buildRecipientsSection(
   model: ReviewModel,
   messages: Messages,
   callbacks: DialogCallbacks,
+  initial: ReviewState,
 ): HTMLElement {
   const children: Node[] = [
     el("h2", { className: "so-section-title", text: messages.sections.recipients }),
@@ -269,7 +288,7 @@ function buildRecipientsSection(
     }))
     const fields: RecipientField[] = ["to", "cc", "bcc"]
     for (const field of fields) {
-      const group = buildFieldGroup(field, indexed, model, messages, callbacks)
+      const group = buildFieldGroup(field, indexed, model, messages, callbacks, initial)
       if (group) {
         children.push(group)
       }
@@ -284,6 +303,7 @@ function buildAttachmentsSection(
   model: ReviewModel,
   messages: Messages,
   callbacks: DialogCallbacks,
+  initial: ReviewState,
 ): HTMLElement {
   const children: Node[] = [
     el("h2", { className: "so-section-title", text: messages.sections.attachments }),
@@ -306,9 +326,14 @@ function buildAttachmentsSection(
         content.push(el("span", { className: "so-attachment-size", text: size }))
       }
       if (model.requireAttachmentConfirmation) {
-        return buildCheckboxRow("so-attachment so-attachment-check", content, checked => {
-          callbacks.onAttachmentToggle(index, checked)
-        })
+        return buildCheckboxRow(
+          "so-attachment so-attachment-check",
+          content,
+          initial.confirmedAttachments.has(index),
+          checked => {
+            callbacks.onAttachmentToggle(index, checked)
+          },
+        )
       }
       return el("div", { className: "so-attachment" }, content)
     })
@@ -323,6 +348,7 @@ function buildSubjectSection(
   model: ReviewModel,
   messages: Messages,
   callbacks: DialogCallbacks,
+  initial: ReviewState,
 ): HTMLElement {
   const subjectText = model.subject.trim().length > 0 ? model.subject : messages.subject.empty
   const children: Node[] = [
@@ -331,7 +357,7 @@ function buildSubjectSection(
   ]
   if (model.requireSubjectConfirmation) {
     children.push(
-      buildCheckbox(messages.subject.confirmEmpty, checked => {
+      buildCheckbox(messages.subject.confirmEmpty, initial.subjectConfirmed, checked => {
         callbacks.onSubjectToggle(checked)
       }),
     )
@@ -344,6 +370,7 @@ function buildBodySection(
   model: ReviewModel,
   messages: Messages,
   callbacks: DialogCallbacks,
+  initial: ReviewState,
 ): HTMLElement {
   const previewText = model.bodyPreview.length > 0 ? model.bodyPreview : messages.body.empty
   // A read-only textarea, not a <p>: it gives the body its own
@@ -360,7 +387,7 @@ function buildBodySection(
   ]
   if (model.requireBodyConfirmation) {
     children.push(
-      buildCheckbox(messages.body.confirm, checked => {
+      buildCheckbox(messages.body.confirm, initial.bodyConfirmed, checked => {
         callbacks.onBodyToggle(checked)
       }),
     )
@@ -471,11 +498,14 @@ export function renderDialog(
   if (warningsBanner) {
     body.append(warningsBanner)
   }
+  // Checkboxes render pre-ticked from any restored progress, so a reopened
+  // review picks up exactly where it was left.
+  const initial = options.initialState ?? initialReviewState(model)
   body.append(
-    buildRecipientsSection(model, messages, callbacks),
-    buildAttachmentsSection(model, messages, callbacks),
-    buildSubjectSection(model, messages, callbacks),
-    buildBodySection(model, messages, callbacks),
+    buildRecipientsSection(model, messages, callbacks, initial),
+    buildAttachmentsSection(model, messages, callbacks, initial),
+    buildSubjectSection(model, messages, callbacks, initial),
+    buildBodySection(model, messages, callbacks, initial),
   )
 
   const footerChildren: Node[] = []

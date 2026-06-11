@@ -3,14 +3,15 @@
 import "../dialog/dialog.css"
 
 import { defaultConfig } from "../config"
-import { canSend, initialReviewState } from "../domain/review"
+import { buildReviewModel, canSend, initialReviewState } from "../domain/review"
 import type { ReviewModel, ReviewState } from "../domain/review"
 import { getMessages, resolveLocale } from "../i18n/catalog"
 import type { LocaleTag } from "../i18n"
 import { renderDialog } from "../dialog/render"
+import type { DialogCallbacks, DialogHandle } from "../dialog/render"
 import { taskPaneMessages, taskPaneRenderOptions } from "../dialog/taskPaneView"
-import { buildReviewModel } from "../domain/review"
 import { collectSnapshot } from "../office/collect"
+import { clearProgress, loadProgress, saveProgress } from "../office/reviewProgress"
 import { rememberConfirmation, snapshotFingerprint } from "../office/smartAlert"
 
 function showStatus(text: string): HTMLElement {
@@ -31,17 +32,31 @@ function showError(locale: LocaleTag): void {
   root.replaceChildren(showStatus(messages.taskPane.loadFailed))
 }
 
-function start(model: ReviewModel, fingerprint: string, locale: LocaleTag): void {
+/** Add or remove an index from a confirmation set, returning a new set. */
+function withIndex(set: ReadonlySet<number>, index: number, present: boolean): Set<number> {
+  const next = new Set(set)
+  if (present) {
+    next.add(index)
+  } else {
+    next.delete(index)
+  }
+  return next
+}
+
+function start(model: ReviewModel, fingerprint: string, locale: LocaleTag, root: HTMLElement): void {
   const baseMessages = getMessages(locale)
   const messages = taskPaneMessages(baseMessages)
-  let state: ReviewState = initialReviewState(model)
   const status = showStatus("")
 
-  // The wait before confirming. Seeded from the model (the configured
-  // default) and changeable on the delay control for this send.
+  // Pick up any progress left from a previous open of this same draft:
+  // the checks already ticked and the countdown deadline.
+  const restored = loadProgress(model, fingerprint)
+  let state: ReviewState = restored?.state ?? initialReviewState(model)
+  let deadline: number | null = restored?.deadline ?? null
   let delaySeconds = model.sendDelaySeconds
-  // A single timer drives the pre-confirm countdown.
   let timer: number | null = null
+  let handle: DialogHandle | null = null
+
   const stopTimer = (): void => {
     if (timer !== null) {
       window.clearInterval(timer)
@@ -49,97 +64,125 @@ function start(model: ReviewModel, fingerprint: string, locale: LocaleTag): void
     }
   }
 
-  const refresh = (): void => {
-    handle.setSendEnabled(canSend(model, state))
+  const persist = (): void => {
+    saveProgress(fingerprint, { state, deadline })
   }
 
-  const handle = renderDialog(
-    model,
-    messages,
-    {
-      onRecipientToggle(index, checked) {
-        const next = new Set(state.confirmedRecipients)
-        if (checked) {
-          next.add(index)
-        } else {
-          next.delete(index)
-        }
-        state = { ...state, confirmedRecipients: next }
-        status.textContent = ""
-        refresh()
-      },
-      onAttachmentToggle(index, checked) {
-        const next = new Set(state.confirmedAttachments)
-        if (checked) {
-          next.add(index)
-        } else {
-          next.delete(index)
-        }
-        state = { ...state, confirmedAttachments: next }
-        status.textContent = ""
-        refresh()
-      },
-      onSubjectToggle(checked) {
-        state = { ...state, subjectConfirmed: checked }
-        status.textContent = ""
-        refresh()
-      },
-      onBodyToggle(checked) {
-        state = { ...state, bodyConfirmed: checked }
-        status.textContent = ""
-        refresh()
-      },
-      onDelayChange(seconds) {
-        delaySeconds = seconds
-      },
-      onSend() {
-        // Record the review so the user's next unchanged Send passes the
-        // Smart Alerts check. A 0 delay confirms at once; any positive
-        // delay runs a countdown first so the confirm is never skipped.
-        const confirm = (): void => {
-          rememberConfirmation(fingerprint)
-          status.textContent = baseMessages.taskPane.confirmed
-        }
-        if (delaySeconds <= 0) {
-          confirm()
-          return
-        }
-        let remaining = delaySeconds
-        status.textContent = baseMessages.taskPane.holding
-        handle.setSending(remaining)
-        timer = window.setInterval(() => {
-          remaining -= 1
-          if (remaining <= 0) {
-            stopTimer()
-            handle.setSending(null)
-            confirm()
-          } else {
-            handle.setSending(remaining)
-          }
-        }, 1000)
-      },
-      onCancelSend() {
-        stopTimer()
-        handle.setSending(null)
-        status.textContent = ""
-      },
-      onBack() {
-        stopTimer()
-        handle.setSending(null)
-        status.textContent = ""
-      },
-    },
-    taskPaneRenderOptions,
-  )
+  const refresh = (): void => {
+    handle?.setSendEnabled(canSend(model, state))
+  }
 
-  const root = document.getElementById("root")
-  if (root) {
-    root.classList.remove("loading")
+  // Confirm the review: stop the wait, record it so the next unchanged
+  // Send passes the Smart Alerts check, and drop the saved progress.
+  const confirmReview = (): void => {
+    stopTimer()
+    deadline = null
+    handle?.setSending(null)
+    rememberConfirmation(fingerprint)
+    clearProgress()
+    status.textContent = baseMessages.taskPane.confirmed
+  }
+
+  // One countdown step, driven by the wall-clock deadline so closing and
+  // reopening the pane resumes — or, if the deadline already passed while
+  // it was closed, confirms straight away.
+  const tick = (): void => {
+    if (deadline === null) {
+      return
+    }
+    const remaining = Math.ceil((deadline - Date.now()) / 1000)
+    if (remaining <= 0) {
+      confirmReview()
+    } else {
+      handle?.setSending(remaining)
+    }
+  }
+
+  const runCountdown = (): void => {
+    status.textContent = baseMessages.taskPane.holding
+    tick()
+    if (deadline !== null && timer === null) {
+      timer = window.setInterval(tick, 1000)
+    }
+  }
+
+  // Cancel abandons the review: drop the saved progress and re-render a
+  // fresh, unchecked pane.
+  const cancel = (): void => {
+    stopTimer()
+    deadline = null
+    clearProgress()
+    state = initialReviewState(model)
+    mount()
+    status.textContent = ""
+  }
+
+  const callbacks: DialogCallbacks = {
+    onRecipientToggle(index, checked) {
+      state = { ...state, confirmedRecipients: withIndex(state.confirmedRecipients, index, checked) }
+      status.textContent = ""
+      persist()
+      refresh()
+    },
+    onAttachmentToggle(index, checked) {
+      state = {
+        ...state,
+        confirmedAttachments: withIndex(state.confirmedAttachments, index, checked),
+      }
+      status.textContent = ""
+      persist()
+      refresh()
+    },
+    onSubjectToggle(checked) {
+      state = { ...state, subjectConfirmed: checked }
+      status.textContent = ""
+      persist()
+      refresh()
+    },
+    onBodyToggle(checked) {
+      state = { ...state, bodyConfirmed: checked }
+      status.textContent = ""
+      persist()
+      refresh()
+    },
+    onDelayChange(seconds) {
+      delaySeconds = seconds
+    },
+    onSend() {
+      // A 0 delay confirms at once; any positive delay starts a wall-clock
+      // countdown that confirms when it reaches zero.
+      if (delaySeconds <= 0) {
+        confirmReview()
+        return
+      }
+      deadline = Date.now() + delaySeconds * 1000
+      persist()
+      runCountdown()
+    },
+    onCancelSend() {
+      cancel()
+    },
+    onBack() {
+      cancel()
+    },
+  }
+
+  function mount(): void {
+    handle = renderDialog(model, messages, callbacks, {
+      ...taskPaneRenderOptions,
+      initialState: state,
+    })
     root.replaceChildren(handle.element)
     handle.element.append(status)
+    refresh()
   }
 
-  refresh()
+  root.classList.remove("loading")
+  mount()
+  // Resume a countdown that was already running when the pane last closed.
+  if (deadline !== null) {
+    runCountdown()
+  }
 }
 
 void Office.onReady(async () => {
@@ -149,7 +192,11 @@ void Office.onReady(async () => {
   try {
     const item = Office.context.mailbox.item as Office.MessageCompose
     const snapshot = await collectSnapshot(item)
-    start(buildReviewModel(snapshot, config), snapshotFingerprint(snapshot), locale)
+    const root = document.getElementById("root")
+    if (!root) {
+      return
+    }
+    start(buildReviewModel(snapshot, config), snapshotFingerprint(snapshot), locale, root)
   } catch (error) {
     console.error("mail-lookout: failed to open review task pane", error)
     showError(locale)
