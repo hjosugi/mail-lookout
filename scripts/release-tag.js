@@ -10,13 +10,7 @@ const args = process.argv.slice(2)
 const flags = new Set(args.filter(arg => arg.startsWith("--")))
 const tagArg = args.find(arg => !arg.startsWith("--"))
 
-const knownFlags = new Set([
-  "--dry-run",
-  "--offline",
-  "--allow-dirty",
-  "--allow-branch",
-  "--yes",
-])
+const knownFlags = new Set(["--dry-run", "--offline", "--allow-dirty", "--allow-branch", "--yes"])
 for (const flag of flags) {
   if (!knownFlags.has(flag)) {
     fail(`Unknown flag: ${flag}`)

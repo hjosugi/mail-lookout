@@ -79,7 +79,12 @@ function showError(locale: LocaleTag, root: HTMLElement): void {
   root.replaceChildren(buildMini(messages.taskPane.loadFailed, []))
 }
 
-function start(model: ReviewModel, fingerprint: string, locale: LocaleTag, root: HTMLElement): void {
+function start(
+  model: ReviewModel,
+  fingerprint: string,
+  locale: LocaleTag,
+  root: HTMLElement,
+): void {
   const baseMessages = getMessages(locale)
   const messages = taskPaneMessages(baseMessages)
 
@@ -179,7 +184,10 @@ function start(model: ReviewModel, fingerprint: string, locale: LocaleTag, root:
   function renderReview(): void {
     const callbacks: DialogCallbacks = {
       onRecipientToggle(index, checked) {
-        state = { ...state, confirmedRecipients: withIndex(state.confirmedRecipients, index, checked) }
+        state = {
+          ...state,
+          confirmedRecipients: withIndex(state.confirmedRecipients, index, checked),
+        }
         persist()
         handle?.setSendEnabled(canSend(model, state))
       },

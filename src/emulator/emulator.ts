@@ -577,7 +577,10 @@ function updateDraftSummary(): void {
   const snapshot = snapshotFromForm()
   subjectEl.textContent =
     snapshot.subject.trim().length > 0 ? snapshot.subject : messages.draft.noSubject
-  metaEl.textContent = messages.draft.summary(snapshot.recipients.length, snapshot.attachments.length)
+  metaEl.textContent = messages.draft.summary(
+    snapshot.recipients.length,
+    snapshot.attachments.length,
+  )
 }
 
 renderShell()

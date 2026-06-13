@@ -79,7 +79,7 @@ if (gitAdd.status !== 0) {
 const commitMsg = `chore: bump version to ${nextPackageVersion}`
 const gitCommit = spawnSync("git", ["commit", "-m", commitMsg], { cwd: rootDir, stdio: "inherit" })
 if (gitCommit.status !== 0) {
-  fail(`git commit failed: ${gitCommit.error || "status code " + gitCommit.status}`)
+  fail(`git commit failed: ${gitCommit.error || `status code ${gitCommit.status}`}`)
 }
 console.log(`[bump-version] Successfully committed: "${commitMsg}"`)
 

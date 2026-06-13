@@ -21,7 +21,7 @@
   xsi:type="MailApp">
 
   <Id>7888d7db-1c99-4e49-a191-ea73f4088740</Id>
-  <Version>1.0.7.0</Version>
+  <Version>1.0.8.0</Version>
   <ProviderName>mail-lookout contributors</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Mail Lookout" />
