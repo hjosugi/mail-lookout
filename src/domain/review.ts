@@ -112,9 +112,8 @@ export function buildReviewModel(snapshot: MessageSnapshot, config: Config): Rev
   if (detectForgottenAttachment(snapshot, config.attachmentKeywords)) {
     warnings.push({ kind: "forgottenAttachment", count: 0 })
   }
-  if (externalEmails.length > 0) {
-    warnings.push({ kind: "externalRecipients", count: externalEmails.length })
-  }
+  // External recipients are not warned here: each external recipient already
+  // carries a "social" badge in the list, so a separate banner is redundant.
 
   const sendDelaySeconds = Math.max(0, Math.floor(config.sendDelaySeconds))
 

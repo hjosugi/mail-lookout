@@ -74,7 +74,7 @@ body {
 }
 
 .so-header {
-  padding: 12px 14px 8px;
+  padding: 8px 12px 5px;
   border-bottom: 1px solid var(--so-border);
 }
 
@@ -92,7 +92,7 @@ body {
 
 .so-body-content {
   flex: 1 1 auto;
-  padding: 6px 14px 12px;
+  padding: 4px 12px 8px;
   overflow-y: auto;
 }
 
@@ -119,11 +119,11 @@ body {
 }
 
 .so-section {
-  margin-top: 12px;
+  margin-top: 7px;
 }
 
 .so-section-title {
-  margin: 0 0 5px;
+  margin: 0 0 3px;
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
@@ -138,7 +138,7 @@ body {
 }
 
 .so-field-group {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .so-field-label {
@@ -159,7 +159,7 @@ body {
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
-  padding: 5px 7px;
+  padding: 4px 7px;
   background: var(--so-surface);
   border: 1px solid var(--so-border);
   border-radius: 6px;
@@ -196,7 +196,7 @@ body {
 }
 
 .so-confirm-hint {
-  margin: 0 0 8px;
+  margin: 0 0 4px;
   font-size: 12px;
   color: var(--so-fg-muted);
 }
@@ -307,6 +307,11 @@ body {
   white-space: pre-wrap;
   word-break: break-word;
   resize: vertical;
+  /* A roomy preview (~1.5x), but bounded with its own scroll so a long
+     body can't push the send button off the bottom. */
+  min-height: 132px;
+  max-height: 220px;
+  overflow-y: auto;
 }
 
 .so-body:focus-visible {
@@ -318,7 +323,7 @@ body {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  margin-top: 8px;
+  margin-top: 5px;
 }
 
 .so-check input[type="checkbox"] {
@@ -335,8 +340,8 @@ body {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding: 10px 14px;
+  gap: 6px;
+  padding: 7px 12px;
   border-top: 1px solid var(--so-border);
   background: var(--so-bg);
 }

@@ -83,10 +83,11 @@ describe("buildReviewModel", () => {
     expect(model.warnings.some(w => w.kind === "forgottenAttachment")).toBe(true)
   })
 
-  it("raises an external-recipients warning with a count", () => {
+  it("does not raise a warning for external recipients (the badge covers it)", () => {
     const model = buildReviewModel(snapshot({ recipients: [externalA, externalB] }), defaultConfig)
-    const warning = model.warnings.find(w => w.kind === "externalRecipients")
-    expect(warning?.count).toBe(2)
+    expect(model.warnings.some(w => w.kind === "externalRecipients")).toBe(false)
+    // The external addresses are still tracked (for the per-recipient badge).
+    expect(model.externalEmails).toHaveLength(2)
   })
 
   it("requires recipient confirmation only when there are recipients", () => {
