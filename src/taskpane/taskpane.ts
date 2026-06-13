@@ -25,7 +25,13 @@ import { renderDialog } from "../dialog/render"
 import type { DialogCallbacks, DialogHandle } from "../dialog/render"
 import { taskPaneMessages, taskPaneRenderOptions } from "../dialog/taskPaneView"
 import { collectSnapshot } from "../office/collect"
-import { MAX_PENDING_REVIEWS, clearProgress, listWaiting, loadProgress, saveProgress } from "../office/reviewProgress"
+import {
+  MAX_PENDING_REVIEWS,
+  clearProgress,
+  listWaiting,
+  loadProgress,
+  saveProgress,
+} from "../office/reviewProgress"
 import { rememberConfirmation, snapshotFingerprint } from "../office/smartAlert"
 
 interface MiniAction {
@@ -181,7 +187,11 @@ function start(
   const showCapReached = (): void => {
     view.replaceChildren(
       buildMini(messages.waiting.capReached(MAX_PENDING_REVIEWS), [
-        { label: messages.waiting.retry, kind: "primary", onClick: () => startCountdown(delaySeconds) },
+        {
+          label: messages.waiting.retry,
+          kind: "primary",
+          onClick: () => startCountdown(delaySeconds),
+        },
         { label: messages.dialog.backToEdit, kind: "secondary", onClick: backToReview },
       ]),
     )

@@ -1,12 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import {
-  getMessages,
-  isLocaleTag,
-  locales,
-  resolveLocale,
-  supportedLocales,
-} from "@/i18n/catalog"
+import { getMessages, isLocaleTag, locales, resolveLocale, supportedLocales } from "@/i18n/catalog"
 
 /**
  * Collect every leaf key path of an object.

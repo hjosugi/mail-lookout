@@ -46,8 +46,9 @@
     "version:set": "node scripts/release-version.js",
     "version:bump": "node scripts/bump-version.js",
     "release:tag": "node scripts/release-tag.js",
-    "check": "biome ci . && npm run typecheck && npm run test:coverage && npm run build && npm run validate",
-    "check:publish": "npm run check && npm run heartbeat"
+    "prepare": "git config core.hooksPath .githooks",
+    "check": "biome ci . && npm run typecheck && npm run test:coverage && npm run build",
+    "check:publish": "npm run check && npm run validate && npm run heartbeat"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.16",

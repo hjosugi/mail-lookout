@@ -1,0 +1,13 @@
+#!/bin/sh
+# Auto-format staged files with Biome before each commit, so a forgotten
+# `npm run format` cannot land unformatted code. Wired up by the package
+# "prepare" script (git config core.hooksPath .githooks) on npm install.
+
+biome="./node_modules/.bin/biome"
+[ -x "$biome" ] || biome="biome"
+
+# Format + safe lint fixes, limited to the staged files.
+"$biome" check --write --staged --no-errors-on-unmatched || exit 1
+
+# Re-stage whatever Biome rewrote (only files already in the index).
+git update-index --again

@@ -68,7 +68,9 @@ describe("review progress persistence", () => {
     saveProgress("b", { state: initialReviewState(model), deadline: 2 }, display, storage)
 
     expect(loadProgress(model, "a", storage)?.deadline).toBe(1)
-    expect([...(loadProgress(model, "a", storage)?.state.confirmedRecipients ?? [])]).toEqual([0, 1])
+    expect([...(loadProgress(model, "a", storage)?.state.confirmedRecipients ?? [])]).toEqual([
+      0, 1,
+    ])
     expect(loadProgress(model, "b", storage)?.deadline).toBe(2)
   })
 

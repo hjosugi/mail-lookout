@@ -68,7 +68,8 @@ export const ja: Messages = {
     empty: "送信待機中のメールはありません。",
     recipients: count => `宛先 ${count} 件`,
     remaining: text => `残り ${text}`,
-    capReached: max => `送信待機が上限（${max} 件）に達しました。1 件送信されるまでお待ちください。`,
+    capReached: max =>
+      `送信待機が上限（${max} 件）に達しました。1 件送信されるまでお待ちください。`,
     retry: "再試行",
   },
   cancel: {
