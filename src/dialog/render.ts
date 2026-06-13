@@ -491,10 +491,11 @@ export function renderDialog(
     }
   })
 
-  const header = el("header", { className: "so-header" }, [
-    el("h1", { className: "so-title", text: messages.dialog.title }),
-    el("p", { className: "so-intro", text: messages.dialog.intro }),
-  ])
+  const headerChildren = [el("h1", { className: "so-title", text: messages.dialog.title })]
+  if (messages.dialog.intro) {
+    headerChildren.push(el("p", { className: "so-intro", text: messages.dialog.intro }))
+  }
+  const header = el("header", { className: "so-header" }, headerChildren)
 
   const body = el("div", { className: "so-body-content" })
   const warningsBanner = buildWarnings(model.warnings, messages)

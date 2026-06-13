@@ -27,8 +27,8 @@ export const taskPaneRenderOptions: DialogRenderOptions = {
  * Re-label the dialog strings for the task pane.
  *
  * The task pane is not a send surface: pressing the primary button only
- * marks the review as done. So the title, intro, and primary button text
- * come from the taskPane catalog section instead of the dialog one.
+ * marks the review as done. So the title and primary button text come
+ * from the taskPane catalog section instead of the dialog one.
  */
 export function taskPaneMessages(messages: Messages): Messages {
   return {

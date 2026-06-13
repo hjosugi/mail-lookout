@@ -64,14 +64,24 @@ describe("review progress persistence", () => {
 
   it("keeps a separate slot per message, so one does not clobber another", () => {
     const storage = new MemoryStorage()
-    saveProgress("a", { state: progressState(), deadline: 1 }, display, storage)
-    saveProgress("b", { state: initialReviewState(model), deadline: 2 }, display, storage)
+    saveProgress("a", { state: progressState(), deadline: 5000 }, display, storage, 1000)
+    saveProgress("b", { state: initialReviewState(model), deadline: 6000 }, display, storage, 1000)
 
-    expect(loadProgress(model, "a", storage)?.deadline).toBe(1)
-    expect([...(loadProgress(model, "a", storage)?.state.confirmedRecipients ?? [])]).toEqual([
-      0, 1,
-    ])
-    expect(loadProgress(model, "b", storage)?.deadline).toBe(2)
+    expect(loadProgress(model, "a", storage, 1000)?.deadline).toBe(5000)
+    expect([...(loadProgress(model, "a", storage, 1000)?.state.confirmedRecipients ?? [])]).toEqual(
+      [0, 1],
+    )
+    expect(loadProgress(model, "b", storage, 1000)?.deadline).toBe(6000)
+  })
+
+  it("cleans out finished sends (past deadline + grace) before adding", () => {
+    const storage = new MemoryStorage()
+    // 'old' finished well before now; 'live' is still counting down.
+    saveProgress("old", { state: progressState(), deadline: 2000 }, display, storage, 1000)
+    saveProgress("live", { state: progressState(), deadline: 100_000 }, display, storage, 90_000)
+
+    expect(loadProgress(model, "old", storage, 90_000)).toBeNull()
+    expect(loadProgress(model, "live", storage, 90_000)?.deadline).toBe(100_000)
   })
 
   it("ignores progress saved under a different fingerprint", () => {

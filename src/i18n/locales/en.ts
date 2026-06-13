@@ -57,7 +57,7 @@ export const en: Messages = {
   },
   taskPane: {
     title: "Review before sending",
-    intro: "Review the required items, then select Review & send.",
+    intro: "",
     confirm: "Review & send",
     holding: "Waiting to send…",
     sending: "Sending…",

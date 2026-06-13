@@ -131,10 +131,17 @@ function start(
   const remaining = (): number =>
     deadline === null ? 0 : Math.max(0, Math.ceil((deadline - Date.now()) / 1000))
 
+  // The banner only appears while THIS pane is itself waiting (counting
+  // down). On the review/edit screen it's hidden — the focus there is the
+  // message being checked, not the others in flight.
+  let bannerWaiting = false
+
   // Refresh the "other messages waiting" banner. The current message is
   // excluded — its own countdown shows in the main view, not here.
   const refreshBanner = (): void => {
-    const others = listWaiting().filter(item => item.fingerprint !== fingerprint)
+    const others = bannerWaiting
+      ? listWaiting().filter(item => item.fingerprint !== fingerprint)
+      : []
     if (others.length === 0) {
       banner.hidden = true
       banner.replaceChildren()
@@ -180,6 +187,8 @@ function start(
   }
 
   const showHolding = (): void => {
+    bannerWaiting = true
+    refreshBanner()
     view.replaceChildren(
       buildMini(
         `${messages.taskPane.holding} ${formatRemaining(remaining())}`,

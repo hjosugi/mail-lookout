@@ -56,7 +56,7 @@ export const ja: Messages = {
   },
   taskPane: {
     title: "送信前の確認",
-    intro: "必要な項目を確認して「確認して送信」を押してください。",
+    intro: "",
     confirm: "確認して送信",
     holding: "送信待機中です…",
     sending: "送信しています…",

@@ -29,6 +29,13 @@ export const MAX_PENDING_REVIEWS = 10
 /** Drop entries untouched for this long, so abandoned reviews don't pile up. */
 const ENTRY_TTL_MS = 24 * 60 * 60 * 1000
 
+/**
+ * Keep showing a waiting entry for a few seconds after its deadline, so a
+ * finished countdown reads "0s" briefly instead of vanishing mid-blink.
+ * Past this, the entry is dropped regardless of whether the send happened.
+ */
+const SEND_GRACE_MS = 5000
+
 export interface ReviewProgress {
   readonly state: ReviewState
   /** Epoch ms when the post-confirm countdown ends, or null if it has not started. */
@@ -149,6 +156,13 @@ export function saveProgress(
   now = Date.now(),
 ): void {
   const registry = readRegistry(storage, now)
+  // Cleanup before adding: drop sends that finished (past deadline + grace),
+  // so failed or abandoned ones can't pile up over time.
+  for (const [key, entry] of Object.entries(registry)) {
+    if (entry.deadline != null && entry.deadline + SEND_GRACE_MS <= now) {
+      delete registry[key]
+    }
+  }
   registry[fingerprint] = {
     fingerprint,
     subject: display.subject,
@@ -215,13 +229,14 @@ export function isCountdownActive(
 }
 
 /**
- * Every message still counting down to send, soonest first.
+ * Every message still counting down to send (plus a short grace), soonest
+ * first.
  *
- * Entries whose deadline has passed are dropped regardless of outcome: the
- * owning pane either already sent (and cleared it) or was closed and never
- * will, so a stuck "0s" row should not linger in the banner or count
- * against the cap. The owning pane's own send runs off its live timer, not
- * this list, so excluding the expired entry here does not stop it.
+ * An entry is shown until SEND_GRACE_MS past its deadline, so a finished
+ * countdown reads "0s" for a moment and then drops — regardless of whether
+ * the send happened. After the grace it no longer lingers in the banner or
+ * counts against the cap; the owning pane's own send runs off its live
+ * timer, not this list, so excluding it here does not stop it.
  */
 export function listWaiting(
   now = Date.now(),
@@ -230,7 +245,7 @@ export function listWaiting(
   return Object.values(readRegistry(storage, now))
     .filter(
       (entry): entry is StoredEntry & { deadline: number } =>
-        entry.deadline != null && entry.deadline > now,
+        entry.deadline != null && entry.deadline + SEND_GRACE_MS > now,
     )
     .map(entry => ({
       fingerprint: entry.fingerprint,
