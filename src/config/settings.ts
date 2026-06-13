@@ -19,7 +19,7 @@ export interface UserSettings {
 }
 
 /** Raw, possibly-invalid override values as they come out of storage. */
-export interface SettingsOverrides {
+interface SettingsOverrides {
   readonly internalDomains?: unknown
   readonly sendDelaySeconds?: unknown
 }
