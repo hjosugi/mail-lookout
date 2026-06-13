@@ -1,6 +1,12 @@
 [build]
   command = "npm run build"
   publish = "dist"
+  # Only build on a release, not on every push. The release flow bumps the
+  # version (version:patch etc.), so a build runs only when package.json's
+  # version changed since the last published deploy; other pushes are
+  # skipped and don't burn build minutes. `git diff --quiet` exits 0 (skip)
+  # when there's no change, non-zero (build) when there is.
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- package.json"
 
 [build.environment]
   NODE_VERSION = "22.12.0"
