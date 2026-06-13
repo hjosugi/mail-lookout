@@ -25,10 +25,8 @@ const scenarios: readonly Scenario[] = [
       body: "Hi team,\n\nPlease see attached forecast before the 15:00 review.\n\nRegards,\nMail Lookout",
       recipients: [
         recipient("to", "Aki Tanaka", "aki@example.com"),
-        recipient("to", "Mina Sato", "mina@example.com"),
         recipient("cc", "Jordan Lee", "jordan@partner.test"),
         recipient("cc", "Sora Kim", "sora@vendor.test"),
-        recipient("bcc", "Riku Mori", "riku@example.com"),
         recipient("bcc", "", "review@client.test"),
       ],
       attachments: [attachment("forecast.xlsx", 184320), attachment("notes.pdf", 94208)],
@@ -303,21 +301,12 @@ function renderMini(text: string, buttons: readonly MiniButton[]): void {
   query<HTMLElement>("#emu-result-body").replaceChildren(wrap)
 }
 
-function openModal(): void {
-  query<HTMLElement>("#emu-dialog").hidden = false
-}
-
-function closeModal(): void {
-  query<HTMLElement>("#emu-dialog").hidden = true
-  query<HTMLElement>("#emu-preview").replaceChildren()
-}
-
 /**
  * Run the post-confirm countdown in the result panel.
  *
- * This stands in for the Outlook task pane: the review dialog has closed,
- * the wait counts down here, and at zero the message is "sent" (the real
- * add-in calls item.sendAsync). Cancel abandons it; Back reopens review.
+ * The review and the countdown share one surface here, mirroring the
+ * task pane: at zero the message is "sent" (the real add-in calls
+ * item.sendAsync). Cancel abandons it; Back returns to the review.
  */
 function startMini(seconds: number, model: ReviewModel, locale: LocaleTag): void {
   stopTimer()
@@ -335,7 +324,7 @@ function startMini(seconds: number, model: ReviewModel, locale: LocaleTag): void
         kind: "secondary",
         onClick: () => {
           stopTimer()
-          openReviewModal(model, locale)
+          openReview(model, locale)
         },
       },
       {
@@ -363,11 +352,12 @@ function startMini(seconds: number, model: ReviewModel, locale: LocaleTag): void
 }
 
 /**
- * Open the review in the roomy modal — the emulator's stand-in for the
- * Outlook dialog the task pane launches. Confirming closes it and hands
- * off to the result-panel countdown.
+ * Render the review inline in the result panel — the emulator's stand-in
+ * for the Outlook task pane, where the whole flow lives on one surface.
+ * Confirming runs the countdown in the same panel; Back returns to the
+ * draft summary.
  */
-function openReviewModal(model: ReviewModel, locale: LocaleTag): void {
+function openReview(model: ReviewModel, locale: LocaleTag): void {
   stopTimer()
   const messages = taskPaneMessages(getMessages(locale))
   let state: ReviewState = initialReviewState(model)
@@ -409,16 +399,13 @@ function openReviewModal(model: ReviewModel, locale: LocaleTag): void {
         delaySeconds = seconds
       },
       onSend() {
-        // Confirm: close the dialog and run the countdown in the result
-        // panel, which "sends" when it reaches zero.
-        closeModal()
+        // Confirm: hand off to the countdown on the same surface.
         startMini(delaySeconds, model, locale)
       },
       onCancelSend() {
-        // No countdown runs inside the dialog.
+        // No countdown runs during the review itself.
       },
       onBack() {
-        closeModal()
         setStatus(getEmulatorMessages(locale).status.ready)
         renderDraft()
       },
@@ -426,8 +413,7 @@ function openReviewModal(model: ReviewModel, locale: LocaleTag): void {
     { showDelayControl: true, showBackButton: true, initialState: state },
   )
 
-  query<HTMLElement>("#emu-preview").replaceChildren(handle.element)
-  openModal()
+  query<HTMLElement>("#emu-result-body").replaceChildren(handle.element)
   handle.setSendEnabled(canSend(model, state))
 }
 
@@ -435,7 +421,7 @@ function runReview(): void {
   const config = configFromForm()
   const model = buildReviewModel(snapshotFromForm(), config)
   setStatus(getEmulatorMessages(config.fallbackLocale).status.reviewing)
-  openReviewModal(model, config.fallbackLocale)
+  openReview(model, config.fallbackLocale)
 }
 
 function renderShell(): void {
@@ -447,7 +433,7 @@ function renderShell(): void {
         <header class="ml-header">
           <div>
             <p class="ml-kicker">Local emulator</p>
-            <h1 id="emu-title">mail-lookout</h1>
+            <h1 id="emu-title">Mail Lookout</h1>
           </div>
           <button id="emu-review" class="ml-primary" type="button">Review send</button>
         </header>
@@ -516,16 +502,6 @@ function renderShell(): void {
       </section>
     </main>
 
-    <div id="emu-dialog" class="ml-dialog" role="dialog" aria-modal="true" aria-labelledby="emu-dialog-title" hidden>
-      <div class="ml-dialog-backdrop" data-close-review></div>
-      <section class="ml-dialog-window">
-        <header class="ml-dialog-header">
-          <h2 id="emu-dialog-title">Review dialog</h2>
-          <button id="emu-close" class="ml-close" type="button" aria-label="Close review">Close</button>
-        </header>
-        <div id="emu-preview" class="ml-preview"></div>
-      </section>
-    </div>
   `
 
   const scenarioSelect = query<HTMLSelectElement>("#emu-scenario")
@@ -541,26 +517,16 @@ function renderShell(): void {
   renderDraft()
   setStatus(getEmulatorMessages(currentLocale()).status.ready)
 
-  // Closing the dialog (button or backdrop) abandons the review and goes
-  // back to the draft.
-  const closeToDraft = (): void => {
-    stopTimer()
-    closeModal()
-    setStatus(getEmulatorMessages(currentLocale()).status.ready)
-    renderDraft()
-  }
-
   scenarioSelect.addEventListener("change", () => {
     const selected = scenarios.find(scenario => scenario.id === scenarioSelect.value)
     if (selected) {
+      stopTimer()
       fillForm(selected.snapshot)
       renderDraft()
     }
   })
   query<HTMLButtonElement>("#emu-review").addEventListener("click", runReview)
   query<HTMLSelectElement>("#emu-locale").addEventListener("change", renderDraft)
-  query<HTMLButtonElement>("#emu-close").addEventListener("click", closeToDraft)
-  query<HTMLElement>("[data-close-review]").addEventListener("click", closeToDraft)
   for (const selector of ["#emu-subject", "#emu-to", "#emu-cc", "#emu-bcc", "#emu-attachments"]) {
     query<HTMLElement>(selector).addEventListener("input", updateDraftSummary)
   }

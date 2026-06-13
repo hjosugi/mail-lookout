@@ -84,4 +84,18 @@ export interface Messages {
     readonly notSent: string
     readonly returnLabel: string
   }
+  /** The Settings task pane. */
+  readonly settings: {
+    readonly title: string
+    readonly intro: string
+    readonly domainsLabel: string
+    readonly domainsHint: string
+    readonly delayLabel: string
+    readonly delayHint: string
+    readonly delayUnit: string
+    readonly save: string
+    readonly saved: string
+    readonly reset: string
+    readonly invalid: string
+  }
 }

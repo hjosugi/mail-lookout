@@ -12,7 +12,7 @@
 
 import "../dialog/dialog.css"
 
-import { defaultConfig } from "../config"
+import { loadConfig } from "../config"
 import { buildReviewModel, canSend, initialReviewState } from "../domain/review"
 import type { ReviewModel, ReviewState } from "../domain/review"
 import { getMessages, resolveLocale } from "../i18n/catalog"
@@ -236,7 +236,7 @@ function start(
 }
 
 void Office.onReady(async () => {
-  const config = defaultConfig
+  const config = loadConfig()
   const locale = resolveLocale(Office.context.displayLanguage, config.fallbackLocale)
   const root = document.getElementById("root")
   if (!root) {

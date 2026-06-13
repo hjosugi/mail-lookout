@@ -347,6 +347,78 @@ body {
   font-weight: 600;
 }
 
+/* The Settings task pane. */
+.so-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+}
+
+.so-set-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.so-set-intro {
+  margin: -6px 0 0;
+  color: var(--so-fg-muted);
+  font-size: 12px;
+}
+
+.so-set-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.so-set-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.so-set-hint {
+  color: var(--so-fg-muted);
+  font-size: 12px;
+}
+
+.so-set-input {
+  width: 100%;
+  font: inherit;
+  color: var(--so-fg);
+  background: var(--so-surface);
+  border: 1px solid var(--so-border);
+  border-radius: 6px;
+  padding: 7px 8px;
+}
+
+.so-set-input:focus-visible {
+  outline: 2px solid var(--so-focus);
+  outline-offset: 1px;
+}
+
+.so-set-delay {
+  width: 6em;
+}
+
+.so-set-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.so-set-status {
+  margin: 0;
+  min-height: 1.2em;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--so-accent);
+}
+
+.so-set-status.so-set-error {
+  color: var(--so-external-fg);
+}
+
 /* The compact pane shown while the review dialog is open or counting down. */
 .so-mini {
   display: flex;

@@ -22,7 +22,7 @@
 
   <Id>7888d7db-1c99-4e49-a191-ea73f4088740</Id>
   <Version>1.0.8.0</Version>
-  <ProviderName>mail-lookout contributors</ProviderName>
+  <ProviderName>Mail Lookout contributors</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Mail Lookout" />
   <Description DefaultValue="Review recipients, attachments, and body before an email is sent." />
@@ -113,6 +113,21 @@
                       <SourceLocation resid="Taskpane.Url" />
                     </Action>
                   </Control>
+                  <Control xsi:type="Button" id="SettingsButton">
+                    <Label resid="SettingsButton.Label" />
+                    <Supertip>
+                      <Title resid="SettingsButton.Label" />
+                      <Description resid="SettingsButton.Tooltip" />
+                    </Supertip>
+                    <Icon>
+                      <bt:Image size="16" resid="Icon.16" />
+                      <bt:Image size="32" resid="Icon.32" />
+                      <bt:Image size="80" resid="Icon.80" />
+                    </Icon>
+                    <Action xsi:type="ShowTaskpane">
+                      <SourceLocation resid="Settings.Url" />
+                    </Action>
+                  </Control>
                 </Group>
               </OfficeTab>
             </ExtensionPoint>
@@ -139,15 +154,18 @@
           <bt:Url id="WebViewRuntime.Url" DefaultValue="https://localhost:3000/commands.html" />
           <bt:Url id="JSRuntime.Url" DefaultValue="https://localhost:3000/assets/commands.js" />
           <bt:Url id="Taskpane.Url" DefaultValue="https://localhost:3000/taskpane.html" />
+          <bt:Url id="Settings.Url" DefaultValue="https://localhost:3000/settings.html" />
         </bt:Urls>
 
         <bt:ShortStrings>
-          <bt:String id="ReviewGroup.Label" DefaultValue="mail-lookout" />
+          <bt:String id="ReviewGroup.Label" DefaultValue="Mail Lookout" />
           <bt:String id="ReviewPaneButton.Label" DefaultValue="Open review" />
+          <bt:String id="SettingsButton.Label" DefaultValue="Settings" />
         </bt:ShortStrings>
 
         <bt:LongStrings>
-          <bt:String id="ReviewPaneButton.Tooltip" DefaultValue="Open the mail-lookout review pane." />
+          <bt:String id="ReviewPaneButton.Tooltip" DefaultValue="Open the Mail Lookout review pane." />
+          <bt:String id="SettingsButton.Tooltip" DefaultValue="Edit Mail Lookout settings: internal domains and the default wait." />
         </bt:LongStrings>
       </Resources>
 

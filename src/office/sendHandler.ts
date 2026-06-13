@@ -16,7 +16,7 @@
  *     without a confirmation.
  */
 
-import { defaultConfig } from "../config"
+import { loadConfig } from "../config"
 import { buildReviewModel } from "../domain/review"
 import { collectSnapshot } from "./collect"
 import { getMessages, resolveLocale } from "../i18n/catalog"
@@ -51,7 +51,7 @@ function failureOptions(
   const detail = error instanceof Error ? `${error.name}: ${error.message}` : String(error)
   return {
     allowEvent: false,
-    errorMessage: `${messages.cancel.notSent}\n\nmail-lookout error: ${detail.slice(0, 180)}`,
+    errorMessage: `${messages.cancel.notSent}\n\nMail Lookout error: ${detail.slice(0, 180)}`,
     cancelLabel: messages.cancel.returnLabel,
   }
 }
@@ -63,7 +63,7 @@ function failureOptions(
  */
 export async function onMessageSendHandler(event: Office.AddinCommands.Event): Promise<void> {
   const complete = completeOnce(event)
-  const config = defaultConfig
+  const config = loadConfig()
   const locale = resolveLocale(Office.context.displayLanguage, config.fallbackLocale)
 
   try {

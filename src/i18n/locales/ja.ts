@@ -66,4 +66,17 @@ export const ja: Messages = {
     notSent: "メールは送信していません。下書きに戻って内容を確認してください。",
     returnLabel: "下書きに戻る",
   },
+  settings: {
+    title: "設定",
+    intro: "この端末でのみ有効な設定です。",
+    domainsLabel: "社内ドメイン",
+    domainsHint: "1行に1つ。ここに無いドメインの宛先は「社外」として扱います。",
+    delayLabel: "デフォルトの待ち時間",
+    delayHint: "「確認して送信」後のカウントダウンの初期値です。",
+    delayUnit: "分",
+    save: "保存",
+    saved: "保存しました。",
+    reset: "既定に戻す",
+    invalid: "入力を確認してください（社内ドメインは1つ以上必要です）。",
+  },
 }

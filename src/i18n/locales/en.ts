@@ -67,4 +67,17 @@ export const en: Messages = {
     notSent: "The message was not sent. Return to your draft to review it.",
     returnLabel: "Back to draft",
   },
+  settings: {
+    title: "Settings",
+    intro: "These settings apply on this device only.",
+    domainsLabel: "Internal domains",
+    domainsHint: "One per line. Recipients on any other domain are treated as external.",
+    delayLabel: "Default wait",
+    delayHint: "The starting countdown after you select Review & send.",
+    delayUnit: "min",
+    save: "Save",
+    saved: "Saved.",
+    reset: "Reset to defaults",
+    invalid: "Check your input (at least one internal domain is required).",
+  },
 }

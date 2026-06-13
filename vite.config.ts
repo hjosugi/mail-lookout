@@ -51,6 +51,7 @@ export default defineConfig({
         terms: fileURLToPath(new URL("terms.html", import.meta.url)),
         commands: fileURLToPath(new URL("commands.html", import.meta.url)),
         taskpane: fileURLToPath(new URL("taskpane.html", import.meta.url)),
+        settings: fileURLToPath(new URL("settings.html", import.meta.url)),
         emulator: fileURLToPath(new URL("emulator.html", import.meta.url)),
       },
       output: {
