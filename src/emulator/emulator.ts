@@ -337,13 +337,19 @@ interface MiniButton {
 }
 
 /** Replace the result panel with a status line and optional buttons. */
-function renderMini(text: string, buttons: readonly MiniButton[]): void {
+function renderMini(text: string, buttons: readonly MiniButton[], note?: string): void {
   const wrap = document.createElement("div")
   wrap.className = "so-mini"
   const status = document.createElement("p")
   status.className = "so-taskpane-status"
   status.textContent = text
   wrap.append(status)
+  if (note) {
+    const noteEl = document.createElement("p")
+    noteEl.className = "so-mini-note"
+    noteEl.textContent = note
+    wrap.append(noteEl)
+  }
   if (buttons.length > 0) {
     const row = document.createElement("div")
     row.className = "so-mini-actions"
@@ -417,29 +423,33 @@ function startMini(
 
   const show = (): void => {
     const remaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000))
-    renderMini(emu.mini.holding(formatCountdown(remaining)), [
-      {
-        label: emu.mini.backToReview,
-        kind: "secondary",
-        onClick: () => {
-          stopTimer()
-          clearProgress(fingerprint)
-          activeFingerprint = null
-          openReview(model, locale, fingerprint)
+    renderMini(
+      emu.mini.holding(formatCountdown(remaining)),
+      [
+        {
+          label: emu.mini.backToReview,
+          kind: "secondary",
+          onClick: () => {
+            stopTimer()
+            clearProgress(fingerprint)
+            activeFingerprint = null
+            openReview(model, locale, fingerprint)
+          },
         },
-      },
-      {
-        label: emu.mini.cancel,
-        kind: "danger",
-        onClick: () => {
-          stopTimer()
-          clearProgress(fingerprint)
-          activeFingerprint = null
-          setStatus(emu.status.ready)
-          renderDraft()
+        {
+          label: emu.mini.cancel,
+          kind: "danger",
+          onClick: () => {
+            stopTimer()
+            clearProgress(fingerprint)
+            activeFingerprint = null
+            setStatus(emu.status.ready)
+            renderDraft()
+          },
         },
-      },
-    ])
+      ],
+      messages.waiting.keepOpen,
+    )
   }
   show()
   currentTimer = window.setInterval(() => {
@@ -622,6 +632,16 @@ function renderShell(): void {
   renderDraft()
   refreshWaiting()
   window.setInterval(refreshWaiting, 1000)
+  // Mirror the task pane: warn before leaving while a countdown is running,
+  // since reloading or closing would cancel the pending send.
+  window.addEventListener("beforeunload", event => {
+    if (currentTimer !== null) {
+      event.preventDefault()
+      event.returnValue = getMessages(currentLocale()).waiting.unloadWarning
+      return getMessages(currentLocale()).waiting.unloadWarning
+    }
+    return undefined
+  })
   setStatus(getEmulatorMessages(currentLocale()).status.ready)
 
   scenarioSelect.addEventListener("change", () => {
