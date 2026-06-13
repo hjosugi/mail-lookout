@@ -168,8 +168,9 @@ version:set 1.2.3` for other version changes. These commands update
 `package.json`, `package-lock.json`, and `manifest.xml`, create the
 version commit, push the current branch, then create and push the
 `v*` release tag. GitHub Actions creates the release asset from that
-tag. Use `bun run version:bump patch` when you only want the local
-version commit without pushing or tagging.
+tag. The script shows the next version first and asks for a `y/N`
+confirmation before changing files. Use `bun run version:bump patch`
+when you only want the local version commit without pushing or tagging.
 
 See [NETLIFY.md](./NETLIFY.md) for the step-by-step flow.
 

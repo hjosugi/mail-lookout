@@ -68,7 +68,7 @@ patch version を上げて、commit、branch push、GitHub Releases 用の tag p
 bun run version:patch
 ```
 
-この script は `package.json`、`package-lock.json`、`manifest.xml` の version をまとめて更新し、version commit を作り、現在の branch を push してから `v1.0.0` のような release tag を作成・push します。GitHub Actions はこの tag push を契機に GitHub Release asset を作ります。minor / major は `bun run version:minor`、`bun run version:major`、明示的に指定する場合は `bun run version:set 1.2.3` を使います。
+この script は次の version を表示して `y/N` 確認してから、`package.json`、`package-lock.json`、`manifest.xml` の version をまとめて更新し、version commit を作り、現在の branch を push してから `v1.0.0` のような release tag を作成・push します。GitHub Actions はこの tag push を契機に GitHub Release asset を作ります。minor / major は `bun run version:minor`、`bun run version:major`、明示的に指定する場合は `bun run version:set 1.2.3` を使います。
 
 push / tag なしでローカルの version commit だけ作りたい場合は、以下を使います。
 
