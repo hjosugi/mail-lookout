@@ -1,4 +1,4 @@
-# mail-lookout
+# Mail Lookout
 
 新しい Outlook と Outlook on the web 向けの送信確認アドインです。
 
@@ -276,9 +276,9 @@ Outlook 内から通常のアドインとして検索・インストールでき
 ### OutlookOkan との関係
 
 [OutlookOkan](https://github.com/t-miyake/OutlookOkan) は Outlook 向けの
-既存の送信確認ツールです。mail-lookout はそのツールの目的に敬意を持っています。
+既存の送信確認ツールです。Mail Lookout はそのツールの目的に敬意を持っています。
 
-mail-lookout は独立したプロジェクトです。OutlookOkan およびその作者と
+Mail Lookout は独立したプロジェクトです。OutlookOkan およびその作者と
 提携、関係、承認、後援を受けているものではありません。
 
 ## 統合マニフェストへの移行

@@ -20,5 +20,5 @@ coverage/
 *.crt
 *.key
 
-# Private, personal notes — never committed
+# Private notes
 private/

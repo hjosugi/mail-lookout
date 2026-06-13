@@ -5,13 +5,15 @@
   A blue rounded tile with a bold white "M" (Mail); a small eye sits at
   the centre of the M (Lookout — watching), kept subtle so the M reads
   first. Rasterized to the icon-*.png sizes the manifest references with:
-  rsvg-convert -w N -h N icon.svg.
+  npm run icons
 -->
 <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
   <rect x="3" y="3" width="74" height="74" rx="16" fill="#0f6cbd"/>
   <path d="M17 59 L17 25 L40 48 L63 25 L63 59" fill="none" stroke="#ffffff"
         stroke-width="10" stroke-linejoin="round" stroke-linecap="round"/>
-  <!-- Subtle eye at the M's centre. -->
-  <circle cx="40" cy="46" r="4.6" fill="#0f6cbd"/>
-  <circle cx="41.2" cy="44.8" r="1.6" fill="#ffffff"/>
+  <!-- Subtle eye at the M's centre. The small L-shaped highlight keeps
+       the eye readable even at add-in icon sizes. -->
+  <circle cx="40" cy="46" r="6.1" fill="#0f6cbd"/>
+  <path d="M37.7 42.5 L37.7 47.1 L42.9 47.1" fill="none" stroke="#ffffff"
+        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

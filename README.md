@@ -1,4 +1,4 @@
-# mail-lookout
+# Mail Lookout
 
 A send-confirmation add-in for new Outlook and Outlook on the web.
 
@@ -281,10 +281,10 @@ environment.
 ### Relation to OutlookOkan
 
 [OutlookOkan](https://github.com/t-miyake/OutlookOkan) is an existing
-send-confirmation tool for Outlook. mail-lookout respects the work
+send-confirmation tool for Outlook. Mail Lookout respects the work
 and the problem it addresses.
 
-mail-lookout is an independent project. It is not affiliated with,
+Mail Lookout is an independent project. It is not affiliated with,
 endorsed by, or sponsored by OutlookOkan or its author.
 
 ## Migrating to the unified manifest
