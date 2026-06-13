@@ -174,6 +174,7 @@ function start(
   // code after sendAsync is not guaranteed to run.
   const confirmAndSend = (): void => {
     stopTimer()
+    bannerWaiting = false
     deadline = null
     rememberConfirmation(fingerprint)
     clearProgress(fingerprint)
@@ -204,6 +205,8 @@ function start(
   // The send-wait cap is full: don't start another countdown. Let the user
   // retry (a slot may have freed) or step back to the checklist.
   const showCapReached = (): void => {
+    bannerWaiting = false
+    refreshBanner()
     view.replaceChildren(
       buildMini(messages.waiting.capReached(MAX_PENDING_REVIEWS), [
         {
@@ -269,6 +272,8 @@ function start(
   }
 
   function renderReview(): void {
+    bannerWaiting = false
+    refreshBanner()
     const callbacks: DialogCallbacks = {
       onRecipientToggle(index, checked) {
         state = {
