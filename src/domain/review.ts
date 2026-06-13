@@ -19,7 +19,7 @@ import { bodyPreview } from "./body"
 import type { Attachment, FieldRecipient, MessageSnapshot, RecipientField } from "./types"
 
 /** The longest body preview we show in the dialog. */
-export const BODY_PREVIEW_MAX_LENGTH = 600
+const BODY_PREVIEW_MAX_LENGTH = 600
 
 /** A recipient as shown in the dialog. */
 export interface RecipientView {

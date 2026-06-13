@@ -2,17 +2,16 @@
 <!--
   Mail Lookout add-in icon source.
 
-  A blue rounded tile with a white eye whose upper lid is an M-shaped
-  double arch — Mail (M) plus Lookout (the watching eye) in one mark.
-  Rasterized to the icon-*.png sizes the manifest references with:
+  A blue rounded tile with a bold white "M" (Mail); a small eye sits at
+  the centre of the M (Lookout — watching), kept subtle so the M reads
+  first. Rasterized to the icon-*.png sizes the manifest references with:
   rsvg-convert -w N -h N icon.svg.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
   <rect x="3" y="3" width="74" height="74" rx="16" fill="#0f6cbd"/>
-  <!-- Eye outline; the top lid rises into two peaks to read as an "M". -->
-  <path d="M13 47 C 21 26, 33 26, 40 41 C 47 26, 59 26, 67 47 C 56 61, 24 61, 13 47 Z"
-        fill="#ffffff"/>
-  <!-- Pupil in the tile colour, so it reads as an opening, with a catchlight. -->
-  <circle cx="40" cy="46" r="8.5" fill="#0f6cbd"/>
-  <circle cx="43" cy="43" r="2.6" fill="#ffffff"/>
+  <path d="M17 59 L17 25 L40 48 L63 25 L63 59" fill="none" stroke="#ffffff"
+        stroke-width="10" stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- Subtle eye at the M's centre. -->
+  <circle cx="40" cy="46" r="4.6" fill="#0f6cbd"/>
+  <circle cx="41.2" cy="44.8" r="1.6" fill="#ffffff"/>
 </svg>

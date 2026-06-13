@@ -6,8 +6,8 @@
  * every rule can be unit tested without Outlook.
  */
 
-/** A single email recipient. */
-export interface Recipient {
+/** A single email recipient. The base for FieldRecipient; not exported. */
+interface Recipient {
   /** The name shown to the user. May be empty. */
   readonly displayName: string
   /** The SMTP address, lowercased and trimmed. */

@@ -119,12 +119,12 @@ body {
 }
 
 .so-section {
-  margin-top: 16px;
+  margin-top: 12px;
 }
 
 .so-section-title {
-  margin: 0 0 8px;
-  font-size: 13px;
+  margin: 0 0 5px;
+  font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -138,7 +138,7 @@ body {
 }
 
 .so-field-group {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .so-field-label {
@@ -157,9 +157,9 @@ body {
 .so-recipient {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
-  padding: 6px 8px;
+  padding: 5px 7px;
   background: var(--so-surface);
   border: 1px solid var(--so-border);
   border-radius: 6px;
@@ -259,7 +259,7 @@ body {
   align-items: baseline;
   justify-content: space-between;
   gap: 8px;
-  padding: 6px 8px;
+  padding: 5px 7px;
   background: var(--so-surface);
   border: 1px solid var(--so-border);
   border-radius: 6px;
@@ -278,7 +278,7 @@ body {
 
 .so-subject {
   margin: 0;
-  padding: 8px 10px;
+  padding: 6px 8px;
   background: var(--so-surface);
   border: 1px solid var(--so-border);
   border-radius: 6px;
@@ -289,7 +289,7 @@ body {
   display: block;
   width: 100%;
   margin: 0;
-  padding: 8px 10px;
+  padding: 6px 8px;
   font: inherit;
   color: var(--so-fg);
   background: var(--so-surface);
@@ -327,7 +327,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 12px 20px;
+  padding: 10px 14px;
   border-top: 1px solid var(--so-border);
   background: var(--so-bg);
 }
@@ -340,7 +340,7 @@ body {
 
 .so-taskpane-status {
   margin: 0;
-  padding: 12px 20px;
+  padding: 10px 14px;
   color: var(--so-accent);
   border-top: 1px solid var(--so-border);
   font-size: 13px;
