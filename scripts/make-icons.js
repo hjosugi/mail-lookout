@@ -23,7 +23,7 @@ const M_POINTS = [
   [63, 25],
   [63, 59],
 ]
-const M_STROKE = 10
+const M_STROKE = 12
 const EYE_CUTOUT = { x: 40, y: 46, radius: 6.1 }
 const EYE_HIGHLIGHT_POINTS = [
   [38.4, 43.3],
