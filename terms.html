@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Terms of use for the mail-lookout Outlook add-in."
+    />
+    <title>Terms of Use - mail-lookout</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f7f7f5;
+        --ink: #1f2933;
+        --muted: #56616d;
+        --line: #d8ddd7;
+        --accent: #115e59;
+        --surface: #ffffff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          "Segoe UI",
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        line-height: 1.6;
+      }
+
+      main {
+        width: min(820px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 48px 0;
+      }
+
+      header {
+        padding-bottom: 28px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2rem, 7vw, 3.8rem);
+        line-height: 1;
+      }
+
+      h2 {
+        margin: 32px 0 8px;
+        font-size: 1.15rem;
+      }
+
+      p,
+      ul {
+        color: var(--muted);
+      }
+
+      a {
+        color: var(--accent);
+      }
+
+      .panel {
+        margin-top: 24px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: 20px;
+      }
+
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-top: 32px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Terms of Use</h1>
+        <p>Last updated: June 13, 2026</p>
+      </header>
+
+      <section class="panel">
+        <h2>Use of the Add-in</h2>
+        <p>
+          mail-lookout is provided to help Outlook users review messages before
+          sending. You are responsible for deciding whether to send each message.
+        </p>
+
+        <h2>No Guarantee</h2>
+        <p>
+          The add-in may miss issues or show warnings that are not relevant to a
+          specific message. It does not guarantee prevention of misdirected mail,
+          missing attachments, or other sending mistakes.
+        </p>
+
+        <h2>Availability</h2>
+        <p>
+          The add-in may change, become unavailable, or stop working with future
+          Outlook or Microsoft 365 platform changes.
+        </p>
+
+        <h2>License</h2>
+        <p>
+          Source code licensing information is available in the
+          <a href="https://github.com/hjosugi/mail-lookout/blob/main/LICENSE">project license</a>.
+        </p>
+      </section>
+
+      <nav aria-label="Related links">
+        <a href="/">Home</a>
+        <a href="/support.html">Support</a>
+        <a href="/privacy.html">Privacy Policy</a>
+      </nav>
+    </main>
+  </body>
+</html>

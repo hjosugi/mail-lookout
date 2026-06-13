@@ -37,13 +37,15 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "heartbeat": "node scripts/heartbeat.js",
     "validate": "office-addin-manifest validate manifest.xml",
     "version:patch": "node scripts/bump-version.js patch",
     "version:minor": "node scripts/bump-version.js minor",
     "version:major": "node scripts/bump-version.js major",
     "version:set": "node scripts/bump-version.js",
     "release:tag": "node scripts/release-tag.js",
-    "check": "biome ci . && npm run typecheck && npm run test:coverage && npm run build && npm run validate"
+    "check": "biome ci . && npm run typecheck && npm run test:coverage && npm run build && npm run validate",
+    "check:publish": "npm run check && npm run heartbeat"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.16",

@@ -46,6 +46,9 @@ export default defineConfig({
     rollupOptions: {
       input: {
         index: fileURLToPath(new URL("index.html", import.meta.url)),
+        privacy: fileURLToPath(new URL("privacy.html", import.meta.url)),
+        support: fileURLToPath(new URL("support.html", import.meta.url)),
+        terms: fileURLToPath(new URL("terms.html", import.meta.url)),
         commands: fileURLToPath(new URL("commands.html", import.meta.url)),
         taskpane: fileURLToPath(new URL("taskpane.html", import.meta.url)),
         emulator: fileURLToPath(new URL("emulator.html", import.meta.url)),

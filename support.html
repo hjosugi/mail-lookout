@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Support information for the mail-lookout Outlook add-in."
+    />
+    <title>Support - mail-lookout</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f7f7f5;
+        --ink: #1f2933;
+        --muted: #56616d;
+        --line: #d8ddd7;
+        --accent: #115e59;
+        --surface: #ffffff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          "Segoe UI",
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        line-height: 1.6;
+      }
+
+      main {
+        width: min(820px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 48px 0;
+      }
+
+      header {
+        padding-bottom: 28px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2rem, 7vw, 3.8rem);
+        line-height: 1;
+      }
+
+      h2 {
+        margin: 32px 0 8px;
+        font-size: 1.15rem;
+      }
+
+      p,
+      ul {
+        color: var(--muted);
+      }
+
+      a {
+        color: var(--accent);
+      }
+
+      .panel {
+        margin-top: 24px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: 20px;
+      }
+
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-top: 32px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Support</h1>
+        <p>Help and contact information for the mail-lookout Outlook add-in.</p>
+      </header>
+
+      <section class="panel">
+        <h2>Contact</h2>
+        <p>
+          For questions, bug reports, or feature requests, open an issue on
+          <a href="https://github.com/hjosugi/mail-lookout/issues">GitHub Issues</a>.
+        </p>
+
+        <h2>Before Reporting</h2>
+        <ul>
+          <li>Use new Outlook or Outlook on the web.</li>
+          <li>Confirm that the add-in was installed from the latest manifest.</li>
+          <li>Include the Outlook client, browser, and a short description of the problem.</li>
+        </ul>
+
+        <h2>Known Scope</h2>
+        <p>
+          mail-lookout is designed to help review recipients, attachments, and
+          message content before sending. It is not a guarantee that every
+          sending mistake will be prevented.
+        </p>
+      </section>
+
+      <nav aria-label="Related links">
+        <a href="/">Home</a>
+        <a href="/privacy.html">Privacy Policy</a>
+        <a href="/terms.html">Terms of Use</a>
+      </nav>
+    </main>
+  </body>
+</html>

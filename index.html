@@ -80,6 +80,17 @@
         margin-top: 28px;
       }
 
+      .footer-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 18px;
+        margin-top: 28px;
+        padding-top: 20px;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
       a {
         color: var(--accent-strong);
       }
@@ -187,6 +198,12 @@
           <p>Pause for a short review of the message body and empty-subject warning.</p>
         </article>
       </section>
+
+      <nav class="footer-links" aria-label="Legal and support links">
+        <a href="/support.html">Support</a>
+        <a href="/privacy.html">Privacy Policy</a>
+        <a href="/terms.html">Terms of Use</a>
+      </nav>
     </main>
   </body>
 </html>

@@ -103,5 +103,12 @@ Netlify で公開されるのは、アドイン本体のWebファイルと配布
 - `.env`、`.env.*`、証明書、秘密鍵、zip は commit しない。
 - `.claude/`、`.codex/`、`.gemini/` などのローカルAI設定は commit しない。
 - `src/config/defaults.ts` の `internalDomains` は、公開したくない社内ドメインに置き換えた状態で commit しない。
-- `manifest.xml` の `SupportUrl` は公開先のリポジトリURLにする。
+- `manifest.xml` の `SupportUrl` は公開サポートページにする。
 - Marketplace / AppSource に出す段階では、Support URL、Privacy Policy、Terms of Use、アイコン、説明文を本番用に整える。
+
+現在の公開URL:
+
+- Site: `https://mail-lookout.netlify.app/`
+- Support URL: `https://mail-lookout.netlify.app/support.html`
+- Privacy Policy: `https://mail-lookout.netlify.app/privacy.html`
+- Terms of Use: `https://mail-lookout.netlify.app/terms.html`
