@@ -167,11 +167,17 @@ body {
 
 .so-recipient-name {
   font-weight: 500;
+  /* Let a long address shrink and wrap instead of overflowing a narrow
+     pane (emails have no spaces, so allow breaking anywhere). */
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .so-recipient-email {
   color: var(--so-fg-muted);
   font-size: 13px;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .so-badge {
@@ -235,6 +241,9 @@ body {
   flex-wrap: wrap;
   gap: 8px;
   flex: 1 1 auto;
+  /* Allow the label to shrink below its content so the long address
+     inside can wrap rather than overflow the row. */
+  min-width: 0;
   margin: 0;
 }
 
