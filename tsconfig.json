@@ -5,6 +5,11 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
 
+    /* Import from src with "@/..." instead of long relative paths.
+       With bundler resolution, paths resolve relative to this file, so
+       no baseUrl is needed (and baseUrl is deprecated in TS 6+). */
+    "paths": { "@/*": ["./src/*"] },
+
     /* No global type packages. office-js is pulled in only via an
        explicit triple-slash reference in the Office layer files.
        So any accidental Office use in the core layers is an error. */

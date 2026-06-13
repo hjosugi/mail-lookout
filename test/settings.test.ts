@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 
-import { defaultConfig } from "../src/config/defaults"
-import { applySettings, normalizeSettings } from "../src/config/settings"
+import { defaultConfig } from "@/config/defaults"
+import { applySettings, normalizeSettings } from "@/config/settings"
 
 describe("applySettings", () => {
   it("returns the defaults when there are no overrides", () => {

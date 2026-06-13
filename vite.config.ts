@@ -39,6 +39,10 @@ const https = await httpsOptions()
 
 export default defineConfig({
   root: rootDir,
+  resolve: {
+    // "@/..." resolves to src, matching the tsconfig paths alias.
+    alias: { "@": fileURLToPath(new URL("src", import.meta.url)) },
+  },
   build: {
     outDir: "dist",
     sourcemap: true,

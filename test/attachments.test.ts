@@ -4,8 +4,8 @@ import {
   detectForgottenAttachment,
   mentionsAttachment,
   realAttachments,
-} from "../src/domain/attachments"
-import type { Attachment, MessageSnapshot } from "../src/domain/types"
+} from "@/domain/attachments"
+import type { Attachment, MessageSnapshot } from "@/domain/types"
 
 function snapshot(overrides: Partial<MessageSnapshot>): MessageSnapshot {
   return {

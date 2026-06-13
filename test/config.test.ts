@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest"
 
-import { defaultConfig } from "../src/config/defaults"
-import { configSchema } from "../src/config/types"
-import { isLocaleTag } from "../src/i18n/catalog"
+import { defaultConfig } from "@/config/defaults"
+import { configSchema } from "@/config/types"
+import { isLocaleTag } from "@/i18n/catalog"
 
 describe("defaultConfig", () => {
   it("has a non-empty list of internal domains", () => {

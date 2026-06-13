@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest"
 
-import { defaultConfig } from "../src/config/defaults"
-import type { Config } from "../src/config/types"
-import { buildReviewModel, canSend, initialReviewState } from "../src/domain/review"
-import type { ReviewModel } from "../src/domain/review"
-import type { Attachment, FieldRecipient, MessageSnapshot } from "../src/domain/types"
+import { defaultConfig } from "@/config/defaults"
+import type { Config } from "@/config/types"
+import { buildReviewModel, canSend, initialReviewState } from "@/domain/review"
+import type { ReviewModel } from "@/domain/review"
+import type { Attachment, FieldRecipient, MessageSnapshot } from "@/domain/types"
 
 function config(overrides: Partial<Config>): Config {
   return { ...defaultConfig, ...overrides }

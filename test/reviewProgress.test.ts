@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest"
 
-import { defaultConfig } from "../src/config/defaults"
-import { buildReviewModel, initialReviewState } from "../src/domain/review"
-import type { ReviewState } from "../src/domain/review"
-import type { MessageSnapshot } from "../src/domain/types"
-import { clearProgress, loadProgress, saveProgress } from "../src/office/reviewProgress"
-import type { StorageLike } from "../src/office/reviewProgress"
+import { defaultConfig } from "@/config/defaults"
+import { buildReviewModel, initialReviewState } from "@/domain/review"
+import type { ReviewState } from "@/domain/review"
+import type { MessageSnapshot } from "@/domain/types"
+import { clearProgress, loadProgress, saveProgress } from "@/office/reviewProgress"
+import type { StorageLike } from "@/office/reviewProgress"
 
 class MemoryStorage implements StorageLike {
   readonly values = new Map<string, string>()

@@ -6,8 +6,8 @@ import {
   domainOf,
   isExternal,
   normalizeEmailAddress,
-} from "../src/domain/recipients"
-import type { FieldRecipient } from "../src/domain/types"
+} from "@/domain/recipients"
+import type { FieldRecipient } from "@/domain/types"
 
 describe("normalizeEmailAddress", () => {
   it("trims and lowercases an email address", () => {

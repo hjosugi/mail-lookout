@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest"
 
-import { defaultConfig } from "../src/config/defaults"
-import { buildReviewModel } from "../src/domain/review"
-import type { MessageSnapshot } from "../src/domain/types"
-import { locales } from "../src/i18n/catalog"
+import { defaultConfig } from "@/config/defaults"
+import { buildReviewModel } from "@/domain/review"
+import type { MessageSnapshot } from "@/domain/types"
+import { locales } from "@/i18n/catalog"
 import {
   REVIEW_PANE_COMMAND_ID,
   buildSmartAlertMessage,
@@ -12,8 +12,8 @@ import {
   rememberConfirmation,
   smartAlertCancelOptions,
   snapshotFingerprint,
-} from "../src/office/smartAlert"
-import type { StorageLike } from "../src/office/smartAlert"
+} from "@/office/smartAlert"
+import type { StorageLike } from "@/office/smartAlert"
 
 class MemoryStorage implements StorageLike {
   readonly values = new Map<string, string>()

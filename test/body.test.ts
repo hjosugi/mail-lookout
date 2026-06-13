@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 
-import { bodyPreview, isBlank, isSubjectEmpty } from "../src/domain/body"
-import type { MessageSnapshot } from "../src/domain/types"
+import { bodyPreview, isBlank, isSubjectEmpty } from "@/domain/body"
+import type { MessageSnapshot } from "@/domain/types"
 
 function snapshot(subject: string): MessageSnapshot {
   return {

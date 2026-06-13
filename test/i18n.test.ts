@@ -6,7 +6,7 @@ import {
   locales,
   resolveLocale,
   supportedLocales,
-} from "../src/i18n/catalog"
+} from "@/i18n/catalog"
 
 /**
  * Collect every leaf key path of an object.
