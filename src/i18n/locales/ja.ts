@@ -48,9 +48,10 @@ export const ja: Messages = {
     externalRecipients: count => `社外の宛先が ${count} 件あります。`,
   },
   smartAlert: {
-    sendAgain: "確認を開いて必要な項目をチェックしてください。確認後、もう一度送信を押します。",
-    warnings: "警告",
+    prompt: "必要な項目をチェックしてください。",
+    waiting: "送信待機中です。",
     openReview: "確認する",
+    showWaiting: "待機画面を表示",
   },
   taskPane: {
     title: "送信前の確認",

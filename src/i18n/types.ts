@@ -59,10 +59,14 @@ export interface Messages {
     readonly externalRecipients: (count: number) => string
   }
   readonly smartAlert: {
-    /** Tell the user that the next unchanged send attempt confirms the review. */
-    readonly sendAgain: string
-    readonly warnings: string
+    /** One-line prompt in the built-in dialog: open the review and check items. */
+    readonly prompt: string
+    /** Shown in the built-in dialog while a send countdown is already running. */
+    readonly waiting: string
+    /** Action button: open the review pane. */
     readonly openReview: string
+    /** Action button when a countdown is running: open the status pane. */
+    readonly showWaiting: string
   }
   readonly taskPane: {
     readonly title: string

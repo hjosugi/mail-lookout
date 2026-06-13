@@ -49,9 +49,10 @@ export const en: Messages = {
       `There ${count === 1 ? "is" : "are"} ${count} external recipient${count === 1 ? "" : "s"}.`,
   },
   smartAlert: {
-    sendAgain: "Open the review pane and check the required items. Then press Send again.",
-    warnings: "Warnings",
+    prompt: "Check the required items.",
+    waiting: "Sending is on hold.",
     openReview: "Review",
+    showWaiting: "Show status",
   },
   taskPane: {
     title: "Confirm before sending",

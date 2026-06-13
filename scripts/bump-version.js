@@ -1,6 +1,7 @@
 import fs from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
+import { spawnSync } from "node:child_process"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootDir = path.resolve(__dirname, "..")
@@ -68,6 +69,19 @@ console.log(
   `[bump-version] package.json: ${formatPackageVersion(currentVersion)} -> ${nextPackageVersion}`,
 )
 console.log(`[bump-version] manifest.xml: ${currentManifestVersion} -> ${nextManifestVersion}`)
+
+// Automatically stage and commit the changes
+const gitAdd = spawnSync("git", ["add", "-A"], { cwd: rootDir, stdio: "inherit" })
+if (gitAdd.status !== 0) {
+  fail("git add -A failed.")
+}
+
+const commitMsg = `chore: bump version to ${nextPackageVersion}`
+const gitCommit = spawnSync("git", ["commit", "-m", commitMsg], { cwd: rootDir, stdio: "inherit" })
+if (gitCommit.status !== 0) {
+  fail(`git commit failed: ${gitCommit.error || "status code " + gitCommit.status}`)
+}
+console.log(`[bump-version] Successfully committed: "${commitMsg}"`)
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"))
