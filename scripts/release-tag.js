@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process"
-import { readFileSync } from "node:fs"
+import { readFileSync, readSync } from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
@@ -10,7 +10,13 @@ const args = process.argv.slice(2)
 const flags = new Set(args.filter(arg => arg.startsWith("--")))
 const tagArg = args.find(arg => !arg.startsWith("--"))
 
-const knownFlags = new Set(["--dry-run", "--offline", "--allow-dirty", "--allow-branch"])
+const knownFlags = new Set([
+  "--dry-run",
+  "--offline",
+  "--allow-dirty",
+  "--allow-branch",
+  "--yes",
+])
 for (const flag of flags) {
   if (!knownFlags.has(flag)) {
     fail(`Unknown flag: ${flag}`)
@@ -21,6 +27,7 @@ const dryRun = flags.has("--dry-run")
 const offline = flags.has("--offline")
 const allowDirty = flags.has("--allow-dirty")
 const allowBranch = flags.has("--allow-branch")
+const skipConfirm = flags.has("--yes")
 
 const packageJson = JSON.parse(readFileSync(path.join(rootDir, "package.json"), "utf8"))
 const tag = normalizeTag(tagArg ?? packageJson.version)
@@ -123,7 +130,27 @@ if (dryRun) {
   process.exit(0)
 }
 
+if (!skipConfirm && !confirm(`[release-tag] Create and push ${tag}? [y/N] `)) {
+  console.log("[release-tag] Aborted. No tag was created or pushed.")
+  process.exit(0)
+}
+
 run("git", ["tag", "-a", tag, "-m", `mail-lookout ${tag}`])
 run("git", ["push", "origin", tag])
 
 console.log(`[release-tag] Pushed ${tag}. GitHub Actions will create the release asset.`)
+
+/** Ask a yes/no question on the terminal; true only on an explicit yes. */
+function confirm(question) {
+  process.stdout.write(question)
+  const buffer = Buffer.alloc(256)
+  let bytesRead
+  try {
+    bytesRead = readSync(0, buffer, 0, buffer.length, null)
+  } catch {
+    // No interactive terminal to read from: treat as "no".
+    return false
+  }
+  const answer = buffer.toString("utf8", 0, bytesRead).trim().toLowerCase()
+  return answer === "y" || answer === "yes"
+}
