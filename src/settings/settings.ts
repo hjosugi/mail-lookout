@@ -10,7 +10,8 @@
 
 import "../dialog/dialog.css"
 
-import { currentSettings, defaultConfig, saveSettings, clearSettings } from "../config"
+import { defaultConfig } from "../config"
+import { currentSettings, saveSettings, clearSettings } from "../office/userSettings"
 import { getMessages, resolveLocale } from "../i18n/catalog"
 import type { LocaleTag } from "../i18n"
 
@@ -77,21 +78,23 @@ function start(locale: LocaleTag, root: HTMLElement): void {
       setStatus(messages.invalid, false)
       return
     }
-    try {
-      saveSettings({ internalDomains: list, sendDelaySeconds })
-      fill()
-      setStatus(messages.saved, true)
-    } catch {
-      setStatus(messages.invalid, false)
-    }
+    saveSettings({ internalDomains: list, sendDelaySeconds }, ok => {
+      if (ok) {
+        fill()
+        setStatus(messages.saved, true)
+      } else {
+        setStatus(messages.invalid, false)
+      }
+    })
   })
 
   const reset = el("button", "so-button so-button-secondary", messages.reset)
   reset.type = "button"
   reset.addEventListener("click", () => {
-    clearSettings()
-    fill()
-    setStatus("", true)
+    clearSettings(() => {
+      fill()
+      setStatus("", true)
+    })
   })
 
   const actions = el("div", "so-set-actions")

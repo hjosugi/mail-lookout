@@ -12,7 +12,7 @@
 
 import "../dialog/dialog.css"
 
-import { loadConfig } from "../config"
+import { loadConfig } from "../office/userSettings"
 import { buildReviewModel, canSend, initialReviewState } from "../domain/review"
 import type { ReviewModel, ReviewState } from "../domain/review"
 import { getMessages, resolveLocale } from "../i18n/catalog"

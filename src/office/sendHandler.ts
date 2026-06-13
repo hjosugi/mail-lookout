@@ -16,7 +16,7 @@
  *     without a confirmation.
  */
 
-import { loadConfig } from "../config"
+import { loadConfig } from "./userSettings"
 import { buildReviewModel } from "../domain/review"
 import { collectSnapshot } from "./collect"
 import { getMessages, resolveLocale } from "../i18n/catalog"
