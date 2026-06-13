@@ -28,6 +28,7 @@ import {
   snapshotFingerprint,
 } from "./smartAlert"
 import { isCountdownActive } from "./reviewProgress"
+import { hasScheduledDelivery } from "./scheduledDelivery"
 
 /** Wrap event.completed so it can run at most once. */
 function completeOnce(
@@ -68,6 +69,11 @@ export async function onMessageSendHandler(event: Office.AddinCommands.Event): P
 
   try {
     const item = Office.context.mailbox.item as Office.MessageCompose
+    if (await hasScheduledDelivery(item)) {
+      complete({ allowEvent: true })
+      return
+    }
+
     const snapshot = await collectSnapshot(item)
     const model = buildReviewModel(snapshot, config)
     const fingerprint = snapshotFingerprint(snapshot)

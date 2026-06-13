@@ -4,9 +4,14 @@ A send-confirmation add-in for new Outlook and Outlook on the web.
 
 It runs when you press Send. Outlook's built-in Smart Alerts dialog
 opens a review task pane with checkboxes for recipients, attachments,
-subject, and body. After everything is checked, you press Send again.
-The goal is to stop the small mistakes: the wrong recipient, the
-forgotten attachment, the empty subject.
+subject, and body. After everything is checked, the review pane sends
+the message. The goal is to stop the small mistakes: the wrong
+recipient, the forgotten attachment, the empty subject.
+
+**Scheduled send / Send later is not supported.** When Outlook has a
+future delivery time on the draft, Mail Lookout skips its review flow
+and lets Outlook schedule the message unchanged. Scheduled messages
+are therefore not checked by this add-in.
 
 The name is literal: a lookout for your outgoing mail — a quiet watch
 that flags problems before a message leaves.
@@ -247,11 +252,10 @@ every cancel is one click to bypass does not confirm much.
 
 The first send attempt shows the Smart Alerts dialog and cancels the
 send. The dialog's action button opens a task pane with the checkbox
-review UI. After the task pane marks the draft as reviewed, the next
-unchanged Send allows the message. If the user changes the subject,
-body, recipients, or attachments, the next attempt shows the review
-again. If any unexpected error happens, the handler cancels the send.
-It never sends real mail without confirmation.
+review UI. After the task pane marks the draft as reviewed, it sends
+the message through Outlook's compose API. If any unexpected error
+happens, the handler cancels the send. It never sends real mail without
+confirmation.
 
 ## Limitations
 
@@ -262,9 +266,16 @@ Be honest about what this is and is not.
   APIs such as `Office.context.ui.displayDialogAsync` are blocked
   there. The production send flow therefore uses the built-in Smart
   Alerts dialog instead of the browser preview dialog.
-- **The send delay is only used by the browser preview.** Outlook's
-  Smart Alerts send handler must stay short-running, so production
-  sends use the second unchanged Send as the confirmation step.
+- **The send delay runs in the review pane.** Outlook's Smart Alerts
+  handler must stay short-running, so the task pane owns the countdown
+  and then calls Outlook's compose send API. Closing or refreshing the
+  pane cancels that pending send.
+- **Scheduled send / Send later is intentionally bypassed.** Mail
+  Lookout checks `delayDeliveryTime` at send time. If a future delivery
+  time is set, the add-in allows the event immediately and doesn't open
+  the review pane. This avoids converting a scheduled message into an
+  immediate `sendAsync` send, but it also means Mail Lookout does not
+  protect scheduled messages.
 - **Classic Outlook on Windows is not a target.** That host uses a
   JavaScript-only runtime for send handlers. This project builds an
   ES module that loads through an HTML page in a browser runtime,
