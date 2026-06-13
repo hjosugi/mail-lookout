@@ -31,10 +31,11 @@ It also raises two warnings:
 - **Forgotten attachment.** A warning when the body mentions an
   attachment ("see attached", "添付") but no file is attached.
 
-There is no settings task pane. All behavior lives in one config
-file, [`src/config/defaults.ts`](./src/config/defaults.ts). For an
-organization, shipping one config file is simpler to deploy and
-review than a per-user UI.
+A **Settings** task pane lets each user adjust the internal domains
+and the default send-delay. Those are stored per user in Outlook
+roaming settings, so they follow the user across devices. Everything
+else — and the shipped defaults — lives in one config file,
+[`src/config/defaults.ts`](./src/config/defaults.ts).
 
 ## Requirements
 
@@ -201,11 +202,15 @@ submission after the hosted preview is stable.
 
 ## Configuration
 
-All settings live in [`src/config/defaults.ts`](./src/config/defaults.ts).
-Fork that file. The main options:
+The shipped defaults live in
+[`src/config/defaults.ts`](./src/config/defaults.ts) — fork that file
+to change them. At runtime, the Settings task pane overrides the
+internal domains and the default send-delay per user. The main options:
 
-- `internalDomains`: domains treated as internal.
-- `sendDelaySeconds`: used only by the browser preview dialog.
+- `internalDomains`: domains treated as internal (also editable in the
+  Settings pane).
+- `sendDelaySeconds`: the default countdown before a confirmed message
+  is sent (also editable in the Settings pane).
 - `requireRecipientConfirmation`: include recipients in the
   send-time confirmation.
 - `requireAttachmentConfirmation`: include attachments in the
