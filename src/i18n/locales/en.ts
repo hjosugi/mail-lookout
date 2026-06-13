@@ -11,7 +11,7 @@ export const en: Messages = {
     sendingInSeconds: seconds => `Sending in ${seconds}s…`,
     delayLabel: "Wait before sending",
     delayUnitMinutes: "min",
-    delayImmediateHint: "0 = send immediately",
+    delayImmediateHint: "0 = send immediately. You can enter tenths of a minute.",
   },
   sections: {
     recipients: "Recipients",
@@ -86,7 +86,8 @@ export const en: Messages = {
     domainsLabel: "Internal domains",
     domainsHint: "One per line. Recipients on any other domain are treated as external.",
     delayLabel: "Default wait",
-    delayHint: "The starting countdown after you select Review & send.",
+    delayHint:
+      "The starting countdown after you select Review & send. You can enter tenths of a minute.",
     delayUnit: "min",
     save: "Save",
     saved: "Saved.",

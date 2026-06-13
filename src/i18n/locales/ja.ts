@@ -11,7 +11,7 @@ export const ja: Messages = {
     sendingInSeconds: seconds => `${seconds} 秒後に送信…`,
     delayLabel: "送信までの待ち時間",
     delayUnitMinutes: "分",
-    delayImmediateHint: "0 で即時送信",
+    delayImmediateHint: "0 で即時送信。0.1 分単位で入力できます。",
   },
   sections: {
     recipients: "宛先",
@@ -52,7 +52,7 @@ export const ja: Messages = {
     waiting: "送信待機中です。",
     openReview: "確認画面を開く",
     showWaiting: "待機画面を開く",
-    action: label => `下の「${label}」を押してください。`,
+    action: label => `「${label}」を押してください。`,
   },
   taskPane: {
     title: "送信前の確認",
@@ -86,7 +86,7 @@ export const ja: Messages = {
     domainsLabel: "社内ドメイン",
     domainsHint: "1行に1つ。ここに無いドメインの宛先は「社外」として扱います。",
     delayLabel: "デフォルトの待ち時間",
-    delayHint: "「確認して送信」後のカウントダウンの初期値です。",
+    delayHint: "「確認して送信」後のカウントダウンの初期値です。0.1 分単位で入力できます。",
     delayUnit: "分",
     save: "保存",
     saved: "保存しました。",

@@ -12,6 +12,7 @@
 
 import "./dialog.css"
 
+import { delayMinutesToSeconds, secondsToDelayMinutes } from "../config/delayMinutes"
 import type { Messages } from "../i18n/types"
 import type {
   AttachmentView,
@@ -412,15 +413,14 @@ function buildDelayControl(
 ): HTMLElement {
   const input = el("input", { type: "number", className: "so-delay-input" })
   input.min = "0"
-  input.step = "1"
-  input.value = String(Math.round(model.sendDelaySeconds / 60))
+  input.step = "0.1"
+  input.value = secondsToDelayMinutes(model.sendDelaySeconds)
   input.setAttribute("aria-label", messages.dialog.delayLabel)
   input.title = messages.dialog.delayImmediateHint
   input.addEventListener("change", () => {
-    const raw = Number(input.value)
-    const minutes = Number.isFinite(raw) ? Math.max(0, Math.floor(raw)) : 0
-    input.value = String(minutes)
-    callbacks.onDelayChange(minutes * 60)
+    const seconds = delayMinutesToSeconds(input.value)
+    input.value = secondsToDelayMinutes(seconds)
+    callbacks.onDelayChange(seconds)
   })
   return el("div", { className: "so-delay" }, [
     el("span", { className: "so-delay-label", text: messages.dialog.delayLabel }),

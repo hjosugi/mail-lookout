@@ -15,6 +15,7 @@ import { currentSettings, saveSettings, clearSettings } from "../office/userSett
 import { listWaiting } from "../office/reviewProgress"
 import { getMessages, resolveLocale } from "../i18n/catalog"
 import type { LocaleTag, Messages } from "../i18n"
+import { delayMinutesToSeconds, secondsToDelayMinutes } from "../config/delayMinutes"
 
 /** Domains may be entered one per line or separated by commas/semicolons. */
 const DOMAIN_SEPARATORS = /[\n,;]+/
@@ -89,14 +90,14 @@ function start(locale: LocaleTag, root: HTMLElement): void {
   delay.type = "number"
   delay.min = "0"
   delay.max = "60"
-  delay.step = "1"
+  delay.step = "0.1"
   const status = el("p", "so-set-status")
   status.setAttribute("role", "status")
 
   const fill = (): void => {
     const current = currentSettings()
     domains.value = current.internalDomains.join("\n")
-    delay.value = String(Math.round(current.sendDelaySeconds / 60))
+    delay.value = secondsToDelayMinutes(current.sendDelaySeconds)
   }
   fill()
 
@@ -112,8 +113,7 @@ function start(locale: LocaleTag, root: HTMLElement): void {
       .split(DOMAIN_SEPARATORS)
       .map(item => item.trim())
       .filter(Boolean)
-    const minutes = Number(delay.value)
-    const sendDelaySeconds = Number.isFinite(minutes) ? Math.max(0, Math.floor(minutes)) * 60 : 0
+    const sendDelaySeconds = delayMinutesToSeconds(delay.value)
     if (list.length === 0) {
       setStatus(messages.invalid, false)
       return

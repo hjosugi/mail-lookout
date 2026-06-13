@@ -1,4 +1,5 @@
 import { defaultConfig } from "../config"
+import { delayMinutesToSeconds, secondsToDelayMinutes } from "../config/delayMinutes"
 import { normalizeEmailAddress } from "../domain/recipients"
 import { buildReviewModel, canSend, initialReviewState } from "../domain/review"
 import type { ReviewModel, ReviewState } from "../domain/review"
@@ -219,16 +220,10 @@ function snapshotFromForm(): MessageSnapshot {
   }
 }
 
-/** Read a minutes field as a non-negative whole number of seconds. */
-function minutesToSeconds(raw: string): number {
-  const minutes = Number(raw)
-  return Number.isFinite(minutes) ? Math.max(0, Math.floor(minutes)) * 60 : 0
-}
-
 function configFromForm() {
   return {
     ...defaultConfig,
-    sendDelaySeconds: minutesToSeconds(query<HTMLInputElement>("#emu-delay").value),
+    sendDelaySeconds: delayMinutesToSeconds(query<HTMLInputElement>("#emu-delay").value),
     requireRecipientConfirmation: query<HTMLInputElement>("#emu-require-recipients").checked,
     requireAttachmentConfirmation: query<HTMLInputElement>("#emu-require-attachments").checked,
     requireBodyConfirmation: query<HTMLInputElement>("#emu-require-body").checked,
@@ -566,7 +561,7 @@ function renderShell(): void {
           </label>
           <label>
             Delay minutes
-            <input id="emu-delay" type="number" min="0" max="60" step="1" value="${defaultConfig.sendDelaySeconds / 60}" />
+            <input id="emu-delay" type="number" min="0" max="60" step="0.1" value="${secondsToDelayMinutes(defaultConfig.sendDelaySeconds)}" />
           </label>
         </div>
 

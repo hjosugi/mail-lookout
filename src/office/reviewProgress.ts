@@ -214,13 +214,24 @@ export function isCountdownActive(
   return entry?.deadline != null && entry.deadline > now
 }
 
-/** Every message currently counting down to send, soonest first. */
+/**
+ * Every message still counting down to send, soonest first.
+ *
+ * Entries whose deadline has passed are dropped regardless of outcome: the
+ * owning pane either already sent (and cleared it) or was closed and never
+ * will, so a stuck "0s" row should not linger in the banner or count
+ * against the cap. The owning pane's own send runs off its live timer, not
+ * this list, so excluding the expired entry here does not stop it.
+ */
 export function listWaiting(
   now = Date.now(),
   storage: StorageLike = window.localStorage,
 ): WaitingReview[] {
   return Object.values(readRegistry(storage, now))
-    .filter((entry): entry is StoredEntry & { deadline: number } => entry.deadline != null)
+    .filter(
+      (entry): entry is StoredEntry & { deadline: number } =>
+        entry.deadline != null && entry.deadline > now,
+    )
     .map(entry => ({
       fingerprint: entry.fingerprint,
       subject: entry.subject,
