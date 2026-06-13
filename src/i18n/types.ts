@@ -67,6 +67,9 @@ export interface Messages {
     readonly openReview: string
     /** Action button when a countdown is running: open the status pane. */
     readonly showWaiting: string
+    /** Spells out the action in the message, since Outlook styles the
+     * built-in "Don't send" button as the prominent one, not ours. */
+    readonly action: (label: string) => string
   }
   readonly taskPane: {
     readonly title: string

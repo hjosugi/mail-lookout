@@ -20,7 +20,7 @@ export const ja: Messages = {
     body: "本文",
   },
   fields: {
-    to: "宛先",
+    to: "To",
     cc: "CC",
     bcc: "BCC",
   },
@@ -52,6 +52,7 @@ export const ja: Messages = {
     waiting: "送信待機中です。",
     openReview: "確認画面を開く",
     showWaiting: "待機画面を開く",
+    action: label => `下の「${label}」を押してください。`,
   },
   taskPane: {
     title: "送信前の確認",

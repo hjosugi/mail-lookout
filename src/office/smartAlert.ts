@@ -139,13 +139,16 @@ export function buildSmartAlertMessage(
   markdown: boolean,
   waiting: boolean,
 ): string {
-  // Keep the built-in alert to two lines: the title and one prompt. The
-  // prompt line must stay — a title-only message makes Outlook drop the
-  // action button, leaving only "Don't send". Warnings and detail live in
-  // the review pane, not here.
+  // Title, one prompt line, then the action spelled out. The prompt line
+  // must stay — a title-only message makes Outlook drop the action button,
+  // leaving only "Don't send". We name the action button in the text too,
+  // since Outlook (not us) styles "Don't send" as the prominent button.
+  // Warnings and detail live in the review pane, not here.
   const body = waiting ? messages.smartAlert.waiting : messages.smartAlert.prompt
+  const label = waiting ? messages.smartAlert.showWaiting : messages.smartAlert.openReview
+  const action = messages.smartAlert.action(label)
   const title = markdown ? strong(messages.dialog.title) : messages.dialog.title
-  const lines = [title, body]
+  const lines = [title, body, action]
 
   const escaped = markdown ? lines.map(escapeMarkdown) : lines
   if (markdown) {

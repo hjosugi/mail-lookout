@@ -161,7 +161,10 @@ function recipientContent(recipient: RecipientView, messages: Messages): Node[] 
   const name = recipient.displayName.trim()
   const primary = name.length > 0 ? name : recipient.emailAddress
   const children: Node[] = [badge, el("span", { className: "so-recipient-name", text: primary })]
-  if (name.length > 0) {
+  // Only show the address as a second line when there is a real name that
+  // differs from it — otherwise (no name, or name == address) it just
+  // repeats the line above.
+  if (name.length > 0 && name.toLowerCase() !== recipient.emailAddress.toLowerCase()) {
     children.push(el("span", { className: "so-recipient-email", text: recipient.emailAddress }))
   }
   return children

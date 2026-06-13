@@ -53,6 +53,7 @@ export const en: Messages = {
     waiting: "Sending is on hold.",
     openReview: "Open review",
     showWaiting: "Open status",
+    action: label => `Select “${label}” below.`,
   },
   taskPane: {
     title: "Review before sending",
