@@ -62,23 +62,19 @@
 
 Git tag `v*` を push すると、GitHub Actions が `mail-lookout-manifest.xml` を Release asset として添付します。
 
-patch version を上げる場合:
+patch version を上げて、commit、branch push、GitHub Releases 用の tag push まで行う場合:
 
 ```sh
 bun run version:patch
 ```
 
-この script は `package.json`、`package-lock.json`、`manifest.xml` の version をまとめて更新します。minor / major は `bun run version:minor`、`bun run version:major`、明示的に指定する場合は `bun run version:set 1.2.3` を使います。
+この script は `package.json`、`package-lock.json`、`manifest.xml` の version をまとめて更新し、version commit を作り、現在の branch を push してから `v1.0.0` のような release tag を作成・push します。GitHub Actions はこの tag push を契機に GitHub Release asset を作ります。minor / major は `bun run version:minor`、`bun run version:major`、明示的に指定する場合は `bun run version:set 1.2.3` を使います。
 
-version 更新後は commit / push してから tag を作ります。
-
-tag は以下で作成・pushできます。
+push / tag なしでローカルの version commit だけ作りたい場合は、以下を使います。
 
 ```sh
-bun run release:tag
+bun run version:bump patch
 ```
-
-この script は `package.json` の version から `v1.0.0` のような tag を作ります。別の version を指定したい場合は `bun run release:tag v1.0.1` を使います。
 
 常に最新でよい場合は Netlify の `/manifest.xml`、特定バージョンを配りたい場合は GitHub Releases の `mail-lookout-manifest.xml` を使います。
 

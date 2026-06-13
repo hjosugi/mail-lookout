@@ -157,28 +157,20 @@ npm run validate       # office-addin-manifest validate
 `mail-lookout-manifest.xml` も添付します。常に最新ではなく固定版を
 使いたい場合は、そのファイルを使います。
 
-patch version を上げるには:
+patch version を上げて、commit、branch push、GitHub Releases 用の
+tag push まで行うには:
 
 ```sh
 bun run version:patch
 ```
 
 この script は `package.json`、`package-lock.json`、`manifest.xml` の
-version をまとめて更新します。minor / major は `bun run version:minor`、
-`bun run version:major`、明示指定は `bun run version:set 1.2.3` を
-使います。version 更新を commit / push してから release tag を作ります。
-
-`package.json` の version から release tag を作って push するには:
-
-```sh
-bun run release:tag
-```
-
-明示的に version を指定する場合:
-
-```sh
-bun run release:tag v1.0.1
-```
+version をまとめて更新し、version commit を作り、現在の branch を
+push してから `v*` release tag を作成・push します。その tag を契機に
+GitHub Actions が Release asset を作ります。minor / major は
+`bun run version:minor`、`bun run version:major`、明示指定は
+`bun run version:set 1.2.3` を使います。push / tag なしでローカルの
+version commit だけ作りたい場合は `bun run version:bump patch` を使います。
 
 手順は [NETLIFY.md](./NETLIFY.md) を参照してください。
 

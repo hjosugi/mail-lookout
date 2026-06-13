@@ -156,28 +156,20 @@ Tagged releases also attach `mail-lookout-manifest.xml` on the
 GitHub Releases page. Use that file when you want a fixed version
 instead of the latest hosted manifest.
 
-To bump the patch version across `package.json`, `package-lock.json`,
-and `manifest.xml`:
+To bump the patch version, commit it, push the branch, and push the
+release tag for GitHub Releases:
 
 ```sh
 bun run version:patch
 ```
 
 Use `bun run version:minor`, `bun run version:major`, or `bun run
-version:set 1.2.3` for other version changes. Commit and push the
-version bump before creating the release tag.
-
-To create and push a release tag from `package.json`'s version:
-
-```sh
-bun run release:tag
-```
-
-Pass an explicit version when needed:
-
-```sh
-bun run release:tag v1.0.1
-```
+version:set 1.2.3` for other version changes. These commands update
+`package.json`, `package-lock.json`, and `manifest.xml`, create the
+version commit, push the current branch, then create and push the
+`v*` release tag. GitHub Actions creates the release asset from that
+tag. Use `bun run version:bump patch` when you only want the local
+version commit without pushing or tagging.
 
 See [NETLIFY.md](./NETLIFY.md) for the step-by-step flow.
 
