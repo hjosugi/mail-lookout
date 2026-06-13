@@ -74,25 +74,25 @@ body {
 }
 
 .so-header {
-  padding: 20px 20px 12px;
+  padding: 12px 14px 8px;
   border-bottom: 1px solid var(--so-border);
 }
 
 .so-title {
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
 }
 
 .so-intro {
-  margin: 6px 0 0;
+  margin: 4px 0 0;
   color: var(--so-fg-muted);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .so-body-content {
   flex: 1 1 auto;
-  padding: 8px 20px 16px;
+  padding: 6px 14px 12px;
   overflow-y: auto;
 }
 

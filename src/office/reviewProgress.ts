@@ -103,6 +103,17 @@ export function loadProgress(
   }
 }
 
+/** True when a send countdown is currently running for this message. */
+export function isCountdownActive(
+  model: ReviewModel,
+  fingerprint: string,
+  now = Date.now(),
+  storage: StorageLike = window.localStorage,
+): boolean {
+  const progress = loadProgress(model, fingerprint, storage)
+  return progress?.deadline != null && progress.deadline > now
+}
+
 export function clearProgress(storage: StorageLike = window.localStorage): void {
   try {
     storage.removeItem(PROGRESS_STORAGE_KEY)

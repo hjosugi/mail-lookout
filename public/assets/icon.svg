@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  mail-lookout add-in icon source.
+  Mail Lookout add-in icon source.
 
-  A black rounded tile with a white check. Black (not blue) so the icon
-  reads as a mark, not a clickable button. Rasterized to the icon-*.png
-  sizes the manifest references with: rsvg-convert -w N -h N icon.svg.
+  A blue rounded tile with a white eye whose upper lid is an M-shaped
+  double arch — Mail (M) plus Lookout (the watching eye) in one mark.
+  Rasterized to the icon-*.png sizes the manifest references with:
+  rsvg-convert -w N -h N icon.svg.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
-  <rect x="3" y="3" width="74" height="74" rx="16" fill="#1f1f1f"/>
-  <path d="M22 41.5 L34 53 L58 27.5" fill="none" stroke="#ffffff"
-        stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="3" y="3" width="74" height="74" rx="16" fill="#0f6cbd"/>
+  <!-- Eye outline; the top lid rises into two peaks to read as an "M". -->
+  <path d="M13 47 C 21 26, 33 26, 40 41 C 47 26, 59 26, 67 47 C 56 61, 24 61, 13 47 Z"
+        fill="#ffffff"/>
+  <!-- Pupil in the tile colour, so it reads as an opening, with a catchlight. -->
+  <circle cx="40" cy="46" r="8.5" fill="#0f6cbd"/>
+  <circle cx="43" cy="43" r="2.6" fill="#ffffff"/>
 </svg>

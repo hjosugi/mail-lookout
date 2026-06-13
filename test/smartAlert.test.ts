@@ -97,25 +97,33 @@ describe("Smart Alerts confirmation", () => {
 })
 
 describe("Smart Alerts message", () => {
-  it("uses the built-in dialog limit and asks the user to send again", () => {
-    const model = buildReviewModel(snapshot(), defaultConfig)
-    const message = buildSmartAlertMessage(model, locales.ja, true)
+  it("stays short: just the title and the one-line prompt", () => {
+    const message = buildSmartAlertMessage(locales.ja, true, false)
 
     expect(message.length).toBeLessThanOrEqual(500)
     expect(message).toContain(locales.ja.dialog.title)
-    // The alert stays short: message body detail lives in the review pane,
-    // so it must not dump the subject or body into the built-in dialog.
+    expect(message).toContain(locales.ja.smartAlert.prompt)
+    // Detail lives in the review pane, not the built-in dialog.
     expect(message).not.toContain("本文:")
   })
 
+  it("switches to the waiting copy and button while a countdown runs", () => {
+    const review = smartAlertCancelOptions("ja", false)
+    expect(review.cancelLabel).toBe(locales.ja.smartAlert.openReview)
+    expect(review.errorMessage).toContain(locales.ja.smartAlert.prompt)
+
+    const waiting = smartAlertCancelOptions("ja", true)
+    expect(waiting.cancelLabel).toBe(locales.ja.smartAlert.showWaiting)
+    expect(waiting.errorMessage).toContain(locales.ja.smartAlert.waiting)
+  })
+
   it("creates completed options with plaintext and markdown messages", () => {
-    const model = buildReviewModel(snapshot(), defaultConfig)
-    const options = smartAlertCancelOptions(model, "en")
+    const options = smartAlertCancelOptions("en", false)
 
     expect(options.allowEvent).toBe(false)
-    expect(options.errorMessage).toContain("Confirm before sending")
-    expect(options.errorMessageMarkdown).toContain("**Confirm before sending**")
-    expect(options.cancelLabel).toBe("Review")
+    expect(options.errorMessage).toContain("Review before sending")
+    expect(options.errorMessageMarkdown).toContain("**Review before sending**")
+    expect(options.cancelLabel).toBe("Open review")
     expect(options.commandId).toBe(REVIEW_PANE_COMMAND_ID)
   })
 

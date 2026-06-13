@@ -27,6 +27,7 @@ import {
   smartAlertCancelOptions,
   snapshotFingerprint,
 } from "./smartAlert"
+import { isCountdownActive } from "./reviewProgress"
 
 /** Wrap event.completed so it can run at most once. */
 function completeOnce(
@@ -79,8 +80,9 @@ export async function onMessageSendHandler(event: Office.AddinCommands.Event): P
     // Block the send and open the review. The confirmation is recorded
     // only when the user completes the review (and its countdown) in the
     // task pane — not here — so closing the pane or sending again without
-    // reviewing stays blocked.
-    complete(smartAlertCancelOptions(model, locale))
+    // reviewing stays blocked. If a countdown is already running, the
+    // alert points at the status pane instead.
+    complete(smartAlertCancelOptions(locale, isCountdownActive(model, fingerprint)))
   } catch (error) {
     // Last resort. Never send real mail without a confirmation.
     console.error("mail-lookout: unexpected error in send handler", error)

@@ -83,53 +83,37 @@ export function consumeConfirmation(
 }
 
 export function smartAlertCancelOptions(
-  model: ReviewModel,
   locale: LocaleTag,
+  waiting: boolean,
 ): Office.SmartAlertsEventCompletedOptions {
   const messages = getMessages(locale)
   return {
     allowEvent: false,
-    errorMessage: buildSmartAlertMessage(model, messages, false),
-    errorMessageMarkdown: buildSmartAlertMessage(model, messages, true),
-    cancelLabel: messages.smartAlert.openReview,
+    errorMessage: buildSmartAlertMessage(messages, false, waiting),
+    errorMessageMarkdown: buildSmartAlertMessage(messages, true, waiting),
+    cancelLabel: waiting ? messages.smartAlert.showWaiting : messages.smartAlert.openReview,
     commandId: REVIEW_PANE_COMMAND_ID,
   }
 }
 
 export function buildSmartAlertMessage(
-  model: ReviewModel,
   messages: Messages,
   markdown: boolean,
+  waiting: boolean,
 ): string {
-  // Keep the built-in alert short: a one-line prompt to open the review,
-  // plus a line for any warnings. The recipient, attachment, subject, and
-  // body detail lives in the review pane, not here. The prompt line must
-  // stay: a title-only message makes Outlook drop the "Review" action
-  // button, leaving only "Don't send".
-  const warnings = model.warnings.map(warning => warningText(warning, messages))
+  // Keep the built-in alert to two lines: the title and one prompt. The
+  // prompt line must stay — a title-only message makes Outlook drop the
+  // action button, leaving only "Don't send". Warnings and detail live in
+  // the review pane, not here.
+  const body = waiting ? messages.smartAlert.waiting : messages.smartAlert.prompt
   const title = markdown ? strong(messages.dialog.title) : messages.dialog.title
-  const lines = [
-    title,
-    messages.smartAlert.sendAgain,
-    warnings.length > 0 ? `${messages.smartAlert.warnings}: ${warnings.join(" / ")}` : "",
-  ].filter(line => line.length > 0)
+  const lines = [title, body]
 
   const escaped = markdown ? lines.map(escapeMarkdown) : lines
   if (markdown) {
     escaped[0] = title
   }
   return truncate(escaped.join("\n\n"), MAX_ALERT_MESSAGE_LENGTH)
-}
-
-function warningText(warning: ReviewModel["warnings"][number], messages: Messages): string {
-  switch (warning.kind) {
-    case "emptySubject":
-      return messages.warnings.emptySubject
-    case "forgottenAttachment":
-      return messages.warnings.forgottenAttachment
-    case "externalRecipients":
-      return messages.warnings.externalRecipients(warning.count)
-  }
 }
 
 function hashString(value: string): string {

@@ -27,12 +27,12 @@ export const ja: Messages = {
   recipients: {
     externalBadge: "社外",
     internalBadge: "社内",
-    confirmHint: "宛先を確認してチェックしてください。",
+    confirmHint: "各宛先を確認してください。",
     none: "宛先がありません",
   },
   attachments: {
     none: "添付ファイルはありません",
-    confirmHint: "添付ファイルを確認してチェックしてください。",
+    confirmHint: "各添付ファイルを確認してください。",
   },
   body: {
     confirm: "本文を確認しました",
@@ -48,14 +48,14 @@ export const ja: Messages = {
     externalRecipients: count => `社外の宛先が ${count} 件あります。`,
   },
   smartAlert: {
-    prompt: "必要な項目をチェックしてください。",
+    prompt: "必要な項目を確認してください。",
     waiting: "送信待機中です。",
-    openReview: "確認する",
-    showWaiting: "待機画面を表示",
+    openReview: "確認画面を開く",
+    showWaiting: "待機画面を開く",
   },
   taskPane: {
     title: "送信前の確認",
-    intro: "必要な項目をチェックしてください。確認後、Outlook の送信ボタンをもう一度押します。",
+    intro: "必要な項目を確認して「確認して送信」を押してください。",
     confirm: "確認して送信",
     holding: "送信待機中です…",
     sending: "送信しています…",

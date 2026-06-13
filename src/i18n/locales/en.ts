@@ -3,8 +3,8 @@ import type { Messages } from "../types"
 /** English messages. */
 export const en: Messages = {
   dialog: {
-    title: "Confirm before sending",
-    intro: "Check the recipients, attachments, and body before you send.",
+    title: "Review before sending",
+    intro: "Review the recipients, attachments, and body before sending.",
     sendNow: "Send now",
     backToEdit: "Back to draft",
     cancelSend: "Cancel",
@@ -27,15 +27,15 @@ export const en: Messages = {
   recipients: {
     externalBadge: "External",
     internalBadge: "Internal",
-    confirmHint: "Check each recipient before sending.",
+    confirmHint: "Review each recipient.",
     none: "No recipients",
   },
   attachments: {
     none: "No attachments",
-    confirmHint: "Check each attachment before sending.",
+    confirmHint: "Review each attachment.",
   },
   body: {
-    confirm: "I checked the body",
+    confirm: "I reviewed the body",
     empty: "(No body text)",
   },
   subject: {
@@ -49,15 +49,15 @@ export const en: Messages = {
       `There ${count === 1 ? "is" : "are"} ${count} external recipient${count === 1 ? "" : "s"}.`,
   },
   smartAlert: {
-    prompt: "Check the required items.",
+    prompt: "Review the required items.",
     waiting: "Sending is on hold.",
-    openReview: "Review",
-    showWaiting: "Show status",
+    openReview: "Open review",
+    showWaiting: "Open status",
   },
   taskPane: {
-    title: "Confirm before sending",
-    intro: "Check the required items. After confirming, press Outlook's Send button again.",
-    confirm: "Confirm & send",
+    title: "Review before sending",
+    intro: "Review the required items, then select Review & send.",
+    confirm: "Review & send",
     holding: "Waiting to send…",
     sending: "Sending…",
     sendFailed: "Couldn't send. Please try again.",
