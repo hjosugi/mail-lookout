@@ -22,12 +22,28 @@ const M_POINTS = [
   [63, 59],
 ]
 const M_STROKE = 10
-const EYE_HIGHLIGHT_POINTS = [
-  [37.7, 42.5],
-  [37.7, 47.1],
-  [42.9, 47.1],
+const EYE_CUTOUT_POINTS = [
+  [30.7, 45.8],
+  [33.5, 41.7],
+  [36.7, 39.9],
+  [40, 39.9],
+  [43.3, 39.9],
+  [46.5, 41.7],
+  [49.3, 45.8],
+  [46.5, 49.9],
+  [43.3, 51.7],
+  [40, 51.7],
+  [36.7, 51.7],
+  [33.5, 49.9],
 ]
-const EYE_HIGHLIGHT_STROKE = 2.5
+const EYE_OUTLINE_POINTS = [...EYE_CUTOUT_POINTS, EYE_CUTOUT_POINTS[0]]
+const EYE_OUTLINE_STROKE = 1.4
+const EYE_HIGHLIGHT_POINTS = [
+  [42.2, 42.8],
+  [42.2, 45.8],
+  [45.1, 45.8],
+]
+const EYE_HIGHLIGHT_STROKE = 2
 
 function makeIcon(size) {
   const big = size * SCALE
@@ -44,8 +60,11 @@ function makeIcon(size) {
       if (distanceToPolyline(point, M_POINTS) <= M_STROKE / 2) {
         color = WHITE
       }
-      if (insideCircle(point, 40, 46, 6.1)) {
+      if (insidePolygon(point, EYE_CUTOUT_POINTS)) {
         color = BLUE
+      }
+      if (distanceToPolyline(point, EYE_OUTLINE_POINTS) <= EYE_OUTLINE_STROKE / 2) {
+        color = WHITE
       }
       if (distanceToPolyline(point, EYE_HIGHLIGHT_POINTS) <= EYE_HIGHLIGHT_STROKE / 2) {
         color = WHITE
@@ -79,8 +98,23 @@ function insideRoundedRect(point, rect) {
   return distance(point.x, point.y, cx, cy) <= rect.radius
 }
 
-function insideCircle(point, cx, cy, radius) {
-  return distance(point.x, point.y, cx, cy) <= radius
+function insidePolygon(point, points) {
+  let inside = false
+  for (let index = 0, previous = points.length - 1; index < points.length; previous = index++) {
+    const currentPoint = points[index]
+    const previousPoint = points[previous]
+    const crossesY = currentPoint[1] > point.y !== previousPoint[1] > point.y
+    const intersectionX =
+      ((previousPoint[0] - currentPoint[0]) * (point.y - currentPoint[1])) /
+        (previousPoint[1] - currentPoint[1]) +
+      currentPoint[0]
+
+    if (crossesY && point.x < intersectionX) {
+      inside = !inside
+    }
+  }
+
+  return inside
 }
 
 function distanceToPolyline(point, points) {

@@ -1,6 +1,6 @@
 {
   "name": "mail-lookout",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A send-confirmation add-in for the new Outlook. It uses Smart Alerts to help prevent misdelivery.",
   "type": "module",
   "license": "MIT",
