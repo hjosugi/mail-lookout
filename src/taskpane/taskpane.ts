@@ -40,8 +40,8 @@ interface MiniAction {
   readonly onClick: () => void
 }
 
-/** Build the compact countdown view: a status line and action buttons. */
-function buildMini(statusText: string, actions: readonly MiniAction[]): HTMLElement {
+/** Build the compact countdown view: a status line, optional note, and buttons. */
+function buildMini(statusText: string, actions: readonly MiniAction[], note?: string): HTMLElement {
   const wrap = document.createElement("div")
   wrap.className = "so-mini"
   const status = document.createElement("p")
@@ -49,6 +49,12 @@ function buildMini(statusText: string, actions: readonly MiniAction[]): HTMLElem
   status.setAttribute("role", "status")
   status.textContent = statusText
   wrap.append(status)
+  if (note) {
+    const noteEl = document.createElement("p")
+    noteEl.className = "so-mini-note"
+    noteEl.textContent = note
+    wrap.append(noteEl)
+  }
   if (actions.length > 0) {
     const row = document.createElement("div")
     row.className = "so-mini-actions"
@@ -175,10 +181,14 @@ function start(
 
   const showHolding = (): void => {
     view.replaceChildren(
-      buildMini(`${messages.taskPane.holding} ${formatRemaining(remaining())}`, [
-        { label: messages.dialog.cancelSend, kind: "danger", onClick: cancelAll },
-        { label: messages.dialog.backToEdit, kind: "secondary", onClick: backToReview },
-      ]),
+      buildMini(
+        `${messages.taskPane.holding} ${formatRemaining(remaining())}`,
+        [
+          { label: messages.dialog.cancelSend, kind: "danger", onClick: cancelAll },
+          { label: messages.dialog.backToEdit, kind: "secondary", onClick: backToReview },
+        ],
+        messages.waiting.keepOpen,
+      ),
     )
   }
 
@@ -293,6 +303,19 @@ function start(
     view.replaceChildren(handle.element)
     handle.setSendEnabled(canSend(model, state))
   }
+
+  // While a countdown is running the send happens here, in this runtime.
+  // Refreshing or closing the pane tears it down and the send never fires,
+  // so warn before the user leaves. (Browsers show their own generic text;
+  // the same warning is also printed under the countdown.)
+  window.addEventListener("beforeunload", event => {
+    if (deadline !== null) {
+      event.preventDefault()
+      event.returnValue = baseMessages.waiting.unloadWarning
+      return baseMessages.waiting.unloadWarning
+    }
+    return undefined
+  })
 
   root.classList.remove("loading")
   root.replaceChildren(banner, view)

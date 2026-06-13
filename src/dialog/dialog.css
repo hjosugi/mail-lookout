@@ -347,6 +347,14 @@ body {
   font-weight: 600;
 }
 
+/* Fine-print warning under the countdown (keep the pane open). */
+.so-mini-note {
+  margin: 0;
+  padding: 0 14px 10px;
+  color: var(--so-fg-muted);
+  font-size: 12px;
+}
+
 /* The Settings task pane. */
 .so-settings {
   display: flex;

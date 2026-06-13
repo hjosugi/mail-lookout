@@ -71,6 +71,9 @@ export const en: Messages = {
     remaining: text => `${text} left`,
     capReached: max => `The send-wait limit (${max}) is reached. Wait until one message sends.`,
     retry: "Retry",
+    keepOpen: "Keep this pane open. Refreshing or closing the page cancels the send.",
+    unloadWarning:
+      "Sending is on hold. Refreshing or closing the page will cancel the send. Continue?",
   },
   cancel: {
     notSent: "The message was not sent. Return to your draft to review it.",

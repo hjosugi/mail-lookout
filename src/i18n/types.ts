@@ -94,6 +94,10 @@ export interface Messages {
     /** Shown when the send-wait cap is reached. */
     readonly capReached: (max: number) => string
     readonly retry: string
+    /** Note under the countdown: the pane must stay open to send. */
+    readonly keepOpen: string
+    /** beforeunload confirmation while a countdown is running. */
+    readonly unloadWarning: string
   }
   readonly cancel: {
     readonly notSent: string
