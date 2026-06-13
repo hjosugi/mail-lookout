@@ -12,11 +12,50 @@ import "../dialog/dialog.css"
 
 import { defaultConfig } from "../config"
 import { currentSettings, saveSettings, clearSettings } from "../office/userSettings"
+import { listWaiting } from "../office/reviewProgress"
 import { getMessages, resolveLocale } from "../i18n/catalog"
-import type { LocaleTag } from "../i18n"
+import type { LocaleTag, Messages } from "../i18n"
 
 /** Domains may be entered one per line or separated by commas/semicolons. */
 const DOMAIN_SEPARATORS = /[\n,;]+/
+
+/** Format a remaining duration as "M:SS" once past a minute, else "Ns". */
+function formatRemaining(totalSeconds: number): string {
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  return minutes > 0 ? `${minutes}:${String(seconds).padStart(2, "0")}` : `${seconds}s`
+}
+
+/** Build the live "waiting to send" list, or an empty-state line. */
+function buildWaitingSection(messages: Messages): { element: HTMLElement; refresh: () => void } {
+  const section = el("div", "so-set-waiting")
+  const refresh = (): void => {
+    const items = listWaiting()
+    const heading = el("p", "so-waiting-title", messages.waiting.settingsTitle)
+    if (items.length === 0) {
+      section.replaceChildren(heading, el("p", "so-set-hint", messages.waiting.empty))
+      return
+    }
+    const list = el("ul", "so-waiting-list")
+    for (const item of items) {
+      const row = el("li", "so-waiting-item")
+      row.append(
+        el("span", "so-waiting-subject", item.subject.trim() || messages.subject.empty),
+        el(
+          "span",
+          "so-waiting-meta",
+          `${messages.waiting.recipients(item.recipientCount)} · ${messages.waiting.remaining(
+            formatRemaining(Math.max(0, Math.ceil((item.deadline - Date.now()) / 1000))),
+          )}`,
+        ),
+      )
+      list.append(row)
+    }
+    section.replaceChildren(heading, list)
+  }
+  refresh()
+  return { element: section, refresh }
+}
 
 function el<K extends keyof HTMLElementTagNameMap>(
   tag: K,
@@ -40,7 +79,8 @@ function field(labelText: string, input: HTMLElement, hintText: string): HTMLEle
 }
 
 function start(locale: LocaleTag, root: HTMLElement): void {
-  const messages = getMessages(locale).settings
+  const all = getMessages(locale)
+  const messages = all.settings
 
   const domains = el("textarea", "so-set-input")
   domains.rows = 6
@@ -100,6 +140,8 @@ function start(locale: LocaleTag, root: HTMLElement): void {
   const actions = el("div", "so-set-actions")
   actions.append(save, reset)
 
+  const waiting = buildWaitingSection(all)
+
   const form = el("div", "so-settings")
   form.append(
     el("h1", "so-set-title", messages.title),
@@ -108,10 +150,12 @@ function start(locale: LocaleTag, root: HTMLElement): void {
     field(`${messages.delayLabel}（${messages.delayUnit}）`, delay, messages.delayHint),
     actions,
     status,
+    waiting.element,
   )
 
   root.classList.remove("loading")
   root.replaceChildren(form)
+  window.setInterval(waiting.refresh, 1000)
 }
 
 void Office.onReady(() => {

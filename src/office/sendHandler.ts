@@ -82,7 +82,7 @@ export async function onMessageSendHandler(event: Office.AddinCommands.Event): P
     // task pane — not here — so closing the pane or sending again without
     // reviewing stays blocked. If a countdown is already running, the
     // alert points at the status pane instead.
-    complete(smartAlertCancelOptions(locale, isCountdownActive(model, fingerprint)))
+    complete(smartAlertCancelOptions(locale, isCountdownActive(fingerprint)))
   } catch (error) {
     // Last resort. Never send real mail without a confirmation.
     console.error("mail-lookout: unexpected error in send handler", error)

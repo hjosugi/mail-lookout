@@ -63,6 +63,15 @@ export const en: Messages = {
     sendFailed: "Couldn't send. Please try again.",
     loadFailed: "The review pane could not load. Return to your draft and review it.",
   },
+  waiting: {
+    othersTitle: "Also waiting to send",
+    settingsTitle: "Waiting to send",
+    empty: "No messages are waiting to send.",
+    recipients: count => `${count} recipient${count === 1 ? "" : "s"}`,
+    remaining: text => `${text} left`,
+    capReached: max => `The send-wait limit (${max}) is reached. Wait until one message sends.`,
+    retry: "Retry",
+  },
   cancel: {
     notSent: "The message was not sent. Return to your draft to review it.",
     returnLabel: "Back to draft",

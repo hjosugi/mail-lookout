@@ -62,6 +62,15 @@ export const ja: Messages = {
     sendFailed: "送信できませんでした。もう一度お試しください。",
     loadFailed: "確認画面を読み込めませんでした。下書きに戻って内容を確認してください。",
   },
+  waiting: {
+    othersTitle: "他に送信待機中",
+    settingsTitle: "送信待機中のメール",
+    empty: "送信待機中のメールはありません。",
+    recipients: count => `宛先 ${count} 件`,
+    remaining: text => `残り ${text}`,
+    capReached: max => `送信待機が上限（${max} 件）に達しました。1 件送信されるまでお待ちください。`,
+    retry: "再試行",
+  },
   cancel: {
     notSent: "メールは送信していません。下書きに戻って内容を確認してください。",
     returnLabel: "下書きに戻る",

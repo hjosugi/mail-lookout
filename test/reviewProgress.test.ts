@@ -4,8 +4,15 @@ import { defaultConfig } from "@/config/defaults"
 import { buildReviewModel, initialReviewState } from "@/domain/review"
 import type { ReviewState } from "@/domain/review"
 import type { MessageSnapshot } from "@/domain/types"
-import { clearProgress, loadProgress, saveProgress } from "@/office/reviewProgress"
-import type { StorageLike } from "@/office/reviewProgress"
+import {
+  MAX_PENDING_REVIEWS,
+  clearProgress,
+  countWaiting,
+  listWaiting,
+  loadProgress,
+  saveProgress,
+} from "@/office/reviewProgress"
+import type { StorageLike, WaitingDisplay } from "@/office/reviewProgress"
 
 class MemoryStorage implements StorageLike {
   readonly values = new Map<string, string>()
@@ -32,6 +39,7 @@ const snapshot: MessageSnapshot = {
 }
 
 const model = buildReviewModel(snapshot, defaultConfig)
+const display: WaitingDisplay = { subject: "Quarterly review", recipientCount: 2 }
 
 function progressState(): ReviewState {
   return {
@@ -45,7 +53,7 @@ function progressState(): ReviewState {
 describe("review progress persistence", () => {
   it("round-trips the checked state and the countdown deadline", () => {
     const storage = new MemoryStorage()
-    saveProgress("fp1", { state: progressState(), deadline: 1234 }, storage)
+    saveProgress("fp1", { state: progressState(), deadline: 1234 }, display, storage)
 
     const loaded = loadProgress(model, "fp1", storage)
     expect(loaded?.deadline).toBe(1234)
@@ -54,9 +62,19 @@ describe("review progress persistence", () => {
     expect(loaded?.state.bodyConfirmed).toBe(true)
   })
 
+  it("keeps a separate slot per message, so one does not clobber another", () => {
+    const storage = new MemoryStorage()
+    saveProgress("a", { state: progressState(), deadline: 1 }, display, storage)
+    saveProgress("b", { state: initialReviewState(model), deadline: 2 }, display, storage)
+
+    expect(loadProgress(model, "a", storage)?.deadline).toBe(1)
+    expect([...(loadProgress(model, "a", storage)?.state.confirmedRecipients ?? [])]).toEqual([0, 1])
+    expect(loadProgress(model, "b", storage)?.deadline).toBe(2)
+  })
+
   it("ignores progress saved under a different fingerprint", () => {
     const storage = new MemoryStorage()
-    saveProgress("old", { state: progressState(), deadline: null }, storage)
+    saveProgress("old", { state: progressState(), deadline: null }, display, storage)
     expect(loadProgress(model, "new", storage)).toBeNull()
   })
 
@@ -64,28 +82,90 @@ describe("review progress persistence", () => {
     expect(loadProgress(model, "fp1", new MemoryStorage())).toBeNull()
   })
 
-  it("clears stored progress", () => {
+  it("clears only the given message's slot", () => {
     const storage = new MemoryStorage()
-    saveProgress("fp1", { state: progressState(), deadline: 1 }, storage)
-    clearProgress(storage)
+    saveProgress("fp1", { state: progressState(), deadline: 1 }, display, storage)
+    saveProgress("fp2", { state: progressState(), deadline: 2 }, display, storage)
+    clearProgress("fp1", storage)
     expect(loadProgress(model, "fp1", storage)).toBeNull()
+    expect(loadProgress(model, "fp2", storage)?.deadline).toBe(2)
+  })
+
+  it("drops entries untouched past the time-to-live", () => {
+    const storage = new MemoryStorage()
+    saveProgress("fp1", { state: progressState(), deadline: 1 }, display, storage, 1000)
+    // A day and a bit later, the abandoned entry is gone.
+    const muchLater = 1000 + 25 * 60 * 60 * 1000
+    expect(loadProgress(model, "fp1", storage, muchLater)).toBeNull()
   })
 
   it("drops malformed indices from untrusted storage", () => {
     const storage = new MemoryStorage()
     storage.setItem(
-      "mail-lookout:review-progress",
+      "mail-lookout:pending-reviews",
       JSON.stringify({
-        fingerprint: "fp1",
-        recipients: [0, "x", -1, 1.5, 2],
-        attachments: "nope",
-        subject: true,
-        body: false,
-        deadline: null,
+        fp1: {
+          fingerprint: "fp1",
+          recipients: [0, "x", -1, 1.5, 2],
+          attachments: "nope",
+          subject: "Quarterly review",
+          recipientCount: 2,
+          subjectConfirmed: false,
+          bodyConfirmed: false,
+          deadline: null,
+          updatedAt: 1000,
+        },
       }),
     )
-    const loaded = loadProgress(model, "fp1", storage)
+    const loaded = loadProgress(model, "fp1", storage, 1000)
     expect([...(loaded?.state.confirmedRecipients ?? [])]).toEqual([0, 2])
     expect([...(loaded?.state.confirmedAttachments ?? [])]).toEqual([])
+  })
+})
+
+describe("waiting list", () => {
+  it("lists only the messages counting down, soonest first, with display info", () => {
+    const storage = new MemoryStorage()
+    saveProgress(
+      "a",
+      { state: progressState(), deadline: 5000 },
+      { subject: "A", recipientCount: 3 },
+      storage,
+      1000,
+    )
+    saveProgress(
+      "b",
+      { state: progressState(), deadline: 3000 },
+      { subject: "B", recipientCount: 1 },
+      storage,
+      1000,
+    )
+    // No deadline: in review, not waiting.
+    saveProgress(
+      "c",
+      { state: progressState(), deadline: null },
+      { subject: "C", recipientCount: 9 },
+      storage,
+      1000,
+    )
+
+    const waiting = listWaiting(1000, storage)
+    expect(waiting.map(item => item.fingerprint)).toEqual(["b", "a"])
+    expect(waiting[0]).toMatchObject({ subject: "B", recipientCount: 1, deadline: 3000 })
+    expect(countWaiting(1000, storage)).toBe(2)
+  })
+
+  it("can fill every slot up to the cap", () => {
+    const storage = new MemoryStorage()
+    for (let index = 0; index < MAX_PENDING_REVIEWS; index += 1) {
+      saveProgress(
+        `fp${index}`,
+        { state: progressState(), deadline: 2000 + index },
+        display,
+        storage,
+        1000,
+      )
+    }
+    expect(countWaiting(1000, storage)).toBe(MAX_PENDING_REVIEWS)
   })
 })

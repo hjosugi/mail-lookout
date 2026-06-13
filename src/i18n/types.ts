@@ -80,6 +80,21 @@ export interface Messages {
     readonly sendFailed: string
     readonly loadFailed: string
   }
+  /** The status list of messages counting down to send. */
+  readonly waiting: {
+    /** Heading of the task-pane banner listing other waiting messages. */
+    readonly othersTitle: string
+    /** Heading of the settings-pane section. */
+    readonly settingsTitle: string
+    /** Shown when nothing is waiting. */
+    readonly empty: string
+    readonly recipients: (count: number) => string
+    /** Wrap a formatted remaining time, e.g. "1:05 left". */
+    readonly remaining: (text: string) => string
+    /** Shown when the send-wait cap is reached. */
+    readonly capReached: (max: number) => string
+    readonly retry: string
+  }
   readonly cancel: {
     readonly notSent: string
     readonly returnLabel: string

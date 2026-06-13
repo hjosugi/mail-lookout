@@ -5,17 +5,68 @@ import type { MessageSnapshot } from "../domain/types"
 import { getMessages } from "../i18n/catalog"
 import type { LocaleTag, Messages } from "../i18n"
 
-const CONFIRMATION_STORAGE_KEY = "mail-lookout:send-confirmation"
+const CONFIRMATION_STORAGE_KEY = "mail-lookout:send-confirmations"
 const CONFIRMATION_TTL_MS = 10 * 60 * 1000
 const MAX_ALERT_MESSAGE_LENGTH = 500
 export const REVIEW_PANE_COMMAND_ID = "ReviewPaneButton"
 
-interface StoredConfirmation {
-  readonly fingerprint: string
-  readonly expiresAt: number
+/**
+ * Confirmations are a map of fingerprint -> expiry, so several messages
+ * can be confirmed and sent independently without one clobbering another.
+ * The in-memory copy only covers the case where localStorage throws (a
+ * reused event runtime); when storage works it is the source of truth.
+ */
+type Confirmations = Record<string, number>
+
+let memoryConfirmations: Confirmations = {}
+
+function parseConfirmations(raw: string): Confirmations {
+  const map: Confirmations = {}
+  const parsed = JSON.parse(raw) as Record<string, unknown>
+  if (typeof parsed === "object" && parsed !== null) {
+    for (const [fingerprint, expiresAt] of Object.entries(parsed)) {
+      if (typeof expiresAt === "number") {
+        map[fingerprint] = expiresAt
+      }
+    }
+  }
+  return map
 }
 
-let memoryConfirmation: StoredConfirmation | null = null
+function pruneExpired(map: Confirmations, now: number): Confirmations {
+  for (const fingerprint of Object.keys(map)) {
+    const expiresAt = map[fingerprint]
+    if (expiresAt === undefined || expiresAt < now) {
+      delete map[fingerprint]
+    }
+  }
+  return map
+}
+
+function readConfirmations(storage: StorageLike, now: number): Confirmations {
+  let map: Confirmations
+  try {
+    const raw = storage.getItem(CONFIRMATION_STORAGE_KEY)
+    map = raw ? parseConfirmations(raw) : {}
+  } catch {
+    // Storage unavailable: fall back to the in-memory copy.
+    map = { ...memoryConfirmations }
+  }
+  return pruneExpired(map, now)
+}
+
+function writeConfirmations(storage: StorageLike, map: Confirmations): void {
+  memoryConfirmations = map
+  try {
+    if (Object.keys(map).length === 0) {
+      storage.removeItem(CONFIRMATION_STORAGE_KEY)
+    } else {
+      storage.setItem(CONFIRMATION_STORAGE_KEY, JSON.stringify(map))
+    }
+  } catch {
+    // The in-memory fallback still covers a reused event runtime.
+  }
+}
 
 export interface StorageLike {
   getItem(key: string): string | null
@@ -49,16 +100,9 @@ export function rememberConfirmation(
   storage: StorageLike = window.localStorage,
   now = Date.now(),
 ): void {
-  const confirmation: StoredConfirmation = {
-    fingerprint,
-    expiresAt: now + CONFIRMATION_TTL_MS,
-  }
-  memoryConfirmation = confirmation
-  try {
-    storage.setItem(CONFIRMATION_STORAGE_KEY, JSON.stringify(confirmation))
-  } catch {
-    // The in-memory fallback still covers a reused event runtime.
-  }
+  const map = readConfirmations(storage, now)
+  map[fingerprint] = now + CONFIRMATION_TTL_MS
+  writeConfirmations(storage, map)
 }
 
 export function consumeConfirmation(
@@ -66,20 +110,14 @@ export function consumeConfirmation(
   storage: StorageLike = window.localStorage,
   now = Date.now(),
 ): boolean {
-  let confirmation: Partial<StoredConfirmation> | null = memoryConfirmation
-  memoryConfirmation = null
-
-  try {
-    const raw = storage.getItem(CONFIRMATION_STORAGE_KEY)
-    storage.removeItem(CONFIRMATION_STORAGE_KEY)
-    if (raw) {
-      confirmation = JSON.parse(raw) as Partial<StoredConfirmation>
-    }
-  } catch {
-    // Fall through to the in-memory fallback.
+  const map = readConfirmations(storage, now)
+  const expiresAt = map[fingerprint]
+  const valid = typeof expiresAt === "number" && expiresAt >= now
+  if (fingerprint in map) {
+    delete map[fingerprint]
+    writeConfirmations(storage, map)
   }
-
-  return confirmation?.fingerprint === fingerprint && Number(confirmation.expiresAt) >= now
+  return valid
 }
 
 export function smartAlertCancelOptions(

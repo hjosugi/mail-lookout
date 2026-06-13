@@ -7,6 +7,13 @@ import { getMessages } from "../i18n/catalog"
 import type { LocaleTag } from "../i18n/catalog"
 import { renderDialog } from "../dialog/render"
 import { taskPaneMessages } from "../dialog/taskPaneView"
+import {
+  MAX_PENDING_REVIEWS,
+  clearProgress,
+  listWaiting,
+  saveProgress,
+} from "../office/reviewProgress"
+import { snapshotFingerprint } from "../office/smartAlert"
 import { getEmulatorMessages } from "./messages"
 import "./emulator.css"
 
@@ -92,6 +99,10 @@ function firstScenario(): Scenario {
 
 // Drives the post-confirm countdown shown in the result panel.
 let currentTimer: number | null = null
+
+// The message whose review/countdown is on screen now. The waiting banner
+// excludes it, since its own countdown already shows in the main panel.
+let activeFingerprint: string | null = null
 
 function recipient(
   field: RecipientField,
@@ -253,8 +264,56 @@ function formatCountdown(totalSeconds: number): string {
   return minutes > 0 ? `${minutes}:${String(seconds).padStart(2, "0")}` : `${seconds}s`
 }
 
+/**
+ * Reap finished sends and redraw the "other messages waiting" banner.
+ *
+ * The emulator has one surface, so the other waiting messages have no live
+ * timer of their own: this reaps them when their deadline passes, standing
+ * in for each task pane sending its own message.
+ */
+function refreshWaiting(): void {
+  const banner = document.getElementById("emu-waiting")
+  if (!banner) {
+    return
+  }
+  const messages = getMessages(currentLocale())
+  const now = Date.now()
+  for (const item of listWaiting(now)) {
+    if (item.fingerprint !== activeFingerprint && item.deadline <= now) {
+      clearProgress(item.fingerprint)
+    }
+  }
+  const others = listWaiting(now).filter(item => item.fingerprint !== activeFingerprint)
+  if (others.length === 0) {
+    banner.hidden = true
+    banner.replaceChildren()
+    return
+  }
+  banner.hidden = false
+  const heading = document.createElement("p")
+  heading.className = "so-waiting-title"
+  heading.textContent = `${messages.waiting.othersTitle} (${others.length})`
+  const list = document.createElement("ul")
+  list.className = "so-waiting-list"
+  for (const item of others) {
+    const row = document.createElement("li")
+    row.className = "so-waiting-item"
+    const name = document.createElement("span")
+    name.className = "so-waiting-subject"
+    name.textContent = item.subject.trim() || messages.subject.empty
+    const meta = document.createElement("span")
+    meta.className = "so-waiting-meta"
+    const secs = Math.max(0, Math.ceil((item.deadline - now) / 1000))
+    meta.textContent = `${messages.waiting.recipients(item.recipientCount)} · ${messages.waiting.remaining(formatCountdown(secs))}`
+    row.append(name, meta)
+    list.append(row)
+  }
+  banner.replaceChildren(heading, list)
+}
+
 /** Replace the result panel with the draft summary card. */
 function renderDraft(): void {
+  activeFingerprint = null
   const messages = getEmulatorMessages(currentLocale())
   const card = document.createElement("div")
   card.className = "ml-result-card"
@@ -308,23 +367,65 @@ function renderMini(text: string, buttons: readonly MiniButton[]): void {
  * task pane: at zero the message is "sent" (the real add-in calls
  * item.sendAsync). Cancel abandons it; Back returns to the review.
  */
-function startMini(seconds: number, model: ReviewModel, locale: LocaleTag): void {
+function startMini(
+  seconds: number,
+  model: ReviewModel,
+  locale: LocaleTag,
+  fingerprint: string,
+  state: ReviewState,
+): void {
   stopTimer()
   const emu = getEmulatorMessages(locale)
-  if (seconds <= 0) {
+  const messages = getMessages(locale)
+
+  const sent = (): void => {
+    clearProgress(fingerprint)
+    activeFingerprint = null
     setStatus(emu.mini.sent)
     renderMini(emu.mini.sent, [])
+    refreshWaiting()
+  }
+
+  if (seconds <= 0) {
+    sent()
     return
   }
-  let remaining = seconds
+
+  // Respect the same send-wait cap as the task pane.
+  const others = listWaiting().filter(item => item.fingerprint !== fingerprint)
+  if (others.length >= MAX_PENDING_REVIEWS) {
+    renderMini(messages.waiting.capReached(MAX_PENDING_REVIEWS), [
+      {
+        label: messages.waiting.retry,
+        kind: "secondary",
+        onClick: () => startMini(seconds, model, locale, fingerprint, state),
+      },
+      {
+        label: emu.mini.backToReview,
+        kind: "secondary",
+        onClick: () => openReview(model, locale, fingerprint),
+      },
+    ])
+    return
+  }
+
+  const display = { subject: model.subject, recipientCount: model.recipients.length }
+  const deadline = Date.now() + seconds * 1000
+  saveProgress(fingerprint, { state, deadline }, display)
+  activeFingerprint = fingerprint
+  refreshWaiting()
+
   const show = (): void => {
+    const remaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000))
     renderMini(emu.mini.holding(formatCountdown(remaining)), [
       {
         label: emu.mini.backToReview,
         kind: "secondary",
         onClick: () => {
           stopTimer()
-          openReview(model, locale)
+          clearProgress(fingerprint)
+          activeFingerprint = null
+          openReview(model, locale, fingerprint)
         },
       },
       {
@@ -332,6 +433,8 @@ function startMini(seconds: number, model: ReviewModel, locale: LocaleTag): void
         kind: "danger",
         onClick: () => {
           stopTimer()
+          clearProgress(fingerprint)
+          activeFingerprint = null
           setStatus(emu.status.ready)
           renderDraft()
         },
@@ -340,11 +443,9 @@ function startMini(seconds: number, model: ReviewModel, locale: LocaleTag): void
   }
   show()
   currentTimer = window.setInterval(() => {
-    remaining -= 1
-    if (remaining <= 0) {
+    if (Date.now() >= deadline) {
       stopTimer()
-      setStatus(emu.mini.sent)
-      renderMini(emu.mini.sent, [])
+      sent()
     } else {
       show()
     }
@@ -357,8 +458,10 @@ function startMini(seconds: number, model: ReviewModel, locale: LocaleTag): void
  * Confirming runs the countdown in the same panel; Back returns to the
  * draft summary.
  */
-function openReview(model: ReviewModel, locale: LocaleTag): void {
+function openReview(model: ReviewModel, locale: LocaleTag, fingerprint: string): void {
   stopTimer()
+  activeFingerprint = fingerprint
+  refreshWaiting()
   const messages = taskPaneMessages(getMessages(locale))
   let state: ReviewState = initialReviewState(model)
   let delaySeconds = model.sendDelaySeconds
@@ -400,7 +503,7 @@ function openReview(model: ReviewModel, locale: LocaleTag): void {
       },
       onSend() {
         // Confirm: hand off to the countdown on the same surface.
-        startMini(delaySeconds, model, locale)
+        startMini(delaySeconds, model, locale, fingerprint, state)
       },
       onCancelSend() {
         // No countdown runs during the review itself.
@@ -419,9 +522,10 @@ function openReview(model: ReviewModel, locale: LocaleTag): void {
 
 function runReview(): void {
   const config = configFromForm()
-  const model = buildReviewModel(snapshotFromForm(), config)
+  const snapshot = snapshotFromForm()
+  const model = buildReviewModel(snapshot, config)
   setStatus(getEmulatorMessages(config.fallbackLocale).status.reviewing)
-  openReview(model, config.fallbackLocale)
+  openReview(model, config.fallbackLocale, snapshotFingerprint(snapshot))
 }
 
 function renderShell(): void {
@@ -498,6 +602,7 @@ function renderShell(): void {
           <h2 id="emu-preview-title">Result</h2>
           <div id="emu-status" class="ml-status" role="status">Ready.</div>
         </header>
+        <div id="emu-waiting" class="so-waiting" hidden></div>
         <div class="ml-result-body" id="emu-result-body"></div>
       </section>
     </main>
@@ -515,6 +620,8 @@ function renderShell(): void {
   scenarioSelect.value = initialScenario.id
   fillForm(initialScenario.snapshot)
   renderDraft()
+  refreshWaiting()
+  window.setInterval(refreshWaiting, 1000)
   setStatus(getEmulatorMessages(currentLocale()).status.ready)
 
   scenarioSelect.addEventListener("change", () => {

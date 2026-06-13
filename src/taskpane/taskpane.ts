@@ -8,6 +8,10 @@
  * send-delay countdown, and at zero it sends the message with
  * item.sendAsync — no second manual Send. Ticked boxes and the countdown
  * deadline are persisted, so closing and reopening the pane resumes.
+ *
+ * Several messages can wait at once (one per compose window). A banner at
+ * the top shows the other messages that are counting down, and the
+ * countdown will not start past MAX_PENDING_REVIEWS to keep that bounded.
  */
 
 import "../dialog/dialog.css"
@@ -21,7 +25,7 @@ import { renderDialog } from "../dialog/render"
 import type { DialogCallbacks, DialogHandle } from "../dialog/render"
 import { taskPaneMessages, taskPaneRenderOptions } from "../dialog/taskPaneView"
 import { collectSnapshot } from "../office/collect"
-import { clearProgress, loadProgress, saveProgress } from "../office/reviewProgress"
+import { MAX_PENDING_REVIEWS, clearProgress, listWaiting, loadProgress, saveProgress } from "../office/reviewProgress"
 import { rememberConfirmation, snapshotFingerprint } from "../office/smartAlert"
 
 interface MiniAction {
@@ -87,6 +91,12 @@ function start(
 ): void {
   const baseMessages = getMessages(locale)
   const messages = taskPaneMessages(baseMessages)
+  const display = { subject: model.subject, recipientCount: model.recipients.length }
+
+  // The banner (other waiting messages) sits above the swappable view.
+  const banner = document.createElement("div")
+  banner.className = "so-waiting"
+  const view = document.createElement("div")
 
   const restored = loadProgress(model, fingerprint)
   let state: ReviewState = restored?.state ?? initialReviewState(model)
@@ -103,11 +113,42 @@ function start(
   }
 
   const persist = (): void => {
-    saveProgress(fingerprint, { state, deadline })
+    saveProgress(fingerprint, { state, deadline }, display)
   }
 
   const remaining = (): number =>
     deadline === null ? 0 : Math.max(0, Math.ceil((deadline - Date.now()) / 1000))
+
+  // Refresh the "other messages waiting" banner. The current message is
+  // excluded — its own countdown shows in the main view, not here.
+  const refreshBanner = (): void => {
+    const others = listWaiting().filter(item => item.fingerprint !== fingerprint)
+    if (others.length === 0) {
+      banner.hidden = true
+      banner.replaceChildren()
+      return
+    }
+    banner.hidden = false
+    const heading = document.createElement("p")
+    heading.className = "so-waiting-title"
+    heading.textContent = `${messages.waiting.othersTitle} (${others.length})`
+    const list = document.createElement("ul")
+    list.className = "so-waiting-list"
+    for (const item of others) {
+      const row = document.createElement("li")
+      row.className = "so-waiting-item"
+      const name = document.createElement("span")
+      name.className = "so-waiting-subject"
+      name.textContent = item.subject.trim() || messages.subject.empty
+      const meta = document.createElement("span")
+      meta.className = "so-waiting-meta"
+      const secs = Math.max(0, Math.ceil((item.deadline - Date.now()) / 1000))
+      meta.textContent = `${messages.waiting.recipients(item.recipientCount)} · ${messages.waiting.remaining(formatRemaining(secs))}`
+      row.append(name, meta)
+      list.append(row)
+    }
+    banner.replaceChildren(heading, list)
+  }
 
   // Confirm and send. Everything that mutates state runs before sendAsync:
   // it re-fires OnMessageSend, which sees the recorded confirmation, and
@@ -116,20 +157,31 @@ function start(
     stopTimer()
     deadline = null
     rememberConfirmation(fingerprint)
-    clearProgress()
-    root.replaceChildren(buildMini(baseMessages.taskPane.sending, []))
+    clearProgress(fingerprint)
+    view.replaceChildren(buildMini(baseMessages.taskPane.sending, []))
     const item = Office.context.mailbox.item as Office.MessageCompose
     item.sendAsync({}, result => {
       if (result.status === Office.AsyncResultStatus.Failed) {
-        root.replaceChildren(buildMini(baseMessages.taskPane.sendFailed, []))
+        view.replaceChildren(buildMini(baseMessages.taskPane.sendFailed, []))
       }
     })
   }
 
   const showHolding = (): void => {
-    root.replaceChildren(
+    view.replaceChildren(
       buildMini(`${messages.taskPane.holding} ${formatRemaining(remaining())}`, [
         { label: messages.dialog.cancelSend, kind: "danger", onClick: cancelAll },
+        { label: messages.dialog.backToEdit, kind: "secondary", onClick: backToReview },
+      ]),
+    )
+  }
+
+  // The send-wait cap is full: don't start another countdown. Let the user
+  // retry (a slot may have freed) or step back to the checklist.
+  const showCapReached = (): void => {
+    view.replaceChildren(
+      buildMini(messages.waiting.capReached(MAX_PENDING_REVIEWS), [
+        { label: messages.waiting.retry, kind: "primary", onClick: () => startCountdown(delaySeconds) },
         { label: messages.dialog.backToEdit, kind: "secondary", onClick: backToReview },
       ]),
     )
@@ -154,9 +206,15 @@ function start(
     }
   }
 
-  const startCountdown = (seconds: number): void => {
+  function startCountdown(seconds: number): void {
     if (seconds <= 0) {
       confirmAndSend()
+      return
+    }
+    const waiting = listWaiting()
+    const alreadyWaiting = waiting.some(item => item.fingerprint === fingerprint)
+    if (!alreadyWaiting && waiting.length >= MAX_PENDING_REVIEWS) {
+      showCapReached()
       return
     }
     deadline = Date.now() + seconds * 1000
@@ -168,7 +226,7 @@ function start(
   function cancelAll(): void {
     stopTimer()
     deadline = null
-    clearProgress()
+    clearProgress(fingerprint)
     state = initialReviewState(model)
     renderReview()
   }
@@ -222,11 +280,14 @@ function start(
       ...taskPaneRenderOptions,
       initialState: state,
     })
-    root.replaceChildren(handle.element)
+    view.replaceChildren(handle.element)
     handle.setSendEnabled(canSend(model, state))
   }
 
   root.classList.remove("loading")
+  root.replaceChildren(banner, view)
+  refreshBanner()
+  window.setInterval(refreshBanner, 1000)
   if (deadline !== null) {
     // A countdown was running when the pane last closed; resume it.
     runCountdown()

@@ -517,3 +517,58 @@ body {
   color: var(--so-disabled-fg);
   cursor: not-allowed;
 }
+
+/* The "waiting to send" status list: a banner at the top of the review
+   pane, and a section in the settings pane. */
+.so-waiting {
+  background: var(--so-surface);
+  border-bottom: 1px solid var(--so-border);
+  padding: 10px 14px;
+}
+
+.so-waiting[hidden] {
+  display: none;
+}
+
+.so-waiting-title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--so-fg-muted);
+}
+
+.so-waiting-list {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.so-waiting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.so-waiting-subject {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.so-waiting-meta {
+  flex-shrink: 0;
+  color: var(--so-fg-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* In settings the list is a normal block, not a banner. */
+.so-set-waiting {
+  border-top: 1px solid var(--so-border);
+  padding-top: 14px;
+}
