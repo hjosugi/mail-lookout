@@ -9,6 +9,7 @@ const requiredPaths = [
   "/support.html",
   "/privacy.html",
   "/terms.html",
+  "/favicon.ico",
   "/assets/icon-16.png",
   "/assets/icon-32.png",
   "/assets/icon-64.png",

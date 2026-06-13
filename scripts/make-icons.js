@@ -4,9 +4,11 @@ import path from "node:path"
 import { fileURLToPath } from "node:url"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const outDir = path.resolve(__dirname, "..", "public", "assets")
+const publicDir = path.resolve(__dirname, "..", "public")
+const outDir = path.resolve(publicDir, "assets")
 
 const SIZES = [16, 32, 64, 80, 128]
+const FAVICON_SIZES = new Set([16, 32, 64])
 const SCALE = 4
 const BLUE = [15, 108, 189, 255]
 const WHITE = [255, 255, 255, 255]
@@ -22,28 +24,13 @@ const M_POINTS = [
   [63, 59],
 ]
 const M_STROKE = 10
-const EYE_CUTOUT_POINTS = [
-  [30.7, 45.8],
-  [33.5, 41.7],
-  [36.7, 39.9],
-  [40, 39.9],
-  [43.3, 39.9],
-  [46.5, 41.7],
-  [49.3, 45.8],
-  [46.5, 49.9],
-  [43.3, 51.7],
-  [40, 51.7],
-  [36.7, 51.7],
-  [33.5, 49.9],
-]
-const EYE_OUTLINE_POINTS = [...EYE_CUTOUT_POINTS, EYE_CUTOUT_POINTS[0]]
-const EYE_OUTLINE_STROKE = 1.4
+const EYE_CUTOUT = { x: 40, y: 46, radius: 6.1 }
 const EYE_HIGHLIGHT_POINTS = [
-  [42.2, 42.8],
-  [42.2, 45.8],
-  [45.1, 45.8],
+  [38.4, 43.3],
+  [38.4, 48.2],
+  [41.6, 48.2],
 ]
-const EYE_HIGHLIGHT_STROKE = 2
+const EYE_HIGHLIGHT_STROKE = 2.5
 
 function makeIcon(size) {
   const big = size * SCALE
@@ -60,11 +47,8 @@ function makeIcon(size) {
       if (distanceToPolyline(point, M_POINTS) <= M_STROKE / 2) {
         color = WHITE
       }
-      if (insidePolygon(point, EYE_CUTOUT_POINTS)) {
+      if (insideCircle(point, EYE_CUTOUT.x, EYE_CUTOUT.y, EYE_CUTOUT.radius)) {
         color = BLUE
-      }
-      if (distanceToPolyline(point, EYE_OUTLINE_POINTS) <= EYE_OUTLINE_STROKE / 2) {
-        color = WHITE
       }
       if (distanceToPolyline(point, EYE_HIGHLIGHT_POINTS) <= EYE_HIGHLIGHT_STROKE / 2) {
         color = WHITE
@@ -98,23 +82,8 @@ function insideRoundedRect(point, rect) {
   return distance(point.x, point.y, cx, cy) <= rect.radius
 }
 
-function insidePolygon(point, points) {
-  let inside = false
-  for (let index = 0, previous = points.length - 1; index < points.length; previous = index++) {
-    const currentPoint = points[index]
-    const previousPoint = points[previous]
-    const crossesY = currentPoint[1] > point.y !== previousPoint[1] > point.y
-    const intersectionX =
-      ((previousPoint[0] - currentPoint[0]) * (point.y - currentPoint[1])) /
-        (previousPoint[1] - currentPoint[1]) +
-      currentPoint[0]
-
-    if (crossesY && point.x < intersectionX) {
-      inside = !inside
-    }
-  }
-
-  return inside
+function insideCircle(point, cx, cy, radius) {
+  return distance(point.x, point.y, cx, cy) <= radius
 }
 
 function distanceToPolyline(point, points) {
@@ -194,6 +163,37 @@ function encodePng(width, height, rgba) {
   ])
 }
 
+function encodeIco(images) {
+  const headerSize = 6
+  const directorySize = images.length * 16
+  let imageOffset = headerSize + directorySize
+  const header = Buffer.alloc(headerSize)
+  const entries = []
+  const data = []
+
+  header.writeUInt16LE(0, 0)
+  header.writeUInt16LE(1, 2)
+  header.writeUInt16LE(images.length, 4)
+
+  for (const image of images) {
+    const entry = Buffer.alloc(16)
+    entry[0] = image.size >= 256 ? 0 : image.size
+    entry[1] = image.size >= 256 ? 0 : image.size
+    entry[2] = 0
+    entry[3] = 0
+    entry.writeUInt16LE(1, 4)
+    entry.writeUInt16LE(32, 6)
+    entry.writeUInt32LE(image.png.length, 8)
+    entry.writeUInt32LE(imageOffset, 12)
+
+    entries.push(entry)
+    data.push(image.png)
+    imageOffset += image.png.length
+  }
+
+  return Buffer.concat([header, ...entries, ...data])
+}
+
 function ihdr(width, height) {
   const data = Buffer.alloc(13)
   data.writeUInt32BE(width, 0)
@@ -238,10 +238,18 @@ function makeCrcTable() {
 const CRC_TABLE = makeCrcTable()
 
 fs.mkdirSync(outDir, { recursive: true })
+const faviconImages = []
 for (const size of SIZES) {
   const rgba = makeIcon(size)
   const png = encodePng(size, size, rgba)
   const outputPath = path.join(outDir, `icon-${size}.png`)
   fs.writeFileSync(outputPath, png)
+  if (FAVICON_SIZES.has(size)) {
+    faviconImages.push({ size, png })
+  }
   console.log(`wrote ${outputPath}`)
 }
+
+const faviconPath = path.join(publicDir, "favicon.ico")
+fs.writeFileSync(faviconPath, encodeIco(faviconImages))
+console.log(`wrote ${faviconPath}`)
