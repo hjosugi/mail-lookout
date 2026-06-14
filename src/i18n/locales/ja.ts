@@ -5,7 +5,7 @@ export const ja: Messages = {
   dialog: {
     title: "送信前の確認",
     intro: "送信前に、宛先・添付・本文を確認してください。",
-    sendNow: "今すぐ送信",
+    sendNow: "今すぐ送信する",
     backToEdit: "編集に戻る",
     cancelSend: "キャンセル",
     sendingInSeconds: seconds => `${seconds} 秒後に送信…`,
@@ -57,7 +57,7 @@ export const ja: Messages = {
   taskPane: {
     title: "送信前の確認",
     intro: "",
-    confirm: "確認して送信",
+    confirm: "確認して送信する",
     holding: "送信待機中です…",
     sending: "送信しています…",
     sendFailed: "送信できませんでした。もう一度お試しください。",
@@ -72,7 +72,7 @@ export const ja: Messages = {
     capReached: max =>
       `送信待機が上限（${max} 件）に達しました。1 件送信されるまでお待ちください。`,
     retry: "再試行",
-    keepOpen: "この画面を開いたままにしてください。更新・閉じると送信はキャンセルされます。",
+    keepOpen: "送信待機中です。ページの更新または閉じる場合、メールの送信はキャンセルされます。",
     unloadWarning:
       "送信待機中です。ページの更新または閉じる場合、メールの送信はキャンセルされます。よろしいですか？",
   },
@@ -86,7 +86,7 @@ export const ja: Messages = {
     domainsLabel: "社内ドメイン",
     domainsHint: "1行に1つ。ここに無いドメインの宛先は「社外」として扱います。",
     delayLabel: "デフォルトの待ち時間",
-    delayHint: "「確認して送信」後のカウントダウンの初期値です。0.1 分単位で入力できます。",
+    delayHint: "「確認して送信する」後のカウントダウンの初期値です。0.1 分単位で入力できます。",
     delayUnit: "分",
     save: "保存",
     saved: "保存しました。",
