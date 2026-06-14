@@ -307,10 +307,10 @@ body {
   white-space: pre-wrap;
   word-break: break-word;
   resize: vertical;
-  /* A roomy preview (~1.5x), but bounded with its own scroll so a long
-     body can't push the send button off the bottom. */
-  min-height: 132px;
-  max-height: 220px;
+  /* A roomy default (~1.5x) with its own scroll so a long body can't push
+     the send button off the bottom; drag-resizable up to ~4x. */
+  min-height: 200px;
+  max-height: 800px;
   overflow-y: auto;
 }
 
@@ -337,10 +337,12 @@ body {
 .so-footer {
   flex: 0 0 auto;
   display: flex;
-  flex-wrap: wrap;
+  /* Keep the delay control and the send button on one row even when the
+     pane is narrow; the delay label truncates rather than wrapping. */
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
+  gap: 8px;
   padding: 7px 12px;
   border-top: 1px solid var(--so-border);
   background: var(--so-bg);
@@ -350,6 +352,8 @@ body {
   display: flex;
   gap: 8px;
   margin-left: auto;
+  /* Don't let the button shrink; the delay label gives up space instead. */
+  flex: 0 0 auto;
 }
 
 .so-taskpane-status {
@@ -466,12 +470,22 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
   font-size: 12px;
   color: var(--so-fg-muted);
 }
 
+/* The label is the only part that gives up space when the pane is narrow. */
+.so-delay-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .so-delay-input {
-  width: 4.5em;
+  flex: 0 0 auto;
+  width: 3.4em;
   font: inherit;
   font-size: 13px;
   color: var(--so-fg);

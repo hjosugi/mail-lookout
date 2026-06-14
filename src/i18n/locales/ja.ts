@@ -9,7 +9,7 @@ export const ja: Messages = {
     backToEdit: "編集に戻る",
     cancelSend: "キャンセル",
     sendingInSeconds: seconds => `${seconds}秒後に送信…`,
-    delayLabel: "送信までの待ち時間",
+    delayLabel: "送信待ち時間",
     delayUnitMinutes: "分",
     delayImmediateHint: "0で即時送信。0.1分単位で入力できます。",
   },
@@ -57,7 +57,7 @@ export const ja: Messages = {
   taskPane: {
     title: "送信前の確認",
     intro: "",
-    confirm: "確認して送信する",
+    confirm: "送信する",
     holding: "送信待機中です…",
     sending: "送信しています…",
     sendFailed: "送信できませんでした。もう一度お試しください。",

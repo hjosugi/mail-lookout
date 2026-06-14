@@ -9,7 +9,7 @@ export const en: Messages = {
     backToEdit: "Back to draft",
     cancelSend: "Cancel",
     sendingInSeconds: seconds => `Sending in ${seconds}s…`,
-    delayLabel: "Wait before sending",
+    delayLabel: "Send delay",
     delayUnitMinutes: "min",
     delayImmediateHint: "0 = send immediately. You can enter tenths of a minute.",
   },
@@ -58,7 +58,7 @@ export const en: Messages = {
   taskPane: {
     title: "Review before sending",
     intro: "",
-    confirm: "Review & send",
+    confirm: "Send",
     holding: "Waiting to send…",
     sending: "Sending…",
     sendFailed: "Couldn't send. Please try again.",
