@@ -109,12 +109,10 @@ npm run dev:emulator
 ```
 
 または通常の開発サーバーを起動して
-Viteが表示するURLの`/emulator.html`を開きます。3000番ポートが
-使われている場合、Viteは例えば`https://localhost:3001/emulator.html`
-のように次の空きポートを使います。このemulatorはOutlookのAPIや
-Office.jsを使わず、実際のドメインロジックとダイアログrendererを
-そのまま使います。下書き欄やシナリオを変更し、「Review send」を押すと
-確認ダイアログを再生成できます。
+Viteが表示するURLの`/emulator.html`を開きます。3000番ポートが使われている場合、
+`https://localhost:3001/emulator.html` のように次の空きポートを使います。
+このemulatorはOutlookのAPIや Office.jsを使わず、実際のドメインロジックとダイアログrendererを
+そのまま使います。下書き欄やシナリオを変更し、「Review send」を押すと確認ダイアログを再生成できます。
 
 Outlookにサイドロードして試す場合は`npm run dev:outlook`を使います。
 `manifest.xml`は`https://localhost:3000`固定なので、このscriptは
