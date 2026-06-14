@@ -8,10 +8,10 @@ export const ja: Messages = {
     sendNow: "今すぐ送信する",
     backToEdit: "編集に戻る",
     cancelSend: "キャンセル",
-    sendingInSeconds: seconds => `${seconds} 秒後に送信…`,
+    sendingInSeconds: seconds => `${seconds}秒後に送信…`,
     delayLabel: "送信までの待ち時間",
     delayUnitMinutes: "分",
-    delayImmediateHint: "0 で即時送信。0.1 分単位で入力できます。",
+    delayImmediateHint: "0で即時送信。0.1分単位で入力できます。",
   },
   sections: {
     recipients: "宛先",
@@ -45,7 +45,7 @@ export const ja: Messages = {
   warnings: {
     emptySubject: "件名が空です。",
     forgottenAttachment: "本文は添付ファイルの記載がありますが、ファイルが添付されていません。",
-    externalRecipients: count => `社外の宛先が ${count} 件あります。`,
+    externalRecipients: count => `社外の宛先が${count}件あります。`,
   },
   smartAlert: {
     prompt: "必要な項目を確認してください。",
@@ -67,10 +67,9 @@ export const ja: Messages = {
     othersTitle: "他に送信待機中",
     settingsTitle: "送信待機中のメール",
     empty: "送信待機中のメールはありません。",
-    recipients: count => `宛先 ${count} 件`,
-    remaining: text => `残り ${text}`,
-    capReached: max =>
-      `送信待機が上限（${max} 件）に達しました。1 件送信されるまでお待ちください。`,
+    recipients: count => `宛先${count}件`,
+    remaining: text => `残り${text}`,
+    capReached: max => `送信待機が上限（${max}件）に達しました。1件送信されるまでお待ちください。`,
     retry: "再試行",
     keepOpen: "送信待機中です。ページの更新または閉じる場合、メールの送信はキャンセルされます。",
     unloadWarning:
@@ -86,7 +85,7 @@ export const ja: Messages = {
     domainsLabel: "社内ドメイン",
     domainsHint: "1行に1つ。ここに無いドメインの宛先は「社外」として扱います。",
     delayLabel: "デフォルトの待ち時間",
-    delayHint: "「確認して送信する」後のカウントダウンの初期値です。0.1 分単位で入力できます。",
+    delayHint: "「確認して送信する」後のカウントダウンの初期値です。0.1分単位で入力できます。",
     delayUnit: "分",
     save: "保存",
     saved: "保存しました。",
