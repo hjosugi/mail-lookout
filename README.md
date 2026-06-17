@@ -49,7 +49,7 @@ is confirmed, a cancellable countdown sends the message.
 
 The review pane in Outlook on the web:
 
-![Mail Lookout review pane in Outlook on the web](docs/images/appsource/review-1280x720.png)
+![Mail Lookout review pane in Outlook on the web](docs/images/appsource/review-1366x768.png)
 
 Up close — the review checklist and the send-wait countdown:
 

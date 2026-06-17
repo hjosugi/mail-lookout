@@ -9,4 +9,4 @@ in `raw/` and are **gitignored** (never committed).
 | `review.png` | README — the review pane (recipients + external badge, body) |
 | `countdown.png` | README — the send-wait countdown |
 | `smart-alert.png` | README — the Smart Alerts message on Send |
-| `appsource/*-1280x720.png` | AppSource listing screenshots (1280×720) |
+| `appsource/*-1366x768.png` | AppSource listing screenshots (1366×768, < 1 MB) |
