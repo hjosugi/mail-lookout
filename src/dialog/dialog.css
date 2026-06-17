@@ -485,7 +485,9 @@ body {
 
 .so-delay-input {
   flex: 0 0 auto;
-  width: 3.4em;
+  /* Wide enough for "0.1"/"60" plus the number spinner, so the leading
+     digit isn't clipped (3.4em was too narrow). */
+  width: 4.4em;
   font: inherit;
   font-size: 13px;
   color: var(--so-fg);
