@@ -23,3 +23,6 @@ coverage/
 
 # Private notes
 private/
+
+# Raw screenshot sources (only processed outputs are committed)
+docs/images/raw/

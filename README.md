@@ -42,6 +42,18 @@ roaming settings, so they follow the user across devices. Everything
 else — and the shipped defaults — lives in one config file,
 [`src/config/defaults.ts`](./src/config/defaults.ts).
 
+## Screenshots
+
+On Send, Outlook's Smart Alerts opens the review pane; once the checklist
+is confirmed, a cancellable countdown sends the message.
+
+<p>
+  <img src="docs/images/review.png" alt="Review pane: recipients with external badge, attachments, subject, body" height="340">
+  <img src="docs/images/countdown.png" alt="Send-delay countdown with cancel and back" height="340">
+</p>
+
+![Smart Alerts message on Send](docs/images/smart-alert.png)
+
 ## Requirements
 
 - New Outlook on Windows, or Outlook on the web.
