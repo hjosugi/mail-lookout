@@ -16,29 +16,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: 22
-          cache: npm
+          bun-version-file: .bun-version
 
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
 
       - name: Type check
-        run: npm run typecheck
+        run: bun run typecheck
 
       - name: Test
-        run: npm run test
+        run: bun run test
 
       - name: Build release manifest
-        run: npm run build
+        run: bun run build
         env:
           ADDIN_HOST_URL: https://mail-lookout.netlify.app
 
       - name: Best-effort validate release manifest
         continue-on-error: true
-        run: node node_modules/office-addin-manifest/cli.js validate dist/manifest.xml
+        run: bunx office-addin-manifest validate dist/manifest.xml
 
       - name: Prepare release asset
         run: cp dist/manifest.xml mail-lookout-manifest.xml

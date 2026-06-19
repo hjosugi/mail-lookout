@@ -29,7 +29,7 @@ async function httpsOptions(): Promise<ServerOptions["https"]> {
     return { key: options.key, cert: options.cert, ca: options.ca }
   } catch {
     console.warn(
-      "[mail-lookout] HTTPS certs not found. Run `npm run dev-certs`. Falling back to HTTP.",
+      "[mail-lookout] HTTPS certs not found. Run `bun run dev-certs`. Falling back to HTTP.",
     )
     return undefined
   }
@@ -81,7 +81,7 @@ export default defineConfig({
     include: ["test/**/*.test.ts"],
     coverage: {
       provider: "v8",
-      include: ["src/domain/**", "src/i18n/**", "src/shared/**", "src/config/**"],
+      include: ["src/domain/**", "src/i18n/**", "src/config/**"],
     },
   },
 })

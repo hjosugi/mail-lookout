@@ -66,7 +66,7 @@ The built-in Smart Alerts message that opens the review:
 
 - New Outlook on Windows, or Outlook on the web.
 - Mailbox requirement set 1.15 or later.
-- Node.js 22.12 or later for development.
+- Bun 1.3 or later for development.
 
 This add-in does **not** run on Outlook mobile. See the limitations
 section for classic Outlook on Windows.
@@ -102,13 +102,13 @@ construction; keep any new host calls in the `office` layer.
 
 ```sh
 # 1. Install dependencies.
-npm install
+bun install
 
 # 2. Trust a local HTTPS certificate. Outlook requires HTTPS.
-npm run dev-certs
+bun run dev-certs
 
 # 3. Start the dev server on https://localhost:3000.
-npm run dev:outlook
+bun run dev:outlook
 ```
 
 Then sideload `manifest.xml` in Outlook. The steps depend on the
@@ -130,8 +130,8 @@ Send again without changing the draft.
 You can test the review flow in a browser without Outlook:
 
 ```sh
-npm install
-npm run dev:emulator
+bun install
+bun run dev:emulator
 ```
 
 Or start the normal dev server and open `/emulator.html` on the URL
@@ -142,14 +142,14 @@ Outlook send handler, but it does not load Office.js or call Outlook
 APIs. Edit the draft fields, switch scenarios, then click "Review
 send" to rebuild the dialog.
 
-For Outlook sideloading, use `npm run dev:outlook`. The manifest is
+For Outlook sideloading, use `bun run dev:outlook`. The manifest is
 fixed to `https://localhost:3000`, so that script intentionally fails
 if port 3000 is already in use.
 
 ## Verify the code
 
 ```sh
-npm run check
+bun run check
 ```
 
 This runs, in order: Biome (format and lint), type check on both
@@ -157,20 +157,20 @@ tsconfigs, tests with coverage, the production build, and manifest
 validation. Each step must pass. Useful single steps:
 
 ```sh
-npm run typecheck      # tsc on src and on the build config
-npm run lint           # biome lint
-npm run format         # biome format --write
-npm run test           # vitest, run once
-npm run test:coverage  # vitest with coverage on the pure layers
-npm run build          # tsc --noEmit then vite build
-npm run validate       # office-addin-manifest validate
+bun run typecheck      # tsc on src and on the build config
+bun run lint           # biome lint
+bun run format         # biome format --write
+bun run test           # vitest, run once
+bun run test:coverage  # vitest with coverage on the pure layers
+bun run build          # tsc --noEmit then vite build
+bun run validate       # office-addin-manifest validate
 ```
 
 ## Production deployment
 
 For the simplest public preview, deploy this repository to Netlify.
 The repository includes `netlify.toml`, so Netlify can build with
-`npm run build` and publish `dist/` automatically. During that build,
+`bun run build` and publish `dist/` automatically. During that build,
 `scripts/generate-manifest.js` writes `dist/manifest.xml` with the
 Netlify site URL embedded.
 
@@ -191,7 +191,7 @@ bun run version:patch
 
 Use `bun run version:minor`, `bun run version:major`, or `bun run
 version:set 1.2.3` for other version changes. These commands update
-`package.json`, `package-lock.json`, and `manifest.xml`, create the
+`package.json` and `manifest.xml`, create the
 version commit, push the current branch, then create and push the
 `v*` release tag. GitHub Actions creates the release asset from that
 tag. The script shows the next version first and asks for a `y/N`
@@ -208,7 +208,7 @@ them before a production or marketplace release.
 2. **URLs.** For Netlify, set `ADDIN_HOST_URL` only if you need to
    override the site URL, for example for a custom domain. For other
    hosts, replace every `https://localhost:3000` in `manifest.xml`
-   with your host or run `ADDIN_HOST_URL=https://example.com npm run
+   with your host or run `ADDIN_HOST_URL=https://example.com bun run
    build`. Serve the `dist/` folder over HTTPS at that host. The
    entry JS keeps a stable name (`/assets/commands.js`), so the
    manifest URLs do not change between builds.

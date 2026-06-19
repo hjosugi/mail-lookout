@@ -17,7 +17,7 @@
 2. Git プロバイダーとして **GitHub** を選択し、本リポジトリを選択します。
 3. デプロイ設定は `netlify.toml` から自動で読み込まれます。画面に入力欄が出た場合は以下になっていることを確認します。
 
-   - **Build command**: `npm run build`
+   - **Build command**: `bun run build`
    - **Publish directory**: `dist`
    - **Production branch**: `main` (または `master`)
 
@@ -33,9 +33,9 @@
 
 このリポジトリでは `netlify.toml` を使って、Netlify のビルド設定をコード管理しています。これで以下は Git に残ります。
 
-- build command: `npm run build`
+- build command: `bun run build`
 - publish directory: `dist`
-- Node.js version
+- Bun version
 - `manifest.xml` の `Content-Type` header
 
 つまり、Netlify に GitHub repo を一度 import すれば、その後のビルド設定は IaC 的に管理できます。
@@ -68,7 +68,7 @@ patch version を上げて、commit、branch push、GitHub Releases 用の tag p
 bun run version:patch
 ```
 
-この script は次の version を表示して `y/N` 確認してから、`package.json`、`package-lock.json`、`manifest.xml` の version をまとめて更新し、version commit を作り、現在の branch を push してから `v1.0.0` のような release tag を作成・push します。GitHub Actions はこの tag push を契機に GitHub Release asset を作ります。minor / major は `bun run version:minor`、`bun run version:major`、明示的に指定する場合は `bun run version:set 1.2.3` を使います。
+この script は次の version を表示して `y/N` 確認してから、`package.json` と `manifest.xml` の version をまとめて更新し、version commit を作り、現在の branch を push してから `v1.0.0` のような release tag を作成・push します。GitHub Actions はこの tag push を契機に GitHub Release asset を作ります。minor / major は `bun run version:minor`、`bun run version:major`、明示的に指定する場合は `bun run version:set 1.2.3` を使います。
 
 push / tag なしでローカルの version commit だけ作りたい場合は、以下を使います。
 

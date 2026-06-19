@@ -20,7 +20,6 @@ for (const flag of flags) {
 const dryRun = flags.has("--dry-run")
 
 const packageJsonPath = path.join(rootDir, "package.json")
-const packageLockPath = path.join(rootDir, "package-lock.json")
 const manifestPath = path.join(rootDir, "manifest.xml")
 
 const packageJson = readJson(packageJsonPath)
@@ -30,14 +29,6 @@ const nextPackageVersion = formatPackageVersion(nextVersion)
 const nextManifestVersion = `${nextPackageVersion}.0`
 
 packageJson.version = nextPackageVersion
-
-const packageLock = fs.existsSync(packageLockPath) ? readJson(packageLockPath) : null
-if (packageLock) {
-  packageLock.version = nextPackageVersion
-  if (packageLock.packages?.[""]) {
-    packageLock.packages[""].version = nextPackageVersion
-  }
-}
 
 let manifest = fs.readFileSync(manifestPath, "utf8")
 const manifestVersionMatch = /<Version>([^<]+)<\/Version>/.exec(manifest)
@@ -60,9 +51,6 @@ if (dryRun) {
 }
 
 writeJson(packageJsonPath, packageJson)
-if (packageLock) {
-  writeJson(packageLockPath, packageLock)
-}
 fs.writeFileSync(manifestPath, manifest, "utf8")
 
 console.log(

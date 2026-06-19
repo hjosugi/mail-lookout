@@ -5,7 +5,7 @@
   A blue rounded tile with a bold white "M" (Mail); a small eye sits at
   the centre of the M (Lookout — watching), kept subtle so the M reads
   first. Rasterized to the icon-*.png sizes the manifest references with:
-  npm run icons
+  bun run icons
 -->
 <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
   <rect x="3" y="3" width="74" height="74" rx="16" fill="#0f6cbd"/>

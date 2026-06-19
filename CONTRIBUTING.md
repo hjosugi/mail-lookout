@@ -5,15 +5,13 @@ add-in. This guide covers the local setup and how the code is organized.
 
 ## Prerequisites
 
-- Node.js >= 22.12 (see `engines` in `package.json`)
-- npm or [Bun](https://bun.sh) — the scripts work with either
-  (`npm run <script>` or `bun run <script>`)
+- [Bun](https://bun.sh) >= 1.3 (see `engines` in `package.json`)
 
 ## Setup
 
 ```sh
-npm install
-npm run dev-certs   # one-time: trust the local HTTPS dev certificate
+bun install
+bun run dev-certs   # one-time: trust the local HTTPS dev certificate
 ```
 
 ## Develop
@@ -23,7 +21,7 @@ Two ways to work on the UI:
 - **Emulator (no Outlook needed)** — fastest loop for the review UI:
 
   ```sh
-  npm run dev:emulator
+  bun run dev:emulator
   ```
 
   Opens `/emulator.html`: compose a fake draft on the left, run the
@@ -33,7 +31,7 @@ Two ways to work on the UI:
 - **Real Outlook** — to test the Smart Alerts send flow end to end:
 
   ```sh
-  npm run dev:outlook   # serves on https://localhost:3000
+  bun run dev:outlook   # serves on https://localhost:3000
   ```
 
   Then sideload `manifest.xml` in new Outlook or Outlook on the web
@@ -42,14 +40,14 @@ Two ways to work on the UI:
 
 ## Checks
 
-Run these before opening a PR (or `npm run check` for all of them):
+Run these before opening a PR (or `bun run check` for all of them):
 
 ```sh
-npm run typecheck   # tsc, app + node configs
-npm run lint        # Biome
-npm run format      # Biome formatter (use lint:fix / format to write)
-npm test            # Vitest
-npm run build       # production build + manifest generation
+bun run typecheck   # tsc, app + node configs
+bun run lint        # Biome
+bun run format      # Biome formatter (use lint:fix / format to write)
+bun run test        # Vitest
+bun run build       # production build + manifest generation
 ```
 
 ## Project layout
@@ -84,6 +82,6 @@ roaming settings).
 ## Pull requests
 
 - Keep changes focused; add or update tests for behavior changes.
-- Make sure `npm run check` passes.
+- Make sure `bun run check` passes.
 - The default branch is `main`. Releases are cut by bumping the version
-  and pushing a `v*` tag (`npm run version:patch` then `npm run release:tag`).
+  and pushing a `v*` tag (`bun run version:patch` then `bun run release:tag`).

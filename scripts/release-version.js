@@ -65,7 +65,7 @@ function confirm(question) {
   return answer === "y" || answer === "yes"
 }
 
-run("node", ["scripts/bump-version.js", target, "--dry-run"])
+run("bun", ["scripts/bump-version.js", target, "--dry-run"])
 
 if (dryRun) {
   console.log("[release-version] Dry run only. No branch or tag was pushed.")
@@ -80,8 +80,8 @@ if (
   process.exit(0)
 }
 
-run("node", ["scripts/bump-version.js", target])
+run("bun", ["scripts/bump-version.js", target])
 
 const branch = output("git", ["branch", "--show-current"])
 run("git", ["push", "origin", branch])
-run("node", ["scripts/release-tag.js", "--yes", ...releaseTagFlags])
+run("bun", ["scripts/release-tag.js", "--yes", ...releaseTagFlags])
