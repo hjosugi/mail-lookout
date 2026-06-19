@@ -11,7 +11,7 @@
  * why it is easy to test, and the tests are where the value is.
  */
 
-import type { Config } from "../config"
+import type { Config } from "../config/types"
 import { detectForgottenAttachment, realAttachments } from "./attachments"
 import { createExternalRecipientChecker } from "./recipients"
 import { isSubjectEmpty } from "./body"

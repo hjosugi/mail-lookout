@@ -1,4 +1,4 @@
-import { defaultConfig } from "../config"
+import { defaultConfig } from "../config/defaults"
 import { delayMinutesToSeconds, secondsToDelayMinutes } from "../config/delayMinutes"
 import { normalizeEmailAddress } from "../domain/recipients"
 import { buildReviewModel, canSend, initialReviewState } from "../domain/review"

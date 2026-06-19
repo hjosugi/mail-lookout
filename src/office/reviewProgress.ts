@@ -36,7 +36,7 @@ const ENTRY_TTL_MS = 24 * 60 * 60 * 1000
  */
 const SEND_GRACE_MS = 5000
 
-export interface ReviewProgress {
+interface ReviewProgress {
   readonly state: ReviewState
   /** Epoch ms when the post-confirm countdown ends, or null if it has not started. */
   readonly deadline: number | null
@@ -49,7 +49,7 @@ export interface WaitingDisplay {
 }
 
 /** One waiting send, as shown in the status list. */
-export interface WaitingReview {
+interface WaitingReview {
   readonly fingerprint: string
   readonly subject: string
   readonly recipientCount: number

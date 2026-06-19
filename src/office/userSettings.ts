@@ -14,14 +14,10 @@
  * a pane opens — not by an already-loaded runtime mid-session.
  */
 
-import {
-  applySettings,
-  defaultConfig,
-  normalizeSettings,
-  settingsFromConfig,
-  type Config,
-  type UserSettings,
-} from "../config"
+import { applySettings, normalizeSettings, settingsFromConfig } from "../config/settings"
+import type { UserSettings } from "../config/settings"
+import { defaultConfig } from "../config/defaults"
+import type { Config } from "../config/types"
 
 const KEY_DOMAINS = "internalDomains"
 const KEY_DELAY = "sendDelaySeconds"

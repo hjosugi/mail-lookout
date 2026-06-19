@@ -9,7 +9,7 @@ import type { LocaleTag } from "../i18n/catalog"
  * anyone extending the emulator has one obvious place to add strings,
  * and adding a language is the same compiler-checked exercise.
  */
-export interface EmulatorMessages {
+interface EmulatorMessages {
   /** Lines shown in the result panel's status area. */
   readonly status: {
     readonly ready: string

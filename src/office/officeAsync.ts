@@ -15,7 +15,7 @@
  * `code` and a `name`. A plain Error drops those, so we keep them so
  * failures stay debuggable.
  */
-export class OfficeAsyncError extends Error {
+class OfficeAsyncError extends Error {
   readonly code: number | undefined
   /** The Office-supplied error name, kept off `name` so the stack reads cleanly. */
   readonly officeName: string | undefined

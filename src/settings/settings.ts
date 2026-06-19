@@ -10,11 +10,12 @@
 
 import "../dialog/dialog.css"
 
-import { defaultConfig } from "../config"
+import { defaultConfig } from "../config/defaults"
 import { currentSettings, saveSettings, clearSettings } from "../office/userSettings"
 import { listWaiting } from "../office/reviewProgress"
 import { getMessages, resolveLocale } from "../i18n/catalog"
-import type { LocaleTag, Messages } from "../i18n"
+import type { LocaleTag } from "../i18n/catalog"
+import type { Messages } from "../i18n/types"
 import { delayMinutesToSeconds, secondsToDelayMinutes } from "../config/delayMinutes"
 
 /** Domains may be entered one per line or separated by commas/semicolons. */

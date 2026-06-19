@@ -3,7 +3,8 @@
 import type { ReviewModel } from "../domain/review"
 import type { MessageSnapshot } from "../domain/types"
 import { getMessages } from "../i18n/catalog"
-import type { LocaleTag, Messages } from "../i18n"
+import type { LocaleTag } from "../i18n/catalog"
+import type { Messages } from "../i18n/types"
 
 const CONFIRMATION_STORAGE_KEY = "mail-lookout:send-confirmations"
 const CONFIRMATION_TTL_MS = 10 * 60 * 1000

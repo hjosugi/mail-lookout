@@ -55,7 +55,7 @@ export function isExternal(email: string, internalDomains: readonly string[]): b
 }
 
 /** Recipients split into internal and external groups. */
-export interface ClassifiedRecipients {
+interface ClassifiedRecipients {
   readonly internal: readonly FieldRecipient[]
   readonly external: readonly FieldRecipient[]
 }
