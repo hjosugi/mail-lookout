@@ -21,7 +21,11 @@ function snapshot(overrides: Partial<MessageSnapshot>): MessageSnapshot {
   }
 }
 
-const internal: FieldRecipient = { field: "to", displayName: "In", emailAddress: "in@example.com" }
+const internal: FieldRecipient = {
+  field: "to",
+  displayName: "In",
+  emailAddress: "in@avishaikofun.com",
+}
 const externalA: FieldRecipient = {
   field: "to",
   displayName: "Ext A",
@@ -41,7 +45,9 @@ describe("buildReviewModel", () => {
       snapshot({ recipients: [internal, externalA, externalB] }),
       defaultConfig,
     )
-    expect(model.recipients.find(r => r.emailAddress === "in@example.com")?.isExternal).toBe(false)
+    expect(model.recipients.find(r => r.emailAddress === "in@avishaikofun.com")?.isExternal).toBe(
+      false,
+    )
     expect(model.externalEmails).toEqual(["a@other.com", "b@other.com"])
   })
 

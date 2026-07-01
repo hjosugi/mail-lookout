@@ -7,11 +7,11 @@ import { configSchema, type Config } from "./types"
  * file for your organization. Keeping config in code keeps
  * deployment simple: ship one file, no per-user setup.
  *
- * Replace "example.com" with your own internal domains before you
- * deploy. If the list is wrong, every recipient looks external.
+ * Keep this list aligned with the publisher/company domain. If the
+ * list is wrong, every recipient looks external.
  */
 export const defaultConfig: Config = configSchema.parse({
-  internalDomains: ["example.com"],
+  internalDomains: ["avishaikofun.com"],
   sendDelaySeconds: 60,
   requireRecipientConfirmation: true,
   requireAttachmentConfirmation: true,

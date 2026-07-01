@@ -1,4 +1,4 @@
-const DEFAULT_HOST = "https://mail-lookout.netlify.app"
+const DEFAULT_HOST = "https://avishaikofun.com"
 const TIMEOUT_MS = 10_000
 
 const requiredPaths = [

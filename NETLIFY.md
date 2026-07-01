@@ -23,11 +23,11 @@
 
 4. **[Deploy]** ボタンをクリックしてデプロイを実行します。
 
-ビルド時に Netlify の環境変数 `URL` が読み込まれ、`dist/manifest.xml` 内の `https://localhost:3000` が本番URLに置き換わります。
+ビルド時に `ADDIN_HOST_URL=https://avishaikofun.com` が読み込まれ、`dist/manifest.xml` 内の `https://localhost:3000` が本番URLに置き換わります。
 
 サイト名や独自ドメインを後から変えた場合は、Netlify で再デプロイしてください。マニフェスト内のURLはビルド時に埋め込まれます。
 
-独自ドメインを先に使いたい場合は、Netlify の **Environment variables** に `ADDIN_HOST_URL=https://your-domain.example` を設定すると、そのURLが優先されます。
+独自ドメイン `https://avishaikofun.com` を使うため、このリポジトリの `netlify.toml` では `ADDIN_HOST_URL=https://avishaikofun.com` を設定しています。別ドメインに変える場合は、Netlify の **Environment variables** か `netlify.toml` で `ADDIN_HOST_URL=https://your-domain.example` を設定すると、そのURLが優先されます。
 
 ### IaC で管理できる範囲
 
@@ -48,15 +48,15 @@
 
 ## 3. マニフェストファイルの入手と Outlook への登録
 
-デプロイが完了すると、`https://<あなたのサイト名>.netlify.app` のような公開用URLが割り当てられます。
+デプロイが完了すると、`https://<あなたのサイト名>.netlify.app` のような公開用URLが割り当てられます。審査用には、Netlify の Domain management で `avishaikofun.com` を primary domain に設定し、DNS も Netlify の案内通りに向けます。
 
-このプロジェクトの現在の公開URLは `https://mail-lookout.netlify.app/` です。
+このプロジェクトの現在の公開URLは `https://avishaikofun.com/` です。
 
 ### マニフェストのダウンロード
-1. ブラウザで `https://<あなたのサイト名>.netlify.app/manifest.xml` にアクセスします。
+1. ブラウザで `https://avishaikofun.com/manifest.xml` にアクセスします。
 2. 画面に表示されるXMLデータを右クリックして **「名前を付けて保存」** でPCに保存します（ファイル名: `manifest.xml`）。
    > **【注意】**
-   > このマニフェストファイルには、すでに Netlify の公開URLがすべて埋め込まれています。
+   > このマニフェストファイルには、すでに `https://avishaikofun.com` がすべて埋め込まれています。
 
 ### GitHub Releases から固定版をダウンロード
 
@@ -98,13 +98,13 @@ Netlify で公開されるのは、アドイン本体のWebファイルと配布
 - `private/` は commit しない。
 - `.env`、`.env.*`、証明書、秘密鍵、zip は commit しない。
 - `.claude/`、`.codex/`、`.gemini/` などのローカルAI設定は commit しない。
-- `src/config/defaults.ts` の `internalDomains` は、公開したくない社内ドメインに置き換えた状態で commit しない。
+- `src/config/defaults.ts` の `internalDomains` は、company domain の `avishaikofun.com` に合わせる。
 - `manifest.xml` の `SupportUrl` は公開サポートページにする。
 - Marketplace / AppSource に出す段階では、Support URL、Privacy Policy、Terms of Use、アイコン、説明文を本番用に整える。
 
 現在の公開URL:
 
-- Site: `https://mail-lookout.netlify.app/`
-- Support URL: `https://mail-lookout.netlify.app/support.html`
-- Privacy Policy: `https://mail-lookout.netlify.app/privacy.html`
-- Terms of Use: `https://mail-lookout.netlify.app/terms.html`
+- Site: `https://avishaikofun.com/`
+- Support URL: `https://avishaikofun.com/support.html`
+- Privacy Policy: `https://avishaikofun.com/privacy.html`
+- Terms of Use: `https://avishaikofun.com/terms.html`

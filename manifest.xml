@@ -22,7 +22,7 @@
 
   <Id>7888d7db-1c99-4e49-a191-ea73f4088740</Id>
   <Version>1.1.9.0</Version>
-  <ProviderName>Mail Lookout contributors</ProviderName>
+  <ProviderName>Avishai Kofun</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Mail Lookout" />
   <Description DefaultValue="Review recipients, attachments, and body before an email is sent." />

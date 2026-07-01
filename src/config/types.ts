@@ -14,7 +14,7 @@ import type { LocaleTag } from "../i18n/catalog"
 
 /** All settings the add-in reads at send time. */
 export interface Config {
-  /** Domains treated as internal, for example ["example.com"]. */
+  /** Domains treated as internal, for example ["avishaikofun.com"]. */
   readonly internalDomains: readonly string[]
   /** Seconds to count down before the send button turns on. */
   readonly sendDelaySeconds: number

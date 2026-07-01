@@ -7,9 +7,9 @@
     <link rel="apple-touch-icon" href="/assets/icon-128.png" />
     <meta
       name="description"
-      content="Mail Lookout is a send-confirmation add-in for Outlook."
+      content="Avishai Kofun is a software developer and publisher of Mail Lookout."
     />
-    <title>Mail Lookout</title>
+    <title>Avishai Kofun</title>
     <style>
       :root {
         color-scheme: light;
@@ -50,22 +50,30 @@
         display: grid;
         gap: 28px;
         align-items: center;
-        grid-template-columns: auto 1fr;
+        grid-template-columns: 1fr auto;
         padding-bottom: 40px;
         border-bottom: 1px solid var(--line);
       }
 
       img {
-        width: 80px;
-        height: 80px;
+        width: 96px;
+        height: 96px;
         border-radius: 8px;
       }
 
       h1 {
         margin: 0;
-        font-size: clamp(2.2rem, 8vw, 4.8rem);
+        font-size: clamp(2.4rem, 8vw, 5rem);
         line-height: 1;
         font-weight: 720;
+      }
+
+      .eyebrow {
+        margin: 0 0 12px;
+        color: var(--accent-strong);
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
       }
 
       .lead {
@@ -75,7 +83,8 @@
         font-size: 1.12rem;
       }
 
-      .actions {
+      .actions,
+      .footer-links {
         display: flex;
         flex-wrap: wrap;
         gap: 12px;
@@ -83,10 +92,7 @@
       }
 
       .footer-links {
-        display: flex;
-        flex-wrap: wrap;
         gap: 18px;
-        margin-top: 28px;
         padding-top: 20px;
         border-top: 1px solid var(--line);
         color: var(--muted);
@@ -116,24 +122,51 @@
         color: var(--accent-strong);
       }
 
-      section {
+      .details {
         display: grid;
         gap: 18px;
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        padding-top: 32px;
+        padding: 32px 0;
       }
 
-      article {
-        min-height: 148px;
+      article,
+      .detail {
         border: 1px solid var(--line);
         border-radius: 8px;
         background: var(--surface);
         padding: 18px;
       }
 
+      .detail dt {
+        margin: 0 0 8px;
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+
+      .detail dd {
+        margin: 0;
+        font-weight: 650;
+      }
+
+      section {
+        padding: 0 0 32px;
+      }
+
+      article {
+        display: grid;
+        gap: 18px;
+        grid-template-columns: auto 1fr;
+        align-items: start;
+      }
+
+      article img {
+        width: 64px;
+        height: 64px;
+      }
+
       h2 {
         margin: 0 0 8px;
-        font-size: 1rem;
+        font-size: 1.15rem;
       }
 
       p {
@@ -142,6 +175,14 @@
 
       article p {
         color: var(--muted);
+        font-size: 0.96rem;
+      }
+
+      .project-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-top: 14px;
         font-size: 0.95rem;
       }
 
@@ -154,7 +195,8 @@
           grid-template-columns: 1fr;
         }
 
-        section {
+        .details,
+        article {
           grid-template-columns: 1fr;
         }
 
@@ -171,33 +213,53 @@
   <body>
     <main>
       <header>
-        <img src="/assets/icon-128.png" alt="" width="80" height="80" />
         <div>
-          <h1>Mail Lookout</h1>
+          <p class="eyebrow">Software developer / publisher</p>
+          <h1>Avishai Kofun</h1>
           <p class="lead">
-            A send-confirmation add-in for Outlook. It helps review recipients,
-            attachments, and message content before mail leaves your draft.
+            Avishai Kofun publishes small, practical software for productivity
+            and communication workflows, including the Mail Lookout Outlook add-in.
           </p>
-          <nav class="actions" aria-label="Project links">
-            <a class="button" href="/manifest.xml">Download manifest</a>
-            <a class="button secondary" href="/emulator.html">Try emulator</a>
+          <nav class="actions" aria-label="Publisher links">
+            <a class="button" href="mailto:hjosugi@avishaikofun.com">Contact</a>
             <a class="button secondary" href="https://github.com/hjosugi/mail-lookout">GitHub</a>
           </nav>
         </div>
+        <img src="/assets/icon-128.png" alt="" width="96" height="96" />
       </header>
 
-      <section aria-label="What Mail Lookout checks">
+      <dl class="details" aria-label="Publisher details">
+        <div class="detail">
+          <dt>Website</dt>
+          <dd><a href="https://avishaikofun.com">avishaikofun.com</a></dd>
+        </div>
+        <div class="detail">
+          <dt>Contact</dt>
+          <dd><a href="mailto:hjosugi@avishaikofun.com">hjosugi@avishaikofun.com</a></dd>
+        </div>
+        <div class="detail">
+          <dt>Publisher</dt>
+          <dd>Avishai Kofun</dd>
+        </div>
+      </dl>
+
+      <section aria-label="Published software">
         <article>
-          <h2>Recipients</h2>
-          <p>Review To, Cc, and Bcc recipients before Outlook sends the message.</p>
-        </article>
-        <article>
-          <h2>Attachments</h2>
-          <p>Confirm real attachments and catch messages that mention missing files.</p>
-        </article>
-        <article>
-          <h2>Body</h2>
-          <p>Pause for a short review of the message body and empty-subject warning.</p>
+          <img src="/assets/icon-128.png" alt="" width="64" height="64" />
+          <div>
+            <h2>Mail Lookout</h2>
+            <p>
+              A send-confirmation add-in for Outlook. It helps review recipients,
+              attachments, and message content before mail leaves your draft.
+            </p>
+            <nav class="project-links" aria-label="Mail Lookout links">
+              <a href="/manifest.xml">Download manifest</a>
+              <a href="/emulator.html">Try emulator</a>
+              <a href="/support.html">Support</a>
+              <a href="/privacy.html">Privacy Policy</a>
+              <a href="/terms.html">Terms of Use</a>
+            </nav>
+          </div>
         </article>
       </section>
 

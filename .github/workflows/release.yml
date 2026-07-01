@@ -39,7 +39,7 @@ jobs:
       - name: Build release manifest
         run: bun run build
         env:
-          ADDIN_HOST_URL: https://mail-lookout.netlify.app
+          ADDIN_HOST_URL: https://avishaikofun.com
 
       - name: Best-effort validate release manifest
         continue-on-error: true

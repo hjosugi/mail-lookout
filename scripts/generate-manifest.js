@@ -11,7 +11,7 @@ function resolveDeployUrl() {
     process.env.URL ??
     process.env.DEPLOY_PRIME_URL ??
     process.env.DEPLOY_URL ??
-    "https://localhost:3000"
+    "https://avishaikofun.com"
   )
 }
 

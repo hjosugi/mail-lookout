@@ -171,11 +171,11 @@ bun run validate       # office-addin-manifest validate
 For the simplest public preview, deploy this repository to Netlify.
 The repository includes `netlify.toml`, so Netlify can build with
 `bun run build` and publish `dist/` automatically. During that build,
-`scripts/generate-manifest.js` writes `dist/manifest.xml` with the
-Netlify site URL embedded.
+`scripts/generate-manifest.js` writes `dist/manifest.xml` with
+`https://avishaikofun.com` embedded.
 
 The current public preview is served at
-[`https://mail-lookout.netlify.app/`](https://mail-lookout.netlify.app/).
+[`https://avishaikofun.com/`](https://avishaikofun.com/).
 Use `/manifest.xml` from that site when sideloading the add-in.
 
 Tagged releases also attach `mail-lookout-manifest.xml` on the
@@ -205,16 +205,17 @@ them before a production or marketplace release.
 
 1. **GUID.** Replace the `<Id>` in `manifest.xml` with your own
    GUID.
-2. **URLs.** For Netlify, set `ADDIN_HOST_URL` only if you need to
-   override the site URL, for example for a custom domain. For other
-   hosts, replace every `https://localhost:3000` in `manifest.xml`
-   with your host or run `ADDIN_HOST_URL=https://example.com bun run
-   build`. Serve the `dist/` folder over HTTPS at that host. The
-   entry JS keeps a stable name (`/assets/commands.js`), so the
-   manifest URLs do not change between builds.
+2. **URLs.** Netlify is configured with `ADDIN_HOST_URL=https://avishaikofun.com`.
+   For another host, replace every `https://localhost:3000` in
+   `manifest.xml` with your host or run
+   `ADDIN_HOST_URL=https://your-domain.example bun run build`. Serve
+   the `dist/` folder over HTTPS at that host. The entry JS keeps a
+   stable name (`/assets/commands.js`), so the manifest URLs do not
+   change between builds.
 3. **Internal domains.** Edit `internalDomains` in
-   `src/config/defaults.ts`. If this list is wrong, every recipient
-   looks external.
+   `src/config/defaults.ts`. The shipped default is
+   `avishaikofun.com`. If this list is wrong, every recipient looks
+   external.
 4. **Metadata.** Replace `ProviderName`, `SupportUrl`, and
    `AppDomains` in `manifest.xml`.
 
