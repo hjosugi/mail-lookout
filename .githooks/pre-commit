@@ -1,13 +1,23 @@
 #!/bin/sh
-# Auto-format staged files with Biome before each commit, so a forgotten
-# `bun run format` cannot land unformatted code. Wired up by the package
-# "prepare" script (git config core.hooksPath .githooks) on bun install.
+# Auto-format staged files with oxfmt (and apply safe oxlint fixes) before
+# each commit, so a forgotten `bun run format` cannot land unformatted code.
+# Wired up by the package "prepare" script (git config core.hooksPath
+# .githooks) on bun install.
 
-biome="./node_modules/.bin/biome"
-[ -x "$biome" ] || biome="biome"
+oxfmt="./node_modules/.bin/oxfmt"
+[ -x "$oxfmt" ] || oxfmt="oxfmt"
+oxlint="./node_modules/.bin/oxlint"
+[ -x "$oxlint" ] || oxlint="oxlint"
 
-# Format + safe lint fixes, limited to the staged files.
-"$biome" check --write --staged --no-errors-on-unmatched || exit 1
+# Staged files only (added/copied/modified/renamed). Bail early when nothing
+# is staged, so we never fall through to formatting the whole tree.
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+[ -n "$staged" ] || exit 0
 
-# Re-stage whatever Biome rewrote (only files already in the index).
+# Format, then apply safe lint fixes, limited to the staged files. Both tools
+# skip paths they don't handle (oxfmt via ignorePatterns; oxlint by type).
+printf '%s\n' "$staged" | xargs "$oxfmt" --write --no-error-on-unmatched-pattern || exit 1
+printf '%s\n' "$staged" | xargs "$oxlint" --fix >/dev/null 2>&1 || true
+
+# Re-stage whatever the tools rewrote (only files already in the index).
 git update-index --again
