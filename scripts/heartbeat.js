@@ -14,6 +14,7 @@ const requiredPaths = [
   "/assets/icon-32.png",
   "/assets/icon-64.png",
   "/assets/icon-80.png",
+  "/assets/icon-96.png",
   "/assets/icon-128.png",
 ]
 

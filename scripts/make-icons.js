@@ -7,7 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const publicDir = path.resolve(__dirname, "..", "public")
 const outDir = path.resolve(publicDir, "assets")
 
-const SIZES = [16, 32, 64, 80, 128]
+const SIZES = [16, 32, 64, 80, 96, 128]
 const FAVICON_SIZES = new Set([16, 32, 64])
 const SCALE = 4
 const BLUE = [15, 108, 189, 255]
