@@ -44,11 +44,11 @@ export const ja: Messages = {
   },
   warnings: {
     emptySubject: "件名が空です。",
-    forgottenAttachment: "本文は添付ファイルの記載がありますが、ファイルが添付されていません。",
+    forgottenAttachment: "本文に添付ファイルの記載がありますが、ファイルが添付されていません。",
     externalRecipients: count => `社外の宛先が${count}件あります。`,
   },
   smartAlert: {
-    prompt: "必要な項目を確認してください。",
+    prompt: "確認画面を開いて、各項目を確認してください。",
     waiting: "送信待機中です。",
     openReview: "確認画面を開く",
     showWaiting: "待機画面を開く",
@@ -71,9 +71,9 @@ export const ja: Messages = {
     remaining: text => `残り${text}`,
     capReached: max => `送信待機が上限（${max}件）に達しました。1件送信されるまでお待ちください。`,
     retry: "再試行",
-    keepOpen: "送信待機中です。ページの更新または閉じる場合、メールの送信はキャンセルされます。",
+    keepOpen: "送信待機中です。ページを更新または閉じると、メールの送信はキャンセルされます。",
     unloadWarning:
-      "送信待機中です。ページの更新または閉じる場合、メールの送信はキャンセルされます。よろしいですか？",
+      "送信待機中です。ページを更新または閉じると、メールの送信はキャンセルされます。よろしいですか？",
   },
   cancel: {
     notSent: "メールは送信していません。下書きに戻って内容を確認してください。",

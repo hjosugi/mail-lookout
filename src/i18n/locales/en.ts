@@ -49,7 +49,7 @@ export const en: Messages = {
       `There ${count === 1 ? "is" : "are"} ${count} external recipient${count === 1 ? "" : "s"}.`,
   },
   smartAlert: {
-    prompt: "Review the required items.",
+    prompt: "Open the review and check each item.",
     waiting: "Sending is on hold.",
     openReview: "Open review",
     showWaiting: "Open status",
