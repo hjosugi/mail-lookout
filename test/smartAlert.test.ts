@@ -97,12 +97,13 @@ describe("Smart Alerts confirmation", () => {
 })
 
 describe("Smart Alerts message", () => {
-  it("stays short: just the title and the one-line prompt", () => {
+  it("stays short: title, prompt, and action only", () => {
     const message = buildSmartAlertMessage(locales.ja, true, false)
 
     expect(message.length).toBeLessThanOrEqual(500)
     expect(message).toContain(locales.ja.dialog.title)
     expect(message).toContain(locales.ja.smartAlert.prompt)
+    expect(message).toContain(locales.ja.smartAlert.action(locales.ja.smartAlert.openReview, false))
     // Detail lives in the review pane, not the built-in dialog.
     expect(message).not.toContain("本文:")
   })
@@ -111,10 +112,16 @@ describe("Smart Alerts message", () => {
     const review = smartAlertCancelOptions("ja", false)
     expect(review.cancelLabel).toBe(locales.ja.smartAlert.openReview)
     expect(review.errorMessage).toContain(locales.ja.smartAlert.prompt)
+    expect(review.errorMessage).toContain(
+      locales.ja.smartAlert.action(locales.ja.smartAlert.openReview, false),
+    )
 
     const waiting = smartAlertCancelOptions("ja", true)
     expect(waiting.cancelLabel).toBe(locales.ja.smartAlert.showWaiting)
     expect(waiting.errorMessage).toContain(locales.ja.smartAlert.waiting)
+    expect(waiting.errorMessage).toContain(
+      locales.ja.smartAlert.action(locales.ja.smartAlert.showWaiting, true),
+    )
   })
 
   it("creates completed options with plaintext and markdown messages", () => {

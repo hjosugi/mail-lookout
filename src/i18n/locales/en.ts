@@ -49,11 +49,14 @@ export const en: Messages = {
       `There ${count === 1 ? "is" : "are"} ${count} external recipient${count === 1 ? "" : "s"}.`,
   },
   smartAlert: {
-    prompt: "Open the review and check each item.",
+    prompt: "This message needs review.",
     waiting: "Sending is on hold.",
     openReview: "Open review",
     showWaiting: "Open status",
-    action: label => `Select “${label}” below.`,
+    action: (label, waiting) =>
+      waiting
+        ? `Select “${label}” to check the send status.`
+        : `Select “${label}” to review each item.`,
   },
   taskPane: {
     title: "Review before sending",

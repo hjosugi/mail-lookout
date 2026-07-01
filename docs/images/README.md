@@ -13,7 +13,7 @@ in `raw/` and are **gitignored** (never committed).
 | `../../public/assets/icon-96.png` | Microsoft Marketplace listing icon |
 | `../../public/assets/icon-128.png` | Outlook high-DPI add-in icon |
 
-Marketplace image audit, 2026-07-01:
+Marketplace image audit, 2026-07-02:
 
 - AppSource screenshots are 1366×768 PNG files and each is under 1 MB.
 - README screenshots still match the current Japanese review, countdown, and

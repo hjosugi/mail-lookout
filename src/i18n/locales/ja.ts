@@ -48,11 +48,14 @@ export const ja: Messages = {
     externalRecipients: count => `社外の宛先が${count}件あります。`,
   },
   smartAlert: {
-    prompt: "確認画面を開いて、各項目を確認してください。",
+    prompt: "内容の確認が必要です。",
     waiting: "送信待機中です。",
     openReview: "確認画面を開く",
     showWaiting: "待機画面を開く",
-    action: label => `「${label}」を押してください。`,
+    action: (label, waiting) =>
+      waiting
+        ? `「${label}」を押して、送信状況を確認してください。`
+        : `「${label}」を押して、各項目を確認してください。`,
   },
   taskPane: {
     title: "送信前の確認",
@@ -84,8 +87,9 @@ export const ja: Messages = {
     intro: "この端末でのみ有効な設定です。",
     domainsLabel: "社内ドメイン",
     domainsHint: "1行に1つ。ここに無いドメインの宛先は「社外」として扱います。",
-    delayLabel: "デフォルトの待ち時間",
-    delayHint: "「確認して送信する」後のカウントダウンの初期値です。0.1分単位で入力できます。",
+    delayLabel: "デフォルトの送信待ち時間",
+    delayHint:
+      "「確認して送信する」を押した後のカウントダウン初期値です。0.1分単位で入力できます。",
     delayUnit: "分",
     save: "保存",
     saved: "保存しました。",

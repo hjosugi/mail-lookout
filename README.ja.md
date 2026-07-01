@@ -95,8 +95,8 @@ bun run dev:outlook
 - **新しいOutlook（Windows）:** 同じアカウントのOutlook on the webから、同じアドイン管理ページを使います。
 
 サイドロード後、新規メールを開き、宛先を入れて送信を押します。
-Outlook標準のSmart Alertsダイアログが表示されます。「確認画面を開く」
-からtask paneを開き、必要な項目をチェックしてから
+Outlook標準のSmart Alertsダイアログが表示されます。「確認画面を開く」を
+押してtask paneを開き、必要な項目を確認してから
 「確認して送信する」を押します。
 
 ### Outlookなしのローカルemulator

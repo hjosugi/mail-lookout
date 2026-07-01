@@ -69,7 +69,7 @@ export interface Messages {
     readonly showWaiting: string
     /** Spells out the action in the message, since Outlook styles the
      * built-in "Don't send" button as the prominent one, not ours. */
-    readonly action: (label: string) => string
+    readonly action: (label: string, waiting: boolean) => string
   }
   readonly taskPane: {
     readonly title: string

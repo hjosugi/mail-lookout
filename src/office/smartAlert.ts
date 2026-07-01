@@ -147,7 +147,7 @@ export function buildSmartAlertMessage(
   // Warnings and detail live in the review pane, not here.
   const body = waiting ? messages.smartAlert.waiting : messages.smartAlert.prompt
   const label = waiting ? messages.smartAlert.showWaiting : messages.smartAlert.openReview
-  const action = messages.smartAlert.action(label)
+  const action = messages.smartAlert.action(label, waiting)
   const title = markdown ? strong(messages.dialog.title) : messages.dialog.title
   const lines = [title, body, action]
 
