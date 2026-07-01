@@ -152,14 +152,14 @@ if port 3000 is already in use.
 bun run check
 ```
 
-This runs, in order: Biome (format and lint), type check on both
-tsconfigs, tests with coverage, the production build, and manifest
-validation. Each step must pass. Useful single steps:
+This runs, in order: lint (oxlint) and format check (oxfmt), type check
+on both tsconfigs, tests with coverage, the production build, and
+manifest validation. Each step must pass. Useful single steps:
 
 ```sh
 bun run typecheck      # tsc on src and on the build config
-bun run lint           # biome lint
-bun run format         # biome format --write
+bun run lint           # oxlint
+bun run format         # oxfmt --write
 bun run test           # vitest, run once
 bun run test:coverage  # vitest with coverage on the pure layers
 bun run build          # tsc --noEmit then vite build

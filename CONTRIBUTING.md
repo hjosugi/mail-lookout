@@ -44,8 +44,8 @@ Run these before opening a PR (or `bun run check` for all of them):
 
 ```sh
 bun run typecheck   # tsc, app + node configs
-bun run lint        # Biome
-bun run format      # Biome formatter (use lint:fix / format to write)
+bun run lint        # oxlint
+bun run format      # oxfmt (use lint:fix / format to write)
 bun run test        # Vitest
 bun run build       # production build + manifest generation
 ```
