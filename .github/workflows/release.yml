@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to create (e.g. v1.2.3)"
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -45,10 +51,13 @@ jobs:
       - name: Create release and upload manifest
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
         run: |
-          tag="${GITHUB_REF_NAME}"
-          gh release view "$tag" >/dev/null 2>&1 || \
-            gh release create "$tag" \
-              --title "mail-lookout $tag" \
+          # On manual dispatch the tag may not exist yet; create it at this
+          # commit. On a tag push the tag already exists and --target is ignored.
+          gh release view "$TAG" >/dev/null 2>&1 || \
+            gh release create "$TAG" \
+              --target "$GITHUB_SHA" \
+              --title "mail-lookout $TAG" \
               --notes "Download mail-lookout-manifest.xml and sideload it in Outlook."
-          gh release upload "$tag" mail-lookout-manifest.xml --clobber
+          gh release upload "$TAG" mail-lookout-manifest.xml --clobber
