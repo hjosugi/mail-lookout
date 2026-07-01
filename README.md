@@ -168,9 +168,9 @@ bun run validate       # office-addin-manifest validate
 
 ## Production deployment
 
-For the simplest public preview, deploy this repository to Netlify.
-The repository includes `netlify.toml`, so Netlify can build with
-`bun run build` and publish `dist/` automatically. During that build,
+For the public preview, deploy this repository to Cloudflare Pages.
+The repository includes `wrangler.toml`, so Pages can build with
+`bun run build` and publish `dist/`. During that build,
 `scripts/generate-manifest.js` writes `dist/manifest.xml` with
 `https://avishaikofun.com` embedded.
 
@@ -198,16 +198,17 @@ tag. The script shows the next version first and asks for a `y/N`
 confirmation before changing files. Use `bun run version:bump patch`
 when you only want the local version commit without pushing or tagging.
 
-See [NETLIFY.md](./NETLIFY.md) for the step-by-step flow.
+See [CLOUDFLARE.md](./CLOUDFLARE.md) for the step-by-step flow.
+`NETLIFY.md` remains as an alternate deploy path.
 
 The source manifest still ships with placeholder values. Replace
 them before a production or marketplace release.
 
 1. **GUID.** Replace the `<Id>` in `manifest.xml` with your own
    GUID.
-2. **URLs.** Netlify is configured with `ADDIN_HOST_URL=https://avishaikofun.com`.
-   For another host, replace every `https://localhost:3000` in
-   `manifest.xml` with your host or run
+2. **URLs.** Cloudflare Pages is configured for
+   `https://avishaikofun.com`. For another host, replace every
+   `https://localhost:3000` in `manifest.xml` with your host or run
    `ADDIN_HOST_URL=https://your-domain.example bun run build`. Serve
    the `dist/` folder over HTTPS at that host. The entry JS keeps a
    stable name (`/assets/commands.js`), so the manifest URLs do not

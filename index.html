@@ -3,271 +3,92 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/assets/icon-32.png" />
-    <link rel="apple-touch-icon" href="/assets/icon-128.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/company/kofun-friends-group.png" />
+    <link rel="apple-touch-icon" href="/assets/company/kofun-friends-group.png" />
+    <link rel="stylesheet" href="/src/site/company.css" />
     <meta
       name="description"
-      content="Avishai Kofun is a software developer and publisher of Mail Lookout."
+      content="Avishai Kofun is a small software development and publishing studio."
     />
     <title>Avishai Kofun</title>
-    <style>
-      :root {
-        color-scheme: light;
-        --bg: #f7f7f5;
-        --ink: #1f2933;
-        --muted: #56616d;
-        --line: #d8ddd7;
-        --accent: #0f766e;
-        --accent-strong: #115e59;
-        --surface: #ffffff;
-      }
-
-      * {
-        box-sizing: border-box;
-      }
-
-      body {
-        margin: 0;
-        min-height: 100vh;
-        background: var(--bg);
-        color: var(--ink);
-        font-family:
-          "Segoe UI",
-          system-ui,
-          -apple-system,
-          BlinkMacSystemFont,
-          sans-serif;
-        line-height: 1.5;
-      }
-
-      main {
-        width: min(920px, calc(100% - 32px));
-        margin: 0 auto;
-        padding: 56px 0 40px;
-      }
-
-      header {
-        display: grid;
-        gap: 28px;
-        align-items: center;
-        grid-template-columns: 1fr auto;
-        padding-bottom: 40px;
-        border-bottom: 1px solid var(--line);
-      }
-
-      img {
-        width: 96px;
-        height: 96px;
-        border-radius: 8px;
-      }
-
-      h1 {
-        margin: 0;
-        font-size: clamp(2.4rem, 8vw, 5rem);
-        line-height: 1;
-        font-weight: 720;
-      }
-
-      .eyebrow {
-        margin: 0 0 12px;
-        color: var(--accent-strong);
-        font-size: 0.85rem;
-        font-weight: 700;
-        text-transform: uppercase;
-      }
-
-      .lead {
-        max-width: 680px;
-        margin: 18px 0 0;
-        color: var(--muted);
-        font-size: 1.12rem;
-      }
-
-      .actions,
-      .footer-links {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-        margin-top: 28px;
-      }
-
-      .footer-links {
-        gap: 18px;
-        padding-top: 20px;
-        border-top: 1px solid var(--line);
-        color: var(--muted);
-        font-size: 0.95rem;
-      }
-
-      a {
-        color: var(--accent-strong);
-      }
-
-      .button {
-        display: inline-flex;
-        min-height: 44px;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid var(--accent);
-        border-radius: 6px;
-        padding: 10px 14px;
-        background: var(--accent);
-        color: #ffffff;
-        font-weight: 650;
-        text-decoration: none;
-      }
-
-      .button.secondary {
-        background: transparent;
-        color: var(--accent-strong);
-      }
-
-      .details {
-        display: grid;
-        gap: 18px;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        padding: 32px 0;
-      }
-
-      article,
-      .detail {
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: var(--surface);
-        padding: 18px;
-      }
-
-      .detail dt {
-        margin: 0 0 8px;
-        color: var(--muted);
-        font-size: 0.85rem;
-      }
-
-      .detail dd {
-        margin: 0;
-        font-weight: 650;
-      }
-
-      section {
-        padding: 0 0 32px;
-      }
-
-      article {
-        display: grid;
-        gap: 18px;
-        grid-template-columns: auto 1fr;
-        align-items: start;
-      }
-
-      article img {
-        width: 64px;
-        height: 64px;
-      }
-
-      h2 {
-        margin: 0 0 8px;
-        font-size: 1.15rem;
-      }
-
-      p {
-        margin: 0;
-      }
-
-      article p {
-        color: var(--muted);
-        font-size: 0.96rem;
-      }
-
-      .project-links {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 14px;
-        margin-top: 14px;
-        font-size: 0.95rem;
-      }
-
-      @media (max-width: 720px) {
-        main {
-          padding-top: 36px;
-        }
-
-        header {
-          grid-template-columns: 1fr;
-        }
-
-        .details,
-        article {
-          grid-template-columns: 1fr;
-        }
-
-        .actions {
-          flex-direction: column;
-        }
-
-        .button {
-          width: 100%;
-        }
-      }
-    </style>
   </head>
   <body>
+    <nav class="topbar" aria-label="Primary navigation">
+      <a class="brand" href="/">Avishai Kofun</a>
+      <div class="nav-links">
+        <a href="#work">Work</a>
+        <a href="/support.html">Support</a>
+        <a href="mailto:hjosugi@avishaikofun.com">Contact</a>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <div class="hero-copy">
+        <img
+          class="mark"
+          src="/assets/company/kofun-friends-group.png"
+          alt=""
+          width="128"
+          height="128"
+        />
+        <p class="eyebrow">Software development / publishing</p>
+        <h1>Avishai Kofun</h1>
+        <p class="lead">
+          A small independent studio building practical software, Outlook add-ins,
+          and reusable digital assets.
+        </p>
+        <div class="actions">
+          <a class="button" href="mailto:hjosugi@avishaikofun.com">Contact</a>
+          <a class="button secondary" href="#work">View work</a>
+        </div>
+      </div>
+    </header>
+
     <main>
-      <header>
+      <section class="facts" aria-label="Company details">
         <div>
-          <p class="eyebrow">Software developer / publisher</p>
-          <h1>Avishai Kofun</h1>
-          <p class="lead">
-            Avishai Kofun publishes small, practical software for productivity
-            and communication workflows, including the Mail Lookout Outlook add-in.
-          </p>
-          <nav class="actions" aria-label="Publisher links">
-            <a class="button" href="mailto:hjosugi@avishaikofun.com">Contact</a>
-            <a class="button secondary" href="https://github.com/hjosugi/mail-lookout">GitHub</a>
-          </nav>
+          <span>Website</span>
+          <strong>avishaikofun.com</strong>
         </div>
-        <img src="/assets/icon-128.png" alt="" width="96" height="96" />
-      </header>
-
-      <dl class="details" aria-label="Publisher details">
-        <div class="detail">
-          <dt>Website</dt>
-          <dd><a href="https://avishaikofun.com">avishaikofun.com</a></dd>
+        <div>
+          <span>Contact</span>
+          <strong><a href="mailto:hjosugi@avishaikofun.com">hjosugi@avishaikofun.com</a></strong>
         </div>
-        <div class="detail">
-          <dt>Contact</dt>
-          <dd><a href="mailto:hjosugi@avishaikofun.com">hjosugi@avishaikofun.com</a></dd>
+        <div>
+          <span>Focus</span>
+          <strong>Developer tools, productivity, publishing</strong>
         </div>
-        <div class="detail">
-          <dt>Publisher</dt>
-          <dd>Avishai Kofun</dd>
-        </div>
-      </dl>
-
-      <section aria-label="Published software">
-        <article>
-          <img src="/assets/icon-128.png" alt="" width="64" height="64" />
-          <div>
-            <h2>Mail Lookout</h2>
-            <p>
-              A send-confirmation add-in for Outlook. It helps review recipients,
-              attachments, and message content before mail leaves your draft.
-            </p>
-            <nav class="project-links" aria-label="Mail Lookout links">
-              <a href="/manifest.xml">Download manifest</a>
-              <a href="/emulator.html">Try emulator</a>
-              <a href="/support.html">Support</a>
-              <a href="/privacy.html">Privacy Policy</a>
-              <a href="/terms.html">Terms of Use</a>
-            </nav>
-          </div>
-        </article>
       </section>
 
-      <nav class="footer-links" aria-label="Legal and support links">
-        <a href="/support.html">Support</a>
-        <a href="/privacy.html">Privacy Policy</a>
-        <a href="/terms.html">Terms of Use</a>
-      </nav>
+      <section id="work" class="section">
+        <div class="section-heading">
+          <p class="eyebrow">Published work</p>
+          <h2>Software and assets</h2>
+        </div>
+
+        <article class="work-card">
+          <div class="work-card-copy">
+            <p class="work-type">Outlook add-in</p>
+            <h3>Mail Lookout</h3>
+            <p>
+              Send-confirmation software for Outlook that helps review recipients,
+              attachments, subject, and body before a message leaves the draft.
+            </p>
+          </div>
+          <nav class="project-links" aria-label="Mail Lookout links">
+            <a href="/manifest.xml">Manifest</a>
+            <a href="/support.html">Support</a>
+            <a href="/privacy.html">Privacy</a>
+            <a href="/terms.html">Terms</a>
+            <a href="https://github.com/hjosugi/mail-lookout">GitHub</a>
+          </nav>
+        </article>
+      </section>
     </main>
+
+    <footer>
+      <span>Avishai Kofun</span>
+      <span>Artwork: "kofun-friends" by hjosugi, CC BY 4.0.</span>
+    </footer>
   </body>
 </html>

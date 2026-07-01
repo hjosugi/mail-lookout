@@ -1,0 +1,5 @@
+/manifest.xml
+  Content-Type: application/xml; charset=utf-8
+
+/*
+  X-Content-Type-Options: nosniff

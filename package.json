@@ -25,6 +25,7 @@
     "dev:emulator": "vite --open /emulator.html",
     "dev:outlook": "vite --port 3000 --strictPort",
     "build": "tsc -p tsconfig.json --noEmit && vite build && bun scripts/generate-manifest.js",
+    "deploy:cloudflare": "bun run build && bunx wrangler pages deploy dist --project-name=avishai-kofun",
     "preview": "vite preview --port 3000",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.node.json --noEmit",
     "lint": "oxlint .",

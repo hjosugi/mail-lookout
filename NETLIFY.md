@@ -48,7 +48,7 @@
 
 ## 3. マニフェストファイルの入手と Outlook への登録
 
-デプロイが完了すると、`https://<あなたのサイト名>.netlify.app` のような公開用URLが割り当てられます。審査用には、Netlify の Domain management で `avishaikofun.com` を primary domain に設定し、DNS も Netlify の案内通りに向けます。
+デプロイが完了すると、`https://<あなたのサイト名>.netlify.app` のような公開用URLが割り当てられます。Cloudflare Pages を使う場合は [CLOUDFLARE.md](./CLOUDFLARE.md) を参照してください。
 
 このプロジェクトの現在の公開URLは `https://avishaikofun.com/` です。
 

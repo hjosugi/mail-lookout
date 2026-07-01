@@ -140,8 +140,8 @@ bun run validate       # office-addin-manifest validate
 
 ## 本番デプロイ
 
-一番簡単な公開プレビューはNetlifyです。このリポジトリには
-`netlify.toml`が含まれているため、Netlify側では`bun run build`で
+公開プレビューはCloudflare Pagesにデプロイします。このリポジトリには
+`wrangler.toml`が含まれているため、Pages側では`bun run build`で
 ビルドし、`dist/`を公開できます。そのビルド中に
 `scripts/generate-manifest.js`が`https://avishaikofun.com`を
 埋め込んだ`dist/manifest.xml`を生成します。
@@ -171,14 +171,15 @@ GitHub ActionsがRelease assetを作ります。minor/majorは
 `y/N`確認してからファイル変更に進みます。push/tagなしでローカルの
 version commitだけ作りたい場合は`bun run version:bump patch`を使います。
 
-手順は[NETLIFY.md](./NETLIFY.md)を参照してください。
+手順は[CLOUDFLARE.md](./CLOUDFLARE.md)を参照してください。
+`NETLIFY.md`は代替デプロイ手順として残しています。
 
 元のマニフェストはプレースホルダ値で出荷されます。本番運用や
 Marketplace公開の前には置き換えてください。
 
 1. **GUID。** `manifest.xml`の`<Id>`を自分のGUIDに置き換える。
-2. **URL。** Netlifyでは`ADDIN_HOST_URL=https://avishaikofun.com`
-   を設定済み。ほかのホストでは、`manifest.xml`内のすべての
+2. **URL。** Cloudflare Pagesでは`https://avishaikofun.com`を
+   使う。ほかのホストでは、`manifest.xml`内のすべての
    `https://localhost:3000`を自分のホストに置き換えるか、
    `ADDIN_HOST_URL=https://your-domain.example bun run build`を
    実行する。`dist/`フォルダをそのホストのHTTPSで配信する。
