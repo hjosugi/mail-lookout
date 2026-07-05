@@ -13,7 +13,7 @@
   "bugs": {
     "url": "https://github.com/hjosugi/mail-lookout/issues"
   },
-  "license": "MIT",
+  "license": "0BSD",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hjosugi/mail-lookout.git"
