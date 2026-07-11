@@ -1,3 +1,6 @@
+<!-- i18n: language-switcher -->
+[English](README.md) | [日本語](README.ja.md)
+
 # Mail Lookout
 
 新しいOutlookとOutlook on the web向けの送信確認アドインです。

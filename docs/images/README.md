@@ -1,3 +1,6 @@
+<!-- i18n: language-switcher -->
+[English](README.md) | [日本語](README.ja.md)
+
 # Screenshots
 
 Processed screenshots used by the project README and the AppSource listing.
