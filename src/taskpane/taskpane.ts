@@ -33,6 +33,8 @@ import {
   saveProgress,
 } from "../office/reviewProgress"
 import { rememberConfirmation, snapshotFingerprint } from "../office/smartAlert"
+import { completeFirstRun, isFirstRunComplete } from "../office/firstRun"
+import { buildFirstRunView } from "./firstRunView"
 
 interface MiniAction {
   readonly label: string
@@ -343,20 +345,38 @@ function start(
   }
 }
 
-void Office.onReady(async () => {
+void Office.onReady(() => {
   const config = loadConfig()
   const locale = resolveLocale(Office.context.displayLanguage, config.fallbackLocale)
+  const messages = getMessages(locale)
   const root = document.getElementById("root")
   if (!root) {
     return
   }
 
-  try {
-    const item = Office.context.mailbox.item as Office.MessageCompose
-    const snapshot = await collectSnapshot(item)
-    start(buildReviewModel(snapshot, config), snapshotFingerprint(snapshot), locale, root)
-  } catch (error) {
-    console.error("mail-lookout: failed to open review task pane", error)
-    showError(locale, root)
+  const openReview = async (): Promise<void> => {
+    root.classList.add("loading")
+    root.textContent = messages.firstRun.loading
+    try {
+      const item = Office.context.mailbox.item as Office.MessageCompose
+      const snapshot = await collectSnapshot(item)
+      start(buildReviewModel(snapshot, config), snapshotFingerprint(snapshot), locale, root)
+    } catch (error) {
+      console.error("mail-lookout: failed to open review task pane", error)
+      showError(locale, root)
+    }
   }
+
+  if (isFirstRunComplete()) {
+    void openReview()
+    return
+  }
+
+  root.classList.remove("loading")
+  root.replaceChildren(
+    buildFirstRunView(messages, () => {
+      completeFirstRun()
+      void openReview()
+    }),
+  )
 })

@@ -66,6 +66,24 @@ export const ja: Messages = {
     sendFailed: "送信できませんでした。もう一度お試しください。",
     loadFailed: "確認画面を読み込めませんでした。下書きに戻って内容を確認してください。",
   },
+  firstRun: {
+    title: "Mail Lookoutへようこそ",
+    valueProposition: "送信前にありがちなメールのミスを、下書きのうちに見つけます。",
+    recipientFeature: "社外の宛先を強調し、宛先ごとの確認を求めます。",
+    contentFeature: "添付ファイル、件名、本文を送信前に確認できます。",
+    delayFeature: "確認後にキャンセル可能な送信待ち時間を設けます。",
+    activationTitle: "送信時に自動で確認",
+    activationBody:
+      "Mail LookoutはOutlookのLaunchEventsとSmart Alertsを使用します。送信ボタンを押したときに自動起動し、編集中のメールの宛先、添付情報、件名、本文を読み取り、確認が終わるまで送信を止めることがあります。",
+    activationLimit: "予約送信／後で送信するメールは確認対象外です。",
+    privacySummary:
+      "確認処理はOutlookアドイン内で行われます。下書き内容をMail Lookout専用サーバーへ送信しません。",
+    legalLinksLabel: "法的情報",
+    privacyPolicy: "プライバシーポリシー",
+    termsOfUse: "利用規約",
+    start: "利用を開始する",
+    loading: "確認画面を読み込んでいます…",
+  },
   waiting: {
     othersTitle: "他に送信待機中",
     settingsTitle: "送信待機中のメール",

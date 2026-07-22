@@ -67,6 +67,24 @@ export const en: Messages = {
     sendFailed: "Couldn't send. Please try again.",
     loadFailed: "The review pane could not load. Return to your draft and review it.",
   },
+  firstRun: {
+    title: "Welcome to Mail Lookout",
+    valueProposition: "Catch common email mistakes before they leave your draft.",
+    recipientFeature: "Highlights external recipients and asks you to check every address.",
+    contentFeature: "Checks attachments, subject, and body before the message is sent.",
+    delayFeature: "Adds a cancellable countdown after you finish the review.",
+    activationTitle: "Automatic send-time review",
+    activationBody:
+      "Mail Lookout uses Outlook LaunchEvents and Smart Alerts. It starts automatically when you select Send, reads the current draft's recipients, attachment metadata, subject, and body, and can stop the send until you finish the review.",
+    activationLimit: "Scheduled Send / Send later messages are not reviewed.",
+    privacySummary:
+      "The review runs inside the Outlook add-in. Draft content is not sent to a separate Mail Lookout server.",
+    legalLinksLabel: "Legal information",
+    privacyPolicy: "Privacy policy",
+    termsOfUse: "Terms of use",
+    start: "Get started",
+    loading: "Loading your review…",
+  },
   waiting: {
     othersTitle: "Also waiting to send",
     settingsTitle: "Waiting to send",
