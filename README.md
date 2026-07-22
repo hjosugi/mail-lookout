@@ -230,6 +230,10 @@ For a broader public release where users can install the add-in from
 Outlook itself, plan on a Microsoft Marketplace / AppSource
 submission after the hosted preview is stable.
 
+For the current Marketplace description, certification notes, and
+resubmission checklist, see
+[`docs/marketplace-resubmission.md`](./docs/marketplace-resubmission.md).
+
 ## Configuration
 
 The shipped defaults live in

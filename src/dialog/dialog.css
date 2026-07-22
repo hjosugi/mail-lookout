@@ -385,6 +385,93 @@ body {
   padding: 16px;
 }
 
+/* The first-run value proposition and LaunchEvents disclosure. */
+.so-first-run {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  min-height: 100vh;
+  padding: 20px 16px;
+}
+
+.so-first-run-mark {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+}
+
+.so-first-run-title {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.25;
+  font-weight: 600;
+}
+
+.so-first-run-value {
+  margin: -6px 0 0;
+  color: var(--so-fg-muted);
+  font-size: 14px;
+}
+
+.so-first-run-features {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.so-first-run-feature {
+  padding-left: 2px;
+}
+
+.so-first-run-disclosure {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--so-border);
+  border-radius: 8px;
+  background: var(--so-surface);
+}
+
+.so-first-run-section-title {
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.so-first-run-copy,
+.so-first-run-limit,
+.so-first-run-privacy {
+  margin: 0;
+  font-size: 12px;
+}
+
+.so-first-run-limit {
+  margin-top: 8px;
+  color: var(--so-fg-muted);
+}
+
+.so-first-run-privacy {
+  color: var(--so-fg-muted);
+}
+
+.so-first-run-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  font-size: 12px;
+}
+
+.so-first-run-link {
+  color: var(--so-accent);
+}
+
+.so-first-run-button {
+  width: 100%;
+  margin-top: auto;
+}
+
 .so-set-title {
   margin: 0;
   font-size: 17px;

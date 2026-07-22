@@ -17,6 +17,8 @@ import { getMessages, resolveLocale } from "../i18n/catalog"
 import type { LocaleTag } from "../i18n/catalog"
 import type { Messages } from "../i18n/types"
 import { delayMinutesToSeconds, secondsToDelayMinutes } from "../config/delayMinutes"
+import { completeFirstRun, isFirstRunComplete } from "../office/firstRun"
+import { buildFirstRunView } from "../taskpane/firstRunView"
 
 /** Domains may be entered one per line or separated by commas/semicolons. */
 const DOMAIN_SEPARATORS = /[\n,;]+/
@@ -165,5 +167,16 @@ void Office.onReady(() => {
     return
   }
   const locale = resolveLocale(Office.context.displayLanguage, defaultConfig.fallbackLocale)
-  start(locale, root)
+  if (isFirstRunComplete()) {
+    start(locale, root)
+    return
+  }
+
+  root.classList.remove("loading")
+  root.replaceChildren(
+    buildFirstRunView(getMessages(locale), () => {
+      completeFirstRun()
+      start(locale, root)
+    }),
+  )
 })

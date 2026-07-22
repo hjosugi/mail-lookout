@@ -83,6 +83,23 @@ export interface Messages {
     readonly sendFailed: string
     readonly loadFailed: string
   }
+  /** One-time onboarding shown before either task pane is used. */
+  readonly firstRun: {
+    readonly title: string
+    readonly valueProposition: string
+    readonly recipientFeature: string
+    readonly contentFeature: string
+    readonly delayFeature: string
+    readonly activationTitle: string
+    readonly activationBody: string
+    readonly activationLimit: string
+    readonly privacySummary: string
+    readonly legalLinksLabel: string
+    readonly privacyPolicy: string
+    readonly termsOfUse: string
+    readonly start: string
+    readonly loading: string
+  }
   /** The status list of messages counting down to send. */
   readonly waiting: {
     /** Heading of the task-pane banner listing other waiting messages. */
