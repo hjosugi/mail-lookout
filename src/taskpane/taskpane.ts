@@ -184,7 +184,21 @@ function start(
     const item = Office.context.mailbox.item as Office.MessageCompose
     item.sendAsync({}, result => {
       if (result.status === Office.AsyncResultStatus.Failed) {
-        view.replaceChildren(buildMini(baseMessages.taskPane.sendFailed, []))
+        // The send was blocked or failed. The confirmed checks are still
+        // valid, so re-persist them — clearProgress wiped the slot above —
+        // and offer a way forward instead of stranding the user on a
+        // dead-end message with the whole checklist to redo.
+        persist()
+        view.replaceChildren(
+          buildMini(baseMessages.taskPane.sendFailed, [
+            {
+              label: messages.waiting.retry,
+              kind: "primary",
+              onClick: () => startCountdown(delaySeconds),
+            },
+            { label: messages.dialog.backToEdit, kind: "secondary", onClick: backToReview },
+          ]),
+        )
       }
     })
   }

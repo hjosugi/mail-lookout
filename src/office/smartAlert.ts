@@ -7,7 +7,12 @@ import type { LocaleTag } from "../i18n/catalog"
 import type { Messages } from "../i18n/types"
 
 const CONFIRMATION_STORAGE_KEY = "mail-lookout:send-confirmations"
-const CONFIRMATION_TTL_MS = 10 * 60 * 1000
+// A confirmation is written right before sendAsync and consumed by the
+// re-fired OnMessageSend almost immediately, so the token only needs to
+// live for that round-trip. Keeping it short bounds the window in which a
+// left-over (unconsumed) token — e.g. after a failed send — could let a
+// manual resend of the identical draft skip the review.
+const CONFIRMATION_TTL_MS = 2 * 60 * 1000
 const MAX_ALERT_MESSAGE_LENGTH = 500
 export const REVIEW_PANE_COMMAND_ID = "ReviewPaneButton"
 
