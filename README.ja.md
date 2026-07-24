@@ -19,6 +19,14 @@
 
 > 英語版: [README.md](./README.md)
 
+## インストール
+
+Mail LookoutはMicrosoft Marketplaceで一般公開されています。
+[Mail LookoutをOutlookに追加](https://marketplace.microsoft.com/ja-jp/product/WA200011471?tab=Overview)
+し、**今すぐ入手**からMicrosoft 365の案内に沿ってインストールしてください。
+通常のインストールでは、マニフェストのダウンロードやサイドロードは
+不要です。
+
 ## 機能
 
 このアドインは送信時に4つのことを行います。
@@ -76,7 +84,7 @@ src/
 スナップショットを`domain`に渡し、Outlook標準のSmart Alertsダイアログで送信を中止または許可します。中核層はOfficeを一切importしないので、この分離は構造として保たれます。新しいホスト呼び出しは
 `office`層に置いてください。
 
-## セットアップ
+## 開発環境のセットアップ
 
 ```sh
 # 1. 依存関係をインストールする。
@@ -89,8 +97,8 @@ bun run dev-certs
 bun run dev:outlook
 ```
 
-そのあとOutlookに`manifest.xml`をサイドロードします。手順は
-ホストによって異なります。
+そのあと、ローカル開発用としてOutlookに`manifest.xml`を
+サイドロードします。手順はホストによって異なります。
 
 - **Outlook on the web:** 設定を開き、アドインのページで「カスタム
   アドインを追加」→「ファイルから追加」を選び、`manifest.xml`を
@@ -143,16 +151,18 @@ bun run validate       # office-addin-manifest validate
 
 ## 本番デプロイ
 
-公開プレビューはCloudflare Pagesにデプロイします。このリポジトリには
-`wrangler.toml`が含まれているため、Pages側では`bun run build`で
-ビルドし、`dist/`を公開できます。そのビルド中に
+Marketplace公開版はCloudflare Pagesでホストしたアドインを読み込みます。
+このリポジトリには`wrangler.toml`が含まれているため、Pages側では
+`bun run build`でビルドし、`dist/`を公開できます。そのビルド中に
 `scripts/generate-manifest.js`が`https://avishaikofun.com`を
 埋め込んだ`dist/manifest.xml`を生成します。
 
-現在の公開プレビューは
+本番サイトとアドインの実行環境は
 [`https://avishaikofun.com/`](https://avishaikofun.com/)
-です。アドインをサイドロードするときは、このサイトの`/manifest.xml`
-を使います。
+です。一般利用者は
+[Microsoft Marketplace](https://marketplace.microsoft.com/ja-jp/product/WA200011471?tab=Overview)
+からインストールしてください。公開サイトの`/manifest.xml`は、開発・
+テスト用途で引き続き利用できます。
 
 タグ付きリリースでは、GitHub Releasesに
 `mail-lookout-manifest.xml`も添付します。常に最新ではなく固定版を
@@ -197,11 +207,13 @@ Marketplace公開の前には置き換えてください。
 そのうえで、組織向けにMicrosoft 365管理センターから公開するか、
 個人向けにサイドロードします。
 
-Outlook内から通常のアドインとして検索・インストールできる一般公開を
-目指す場合は、ホストしたプレビューが安定してからMicrosoft Marketplace
-/AppSourceへの申請を進めます。
+Mail Lookoutは
+[Microsoft Marketplace](https://marketplace.microsoft.com/ja-jp/product/WA200011471?tab=Overview)
+で一般公開されています。今後Marketplace版を更新するときは、ホストした
+ビルドをデプロイ・検証し、マニフェストのバージョンを上げてから、
+Partner Centerで更新パッケージを提出します。
 
-Marketplaceの説明文、認証担当者向けメモ、再申請チェックリストは
+Marketplaceの説明文と認証担当者向けメモは
 [`docs/marketplace-resubmission.md`](./docs/marketplace-resubmission.md)にまとめています。
 
 ## 設定

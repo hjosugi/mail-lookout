@@ -21,6 +21,14 @@ that flags problems before a message leaves.
 
 > Japanese version: [README.ja.md](./README.ja.md)
 
+## Install
+
+Mail Lookout is publicly available on Microsoft Marketplace:
+[get Mail Lookout for Outlook](https://marketplace.microsoft.com/en-us/product/office/WA200011471).
+Open the listing, select **Get it now**, and follow the Microsoft 365
+installation flow. No manifest download or sideloading is required for
+normal installation.
+
 ## Features
 
 This add-in does four things at send time.
@@ -101,7 +109,7 @@ Outlook's built-in Smart Alerts dialog to cancel or allow the send.
 The core layers import nothing from Office, so the boundary holds by
 construction; keep any new host calls in the `office` layer.
 
-## Setup
+## Development setup
 
 ```sh
 # 1. Install dependencies.
@@ -114,8 +122,8 @@ bun run dev-certs
 bun run dev:outlook
 ```
 
-Then sideload `manifest.xml` in Outlook. The steps depend on the
-host:
+Then sideload `manifest.xml` in Outlook for local development. The
+steps depend on the host:
 
 - **Outlook on the web:** open Settings, go to the add-ins page,
   choose "Add a custom add-in" then "Add from file", and pick
@@ -171,15 +179,18 @@ bun run validate       # office-addin-manifest validate
 
 ## Production deployment
 
-For the public preview, deploy this repository to Cloudflare Pages.
-The repository includes `wrangler.toml`, so Pages can build with
-`bun run build` and publish `dist/`. During that build,
+The Marketplace release loads the hosted add-in from Cloudflare
+Pages. The repository includes `wrangler.toml`, so Pages can build
+with `bun run build` and publish `dist/`. During that build,
 `scripts/generate-manifest.js` writes `dist/manifest.xml` with
 `https://avishaikofun.com` embedded.
 
-The current public preview is served at
+The production site and add-in runtime are served at
 [`https://avishaikofun.com/`](https://avishaikofun.com/).
-Use `/manifest.xml` from that site when sideloading the add-in.
+End users should install from the
+[Microsoft Marketplace listing](https://marketplace.microsoft.com/en-us/product/office/WA200011471);
+the hosted `/manifest.xml` remains available for development and
+testing.
 
 Tagged releases also attach `mail-lookout-manifest.xml` on the
 GitHub Releases page. Use that file when you want a fixed version
@@ -226,12 +237,13 @@ them before a production or marketplace release.
 Then publish through the Microsoft 365 admin center for your
 organization, or sideload for a single user.
 
-For a broader public release where users can install the add-in from
-Outlook itself, plan on a Microsoft Marketplace / AppSource
-submission after the hosted preview is stable.
+Mail Lookout is publicly available from
+[Microsoft Marketplace](https://marketplace.microsoft.com/en-us/product/office/WA200011471).
+For future Marketplace updates, deploy and verify the hosted build,
+bump the manifest version, and submit the updated package through
+Partner Center.
 
-For the current Marketplace description, certification notes, and
-resubmission checklist, see
+For the Marketplace description and certification notes, see
 [`docs/marketplace-resubmission.md`](./docs/marketplace-resubmission.md).
 
 ## Configuration
