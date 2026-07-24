@@ -79,12 +79,17 @@ describe("Smart Alerts confirmation", () => {
     expect(consumeConfirmation(changed, storage, 1001)).toBe(false)
   })
 
-  it("expires old confirmations", () => {
+  it("keeps a confirmation valid within the TTL but expires it after", () => {
     const storage = new MemoryStorage()
-    const fingerprint = snapshotFingerprint(snapshot())
+    const withinTtl = snapshotFingerprint(snapshot())
+    const pastTtl = snapshotFingerprint(snapshot({ body: "Another body" }))
+    const ttl = 2 * 60 * 1000
 
-    rememberConfirmation(fingerprint, storage, 1000)
-    expect(consumeConfirmation(fingerprint, storage, 1000 + 10 * 60 * 1000 + 1)).toBe(false)
+    rememberConfirmation(withinTtl, storage, 1000)
+    expect(consumeConfirmation(withinTtl, storage, 1000 + ttl)).toBe(true)
+
+    rememberConfirmation(pastTtl, storage, 1000)
+    expect(consumeConfirmation(pastTtl, storage, 1000 + ttl + 1)).toBe(false)
   })
 
   it("falls back to memory when storage is unavailable", () => {
