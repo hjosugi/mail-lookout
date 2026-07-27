@@ -1,0 +1,42 @@
+# Availability check for the deployed add-in.
+#
+# The host is not just where the listing points — Outlook loads
+# commands.html from it every time a message is sent. If it goes down, new
+# installs fail *and* the send review breaks for everyone already using the
+# add-in, with no error that reaches us. This job is how we find out before
+# a user reports it.
+#
+# GitHub disables scheduled workflows in a repository with no activity for
+# 60 days. If that happens, re-enable it from the Actions tab.
+
+name: Heartbeat
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+    inputs:
+      host:
+        description: "Host to check (defaults to the production host)"
+        required: false
+        type: string
+
+jobs:
+  heartbeat:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+
+      # A single transient network blip should not page anyone, so the
+      # script retries before it calls the host down.
+      - name: Check the deployed add-in
+        run: bun scripts/heartbeat.js --attempts=3
+        env:
+          ADDIN_HOST_URL: ${{ inputs.host || 'https://avishaikofun.com' }}

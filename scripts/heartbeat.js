@@ -1,5 +1,6 @@
 const DEFAULT_HOST = "https://avishaikofun.com"
 const TIMEOUT_MS = 10_000
+const RETRY_DELAY_MS = 20_000
 
 const requiredPaths = [
   "/",
@@ -18,10 +19,32 @@ const requiredPaths = [
   "/assets/icon-128.png",
 ]
 
+function parseArg(name, fallback) {
+  const prefix = `--${name}=`
+  return process.argv.find(arg => arg.startsWith(prefix))?.slice(prefix.length) ?? fallback
+}
+
 function parseHost() {
-  const hostArg = process.argv.find(arg => arg.startsWith("--host="))
-  const host = hostArg?.slice("--host=".length) ?? process.env.ADDIN_HOST_URL ?? DEFAULT_HOST
+  const host = parseArg("host", process.env.ADDIN_HOST_URL ?? DEFAULT_HOST)
   return host.replace(/\/$/, "")
+}
+
+/**
+ * The four-part manifest version the host is expected to be serving, or
+ * undefined to accept whatever is deployed. A release passes this so it
+ * cannot ship a manifest asset while the host still serves an older build.
+ */
+function parseExpectedVersion() {
+  return parseArg("expect-version", process.env.ADDIN_EXPECT_VERSION) || undefined
+}
+
+/**
+ * A deploy can still be in flight when a release runs, so the caller can
+ * ask for a few attempts before treating the host as broken.
+ */
+function parseAttempts() {
+  const attempts = Number(parseArg("attempts", "1"))
+  return Number.isInteger(attempts) && attempts > 0 ? attempts : 1
 }
 
 async function fetchWithTimeout(url) {
@@ -39,7 +62,7 @@ async function fetchWithTimeout(url) {
   }
 }
 
-async function checkUrl(host, path) {
+async function checkUrl(host, path, expectedVersion) {
   const url = `${host}${path}`
   const response = await fetchWithTimeout(url)
   const contentType = response.headers.get("content-type") ?? ""
@@ -65,6 +88,12 @@ async function checkUrl(host, path) {
     if (!body.includes(`${host}/support.html`)) {
       throw new Error(`${url} does not point SupportUrl at ${host}/support.html`)
     }
+    if (expectedVersion) {
+      const served = /<Version>([^<]+)<\/Version>/.exec(body)?.[1]
+      if (served !== expectedVersion) {
+        throw new Error(`${url} serves version ${served ?? "none"}, expected ${expectedVersion}`)
+      }
+    }
   }
 
   return {
@@ -74,30 +103,54 @@ async function checkUrl(host, path) {
   }
 }
 
-async function main() {
-  const host = parseHost()
-  console.log(`[heartbeat] checking ${host}`)
-
+async function sweep(host, expectedVersion) {
   const results = []
   const failures = []
   for (const path of requiredPaths) {
     try {
-      results.push(await checkUrl(host, path))
+      results.push(await checkUrl(host, path, expectedVersion))
     } catch (error) {
       failures.push(error)
     }
   }
+  return { results, failures }
+}
 
-  for (const result of results) {
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+async function main() {
+  const host = parseHost()
+  const expectedVersion = parseExpectedVersion()
+  const attempts = parseAttempts()
+
+  console.log(`[heartbeat] checking ${host}${expectedVersion ? ` for ${expectedVersion}` : ""}`)
+
+  let sweepResult
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    sweepResult = await sweep(host, expectedVersion)
+
+    if (sweepResult.failures.length === 0) {
+      break
+    }
+
+    if (attempt < attempts) {
+      console.warn(`[heartbeat] ${sweepResult.failures.length} check(s) failed, retrying`)
+      await sleep(RETRY_DELAY_MS)
+    }
+  }
+
+  for (const result of sweepResult.results) {
     console.log(`[ok] ${result.status} ${result.path} ${result.contentType}`)
   }
 
-  for (const failure of failures) {
+  for (const failure of sweepResult.failures) {
     console.error(`[fail] ${failure.message}`)
   }
 
-  if (failures.length > 0) {
-    throw new Error(`${failures.length} check(s) failed`)
+  if (sweepResult.failures.length > 0) {
+    throw new Error(`${sweepResult.failures.length} check(s) failed`)
   }
 
   console.log("[heartbeat] all checks passed")

@@ -112,6 +112,25 @@ Send-flow validation:
 No external account or sign-in is required. Scheduled Send / Send later is intentionally passed through without Mail Lookout review.
 ```
 
+## What is automated, and what is not
+
+The Partner Center submission itself is manual. Microsoft's Product Ingestion API covers SaaS,
+Azure, container, and Dynamics offer types, not Office add-in offers, so uploading the package
+and pressing Submit is a human step — and certification review is a Microsoft-side process with
+no API to wait on either.
+
+Everything up to that point is gated in CI:
+
+| Gate | Where | Fails the build when |
+| --- | --- | --- |
+| Offline manifest lint | `test/manifest.test.ts`, every push and PR | Activation rules, requirement sets, resids, URLs, referenced assets, or the version drift out of agreement |
+| Microsoft's validator | `scripts/validate-manifest.js`, on release | The manifest is invalid. A validator outage is reported and skipped, not treated as a failure |
+| Deployed host serves this version | `scripts/heartbeat.js`, on release | The host is down, missing a page or icon, or still serving an older `<Version>` than the one being released |
+| Deployed host stays up | `.github/workflows/heartbeat.yml`, every 6 hours | Any required URL stops responding |
+
+That last one is not only about listing quality: Outlook fetches `commands.html` from the host on
+every send, so an outage breaks the review for existing users, not just new installs.
+
 ## Resubmission checklist
 
 1. Deploy the version 1.1.13 build to `https://avishaikofun.com`.

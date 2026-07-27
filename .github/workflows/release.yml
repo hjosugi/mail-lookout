@@ -41,9 +41,23 @@ jobs:
         env:
           ADDIN_HOST_URL: https://avishaikofun.com
 
-      - name: Best-effort validate release manifest
-        continue-on-error: true
-        run: bunx office-addin-manifest validate dist/manifest.xml
+      # Blocking on an invalid manifest, tolerant of the validation service
+      # being down. See scripts/validate-manifest.js for why those two cases
+      # have to be told apart.
+      - name: Validate release manifest
+        run: bun scripts/validate-manifest.js dist/manifest.xml
+
+      # The release asset is what people sideload, so the host has to already
+      # be serving this version — otherwise the manifest points at an older
+      # deploy. Netlify builds on the version bump landing in main, which can
+      # still be in flight when the tag is pushed, hence the attempts.
+      - name: Confirm the host serves this version
+        run: |
+          set -euo pipefail
+          version="$(bun scripts/manifest-version.js dist/manifest.xml)"
+          bun scripts/heartbeat.js --attempts=10 --expect-version="$version"
+        env:
+          ADDIN_HOST_URL: https://avishaikofun.com
 
       - name: Prepare release asset
         run: cp dist/manifest.xml mail-lookout-manifest.xml

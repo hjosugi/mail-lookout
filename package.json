@@ -37,7 +37,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "heartbeat": "bun scripts/heartbeat.js",
-    "validate": "office-addin-manifest validate manifest.xml",
+    "validate": "bun scripts/validate-manifest.js manifest.xml",
     "version:patch": "bun scripts/release-version.js patch",
     "version:minor": "bun scripts/release-version.js minor",
     "version:major": "bun scripts/release-version.js major",
