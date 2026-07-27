@@ -46,13 +46,22 @@
 
   <!--
     Legacy activation block. Modern clients use VersionOverrides
-    below, but the base manifest still needs a form and a rule to
-    be valid. This points at the same page as the runtime.
+    below, and Mailbox 1.15 is required to install at all, so every
+    client that can install this add-in honours VersionOverrides and
+    never activates from here. The block only has to stay valid and
+    self-consistent.
+
+    That consistency is the point: FormSettings declares an ItemRead
+    form, so the rule below has to say FormType="Read". A FormType of
+    "Edit" needs a matching ItemEdit form, and a rule that names a form
+    the manifest does not declare is rejected as invalid. It points at
+    the task pane rather than commands.html, which is a script-only
+    runtime page with nothing to render.
   -->
   <FormSettings>
     <Form xsi:type="ItemRead">
       <DesktopSettings>
-        <SourceLocation DefaultValue="https://localhost:3000/commands.html" />
+        <SourceLocation DefaultValue="https://localhost:3000/taskpane.html" />
         <RequestedHeight>250</RequestedHeight>
       </DesktopSettings>
     </Form>
@@ -61,7 +70,7 @@
   <Permissions>ReadWriteItem</Permissions>
 
   <Rule xsi:type="RuleCollection" Mode="Or">
-    <Rule xsi:type="ItemIs" ItemType="Message" FormType="Edit" />
+    <Rule xsi:type="ItemIs" ItemType="Message" FormType="Read" />
   </Rule>
 
   <DisableEntityHighlighting>false</DisableEntityHighlighting>
