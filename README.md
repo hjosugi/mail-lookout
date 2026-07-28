@@ -225,7 +225,6 @@ confirmation before changing files. Use `bun run version:bump patch`
 when you only want the local version commit without pushing or tagging.
 
 See [CLOUDFLARE.md](./CLOUDFLARE.md) for the step-by-step flow.
-`NETLIFY.md` remains as an alternate deploy path.
 
 The source manifest still ships with placeholder values. Replace
 them before a production or marketplace release.

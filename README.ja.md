@@ -198,7 +198,6 @@ GitHub ActionsがRelease assetを作ります。minor/majorは
 version commitだけ作りたい場合は`bun run version:bump patch`を使います。
 
 手順は[CLOUDFLARE.md](./CLOUDFLARE.md)を参照してください。
-`NETLIFY.md`は代替デプロイ手順として残しています。
 
 元のマニフェストはプレースホルダ値で出荷されます。本番運用や
 Marketplace公開の前には置き換えてください。
