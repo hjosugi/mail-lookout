@@ -49,8 +49,9 @@ jobs:
 
       # The release asset is what people sideload, so the host has to already
       # be serving this version — otherwise the manifest points at an older
-      # deploy. Netlify builds on the version bump landing in main, which can
-      # still be in flight when the tag is pushed, hence the attempts.
+      # deploy. The CI deploy job publishes to Cloudflare Pages when the
+      # version bump lands in main, and that can still be in flight when the
+      # tag is pushed, hence the attempts.
       - name: Confirm the host serves this version
         run: |
           set -euo pipefail

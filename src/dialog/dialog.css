@@ -519,6 +519,31 @@ body {
   width: 6em;
 }
 
+.so-set-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  /* The label sits between the group heading and its hint, so it keeps
+     the row height rather than the tighter .so-set-field gap. */
+  padding: 2px 0;
+}
+
+.so-set-toggle input {
+  flex: none;
+  margin: 0;
+  accent-color: var(--so-accent);
+}
+
+.so-set-toggle input:focus-visible {
+  outline: 2px solid var(--so-focus);
+  outline-offset: 1px;
+}
+
+.so-set-toggle-label {
+  color: var(--so-fg);
+}
+
 .so-set-actions {
   display: flex;
   gap: 8px;

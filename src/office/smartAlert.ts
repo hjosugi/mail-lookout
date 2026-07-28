@@ -126,9 +126,29 @@ export function consumeConfirmation(
   return valid
 }
 
+/**
+ * The runtime relaxation of the manifest's SendMode.
+ *
+ * The manifest declares SoftBlock. Office.js allows an override only to
+ * "promptUser", so this can add a "Send Anyway" button to a canceled
+ * send but can never take one away. Returning undefined leaves the
+ * declared SoftBlock in force, which is the default.
+ *
+ * The literal is deliberate. `Office.MailboxEnums.SendModeOverride` is a
+ * runtime global, and reading it here would drag the Office global into
+ * every caller and every test of this pure module. The option type
+ * accepts the string, and there is exactly one legal value.
+ */
+export function sendModeOverrideFor(
+  allowSendAnyway: boolean,
+): Office.SmartAlertsEventCompletedOptions["sendModeOverride"] {
+  return allowSendAnyway ? "promptUser" : undefined
+}
+
 export function smartAlertCancelOptions(
   locale: LocaleTag,
   waiting: boolean,
+  allowSendAnyway: boolean,
 ): Office.SmartAlertsEventCompletedOptions {
   const messages = getMessages(locale)
   return {
@@ -137,6 +157,7 @@ export function smartAlertCancelOptions(
     errorMessageMarkdown: buildSmartAlertMessage(messages, true, waiting),
     cancelLabel: waiting ? messages.smartAlert.showWaiting : messages.smartAlert.openReview,
     commandId: REVIEW_PANE_COMMAND_ID,
+    sendModeOverride: sendModeOverrideFor(allowSendAnyway),
   }
 }
 

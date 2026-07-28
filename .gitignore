@@ -1,6 +1,9 @@
 node_modules/
 dist/
 coverage/
+# Generated knowledge graph. Rebuilt by `graphify update .`, and large
+# enough that lint and format have to skip it as well.
+graphify-out/
 *.log
 .DS_Store
 *.zip

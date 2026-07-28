@@ -109,6 +109,18 @@ export const ja: Messages = {
     delayHint:
       "「確認して送信する」を押した後のカウントダウン初期値です。0.1分単位で入力できます。",
     delayUnit: "分",
+    checksLabel: "必須のチェック項目",
+    checksHint:
+      "確認ペインが送信前にチェックを求める項目です。すべて外すと、残るのは警告だけになります。",
+    requireRecipients: "宛先を1件ずつ確認する",
+    requireAttachments: "添付ファイルを1件ずつ確認する",
+    requireBody: "本文を確認する",
+    strictnessLabel: "送信が中止されたとき",
+    allowSendAnyway: "「とにかく送信」を出す",
+    allowSendAnywayHint:
+      "オフ: 下書きに戻り、確認ペインを通す以外に送信手段はありません。オン: Outlook が「とにかく送信」も表示します。",
+    allowSendAnywayLimit:
+      "どちらにしても、アドインの読み込みに失敗した場合、Outlook は送信を拒否します。この設定を読む前に決まる経路のためです。",
     save: "保存",
     saved: "保存しました。",
     reset: "既定に戻す",

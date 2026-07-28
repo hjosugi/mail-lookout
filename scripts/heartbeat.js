@@ -2,8 +2,14 @@ const DEFAULT_HOST = "https://avishaikofun.com"
 const TIMEOUT_MS = 10_000
 const RETRY_DELAY_MS = 20_000
 
+/** Where the apex root is expected to send visitors. */
+const COMPANY_SITE_URL = "https://www.avishaikofun.com/"
+
+// Paths this host must serve itself, with a 200. The root is not one of
+// them: it is a redirect to the company site now, and gets its own check
+// below. Nothing here reaches into that separate site, so the add-in's
+// health never depends on a marketing page being up.
 const requiredPaths = [
-  "/",
   "/manifest.xml",
   "/commands.html",
   "/taskpane.html",
@@ -47,14 +53,14 @@ function parseAttempts() {
   return Number.isInteger(attempts) && attempts > 0 ? attempts : 1
 }
 
-async function fetchWithTimeout(url) {
+async function fetchWithTimeout(url, redirect = "follow") {
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS)
 
   try {
     return await fetch(url, {
       method: "GET",
-      redirect: "follow",
+      redirect,
       signal: controller.signal,
     })
   } finally {
@@ -70,6 +76,15 @@ async function checkUrl(host, path, expectedVersion) {
 
   if (!response.ok) {
     throw new Error(`${url} returned ${response.status}`)
+  }
+
+  // Redirects are followed on purpose: Cloudflare Pages 308s /foo.html
+  // to /foo, and the manifest still points at the .html form. What must
+  // not slip through is a redirect that leaves this host. The manifest
+  // hard-codes these URLs, so a rule sending them elsewhere would break
+  // Outlook while every status code along the way still read as 200.
+  if (new URL(response.url).origin !== new URL(url).origin) {
+    throw new Error(`${url} redirected off-host to ${response.url}`)
   }
 
   if (path.endsWith(".html") || path === "/") {
@@ -103,6 +118,49 @@ async function checkUrl(host, path, expectedVersion) {
   }
 }
 
+/**
+ * The apex root must redirect to the company site, and that redirect
+ * must land somewhere other than this host.
+ *
+ * Both halves catch a real failure. If `public/_redirects` fails to
+ * deploy, the root 404s and the company site is unreachable from the
+ * domain everyone types. If the rule instead resolves back to this
+ * host — which is what happens while `www` is still a custom domain on
+ * this Pages project — then every request to www matches the same rule
+ * and redirects to itself forever. That loop is invisible from the apex
+ * side, so the second fetch below checks the target directly.
+ */
+async function checkRootRedirect(host) {
+  const url = `${host}/`
+  const response = await fetchWithTimeout(url, "manual")
+
+  if (response.status < 300 || response.status > 399) {
+    throw new Error(
+      `${url} returned ${response.status}, expected a redirect to ${COMPANY_SITE_URL}`,
+    )
+  }
+
+  const location = response.headers.get("location")
+  if (!location) {
+    throw new Error(`${url} returned ${response.status} with no Location header`)
+  }
+
+  const target = new URL(location, url).toString()
+  if (target !== COMPANY_SITE_URL) {
+    throw new Error(`${url} redirects to ${target}, expected ${COMPANY_SITE_URL}`)
+  }
+
+  const hop = await fetchWithTimeout(target, "manual")
+  const next = hop.headers.get("location")
+  if (next && new URL(next, target).toString() === target) {
+    throw new Error(
+      `${target} redirects to itself — www is probably still a custom domain on this Pages project`,
+    )
+  }
+
+  return { path: "/", status: response.status, contentType: `-> ${target}` }
+}
+
 async function sweep(host, expectedVersion) {
   const results = []
   const failures = []
@@ -113,6 +171,13 @@ async function sweep(host, expectedVersion) {
       failures.push(error)
     }
   }
+
+  try {
+    results.push(await checkRootRedirect(host))
+  } catch (error) {
+    failures.push(error)
+  }
+
   return { results, failures }
 }
 

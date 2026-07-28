@@ -11,7 +11,23 @@
     2. Replace every https://localhost:3000 URL with your host.
     3. Replace ProviderName, SupportUrl, and AppDomains.
 
-  SendMode is SoftBlock. There is no one-click "send anyway" path.
+  SendMode is SoftBlock: a send this add-in cancels goes back to the
+  draft, with no one-click "send anyway". Users who want that escape
+  hatch turn on "allow send anyway" in the Settings pane, which makes
+  the handler pass sendModeOverride="promptUser" at runtime. The
+  override only ever relaxes, so the strict behaviour has to be the one
+  declared here.
+
+  Do not change this to Block. Block is the only mode that also refuses
+  the send when the add-in is unavailable, which is the failure this
+  add-in is worst at — but AppSource rejects it outright:
+
+    Error #1: Block SendMode is not allowed
+
+  So a Marketplace-distributed add-in cannot close that gap; SoftBlock
+  and PromptUser both send the message when the runtime fails to load.
+  Block is only reachable by sideloading or admin deployment. See the
+  limitations section of the README.
 -->
 <OfficeApp
   xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"

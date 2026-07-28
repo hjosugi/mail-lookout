@@ -49,7 +49,9 @@ export default defineConfig({
     target: "es2022",
     rollupOptions: {
       input: {
-        index: fileURLToPath(new URL("index.html", import.meta.url)),
+        // No index: the company page lives in hjosugi/avishaikofun-site
+        // and is served from www. The apex root redirects there — see
+        // public/_redirects.
         privacy: fileURLToPath(new URL("privacy.html", import.meta.url)),
         support: fileURLToPath(new URL("support.html", import.meta.url)),
         terms: fileURLToPath(new URL("terms.html", import.meta.url)),

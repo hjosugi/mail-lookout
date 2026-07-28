@@ -1,0 +1,12 @@
+# The apex serves the add-in, not the company page.
+#
+# Outlook loads commands.html, taskpane.html, and settings.html from
+# this host on every send, and the manifest hard-codes those URLs, so
+# the apex has to stay pointed at this project. The company page moved
+# to hjosugi/avishaikofun-site and is served from www, so the only
+# thing left at the root is a redirect to it.
+#
+# Deliberately narrow: this matches the root and nothing else. A
+# catch-all would swallow a genuine 404 from a mistyped add-in URL and
+# turn a loud failure into a confusing one.
+/  https://www.avishaikofun.com/  308
