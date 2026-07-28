@@ -81,6 +81,23 @@ jobs:
           name: dist
           path: dist
 
+      # public/_redirects sends the apex root to the company site, which is
+      # a different Pages project. Deploying that redirect before the
+      # target hostname exists would point the bare domain at nothing —
+      # and since the deploy lands before the verification below runs, a
+      # failed check would not undo it. So refuse up front instead.
+      - name: Confirm the redirect target exists
+        run: |
+          set -euo pipefail
+          status="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 10 "$COMPANY_SITE_URL" || true)"
+          if [ "${status:-000}" != "200" ]; then
+            echo "::error::${COMPANY_SITE_URL} answered ${status:-000}. public/_redirects points the apex root there, so it has to be live before this deploys. Attach the hostname to the company site's Pages project first."
+            exit 1
+          fi
+          echo "ok: ${COMPANY_SITE_URL}"
+        env:
+          COMPANY_SITE_URL: https://www.avishaikofun.com/
+
       - name: Deploy to Cloudflare Pages
         run: bunx wrangler pages deploy dist --project-name=avishai-kofun --branch=main
         env:
