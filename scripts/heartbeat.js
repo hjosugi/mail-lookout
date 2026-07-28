@@ -150,7 +150,19 @@ async function checkRootRedirect(host) {
     throw new Error(`${url} redirects to ${target}, expected ${COMPANY_SITE_URL}`)
   }
 
-  const hop = await fetchWithTimeout(target, "manual")
+  let hop
+  try {
+    hop = await fetchWithTimeout(target, "manual")
+  } catch (error) {
+    // Most likely the redirect target has no DNS record yet, which makes
+    // the bare domain a dead end. Say so, rather than surfacing a bare
+    // "fetch failed" against a URL the reader has to go look up.
+    throw new Error(
+      `${url} redirects to ${target}, which is not reachable (${error.message}). ` +
+        `Attach that hostname to the company site's Pages project before deploying this redirect.`,
+    )
+  }
+
   const next = hop.headers.get("location")
   if (next && new URL(next, target).toString() === target) {
     throw new Error(

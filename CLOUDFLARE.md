@@ -53,9 +53,20 @@ bun run deploy:cloudflare
 `www.avishaikofun.com` は**このプロジェクトには付けません**。コーポレート
 サイトは [hjosugi/avishaikofun-site](https://github.com/hjosugi/avishaikofun-site)
 に分離し、別の Pages project（`avishaikofun-site`）から www で配信します。
-以前このプロジェクトに www を付けていた場合は、**先に外してから**新しい
-プロジェクト側に追加してください。1つのカスタムドメインを2つの Pages
-project に同時に割り当てることはできません。
+
+**順序に注意。** 2026-07-28 時点で `www.avishaikofun.com` は DNS に存在
+しません（apex のみ）。apex の `/` は www へ 308 するので、**www を先に
+用意しないと、素のドメインが解決しないホストへの行き止まりになります。**
+
+1. 新しい Pages project `avishaikofun-site` に `www.avishaikofun.com` を
+   カスタムドメインとして追加する
+2. そのあとでこのプロジェクトをデプロイする
+
+順序を誤った場合、`scripts/heartbeat.js` のルートリダイレクト検査が
+デプロイ後に失敗して知らせます。なお、もし将来このプロジェクトに www を
+付けた場合は、apex と同じ `_redirects` が www にも適用されて**自己参照の
+無限リダイレクト**になります（`_redirects` はホスト名で条件分岐できません）。
+heartbeat はこれも検出します。
 
 apex を手放せない理由は明確です。Outlook は送信のたびに apex から
 `commands.html` を読み込み、マニフェストがその URL を直接埋め込んで
