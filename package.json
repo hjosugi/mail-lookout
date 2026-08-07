@@ -46,7 +46,9 @@
     "release:tag": "bun scripts/release-tag.js",
     "prepare": "git config core.hooksPath .githooks",
     "check": "oxlint . && oxfmt --check . && bun run typecheck && bun run test:coverage && bun run build",
-    "check:publish": "bun run check && bun run validate && bun run heartbeat"
+    "check:publish": "bun run check && bun run validate && bun run heartbeat",
+    "graphify:setup": "sh scripts/graphify.sh setup",
+    "graphify:update": "sh scripts/graphify.sh update"
   },
   "dependencies": {
     "zod": "^4.4.3"

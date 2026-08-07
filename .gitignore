@@ -26,3 +26,9 @@ private/
 
 # Raw screenshot sources (only processed outputs are committed)
 docs/images/raw/
+.claude/skills/graphify/
+.claude/settings.local.json
+.copilot/skills/graphify/
+.codex/skills/graphify/
+.codex/hooks.json
+graphify-out/
