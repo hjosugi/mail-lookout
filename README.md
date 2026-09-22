@@ -185,8 +185,20 @@ with `bun run build` and publish `dist/`. During that build,
 `scripts/generate-manifest.js` writes `dist/manifest.xml` with
 `https://avishaikofun.com` embedded.
 
-The production site and add-in runtime are served at
-[`https://avishaikofun.com/`](https://avishaikofun.com/).
+The add-in runtime is served from the apex,
+[`avishaikofun.com`](https://avishaikofun.com/), and that host belongs
+to this repository. The company site is not here: it lives in
+[hjosugi/avishaikofun-site](https://github.com/hjosugi/avishaikofun-site)
+and is served from `www`, so a copy edit to a marketing page no longer
+goes through this project's build, tests, and release gates. The apex
+root redirects there (`public/_redirects`); every other path is the
+add-in.
+
+The Mail Lookout product pages — `support.html`, `privacy.html`,
+`terms.html` — stayed behind on purpose. The manifest hard-codes
+`SupportUrl` and the Marketplace listing points at those URLs, so
+moving them would mean re-certification.
+
 End users should install from the
 [Microsoft Marketplace listing](https://marketplace.microsoft.com/en-us/product/office/WA200011471);
 the hosted `/manifest.xml` remains available for development and
@@ -213,7 +225,6 @@ confirmation before changing files. Use `bun run version:bump patch`
 when you only want the local version commit without pushing or tagging.
 
 See [CLOUDFLARE.md](./CLOUDFLARE.md) for the step-by-step flow.
-`NETLIFY.md` remains as an alternate deploy path.
 
 The source manifest still ships with placeholder values. Replace
 them before a production or marketplace release.
@@ -250,19 +261,22 @@ For the Marketplace description and certification notes, see
 
 The shipped defaults live in
 [`src/config/defaults.ts`](./src/config/defaults.ts) — fork that file
-to change them. At runtime, the Settings task pane overrides the
-internal domains and the default send-delay per user. The main options:
+to change them. At runtime, the Settings task pane overrides a subset
+per user, marked below. The main options:
 
 - `internalDomains`: domains treated as internal (also editable in the
   Settings pane).
 - `sendDelaySeconds`: the default countdown before a confirmed message
   is sent (also editable in the Settings pane).
 - `requireRecipientConfirmation`: include recipients in the
-  send-time confirmation.
+  send-time confirmation (also editable in the Settings pane).
 - `requireAttachmentConfirmation`: include attachments in the
-  send-time confirmation.
+  send-time confirmation (also editable in the Settings pane).
 - `requireBodyConfirmation`: include the body preview in the
-  send-time confirmation.
+  send-time confirmation (also editable in the Settings pane).
+- `allowSendAnyway`: offer Outlook's **Send Anyway** on a blocked send
+  (also editable in the Settings pane). Off by default; see
+  [SendMode](#sendmode) for what it can and cannot reach.
 - `attachmentKeywords`: words that hint the body refers to an
   attachment, used by the forgotten-attachment warning.
 - `warnOnEmptySubject`: warn when the subject is blank.
@@ -287,9 +301,9 @@ itself from the keys of `locales`.
 ## SendMode
 
 The manifest uses `SendMode="SoftBlock"`. When the add-in cancels a
-send, the user must go back and edit the draft. There is no one-click
-"send anyway" path. This is on purpose: a confirmation tool whose
-every cancel is one click to bypass does not confirm much.
+send, the user must go back and edit the draft. By default there is no
+one-click "send anyway" path. This is on purpose: a confirmation tool
+whose every cancel is one click to bypass does not confirm much.
 
 The first send attempt shows the Smart Alerts dialog and cancels the
 send. The dialog's action button opens a task pane with the checkbox
@@ -297,6 +311,45 @@ review UI. After the task pane marks the draft as reviewed, it sends
 the message through Outlook's compose API. If any unexpected error
 happens, the handler cancels the send. It never sends real mail without
 confirmation.
+
+### What SoftBlock does not cover
+
+SendMode also decides the case the add-in cannot decide itself: what
+happens when the runtime never loads, because the host is unreachable
+or a browser extension blocked the frame. Under `SoftBlock` **Outlook
+sends the message** — no dialog, no warning, nothing in a log. The
+add-in is silently absent rather than visibly broken.
+
+`Block` is the only mode that refuses the send there, and it is not
+available to us. AppSource rejects the manifest:
+
+```
+Error #1: Block SendMode is not allowed
+```
+
+`PromptUser` does not help either — it also sends when the add-in is
+unavailable, and it would additionally put a permanent bypass button on
+every cancel. So for a Marketplace-distributed add-in this gap cannot
+be closed, only monitored: `scripts/heartbeat.js` checks the host every
+six hours. Closing it requires distributing the manifest yourself, by
+sideloading or admin deployment, with `SendMode="Block"`.
+
+### Relaxing it per user
+
+**Settings → When a send is blocked → Offer Send Anyway** adds a
+**Send Anyway** button to a canceled send. It is off by default.
+
+The direction is forced by the API, not chosen. `sendModeOverride`
+accepts exactly one value, `promptUser`, so a running handler can
+loosen the mode the manifest declares but can never tighten it. Strict
+therefore has to be what ships in the manifest, with this as the
+opt-out — shipping `PromptUser` and letting a setting harden it is not
+expressible.
+
+The same asymmetry sets the limit, and the Settings pane says so next
+to the checkbox: **the setting only applies when the add-in actually
+ran.** It cannot change the failed-to-load case above, in either
+direction.
 
 ## Limitations
 
@@ -325,6 +378,14 @@ Be honest about what this is and is not.
   classic path is not supported or tested.
 - **Outlook mobile is not supported.** Smart Alerts on send do not
   run there.
+- **If the add-in cannot load, the message sends unchecked.** Outlook
+  loads `commands.html` from the host on every send. If that fails —
+  host down, extension blocking the frame — `SoftBlock` lets the send
+  through with no dialog and no warning, and no setting can change it,
+  because none of our code runs. Only `SendMode="Block"` refuses there,
+  and AppSource does not allow Block for a Marketplace add-in. This is
+  the add-in's real failure mode; `scripts/heartbeat.js` watches the
+  host every six hours to keep it rare. See [SendMode](#sendmode).
 
 ## Disclaimer
 

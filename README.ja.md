@@ -157,9 +157,22 @@ Marketplace公開版はCloudflare Pagesでホストしたアドインを読み�
 `scripts/generate-manifest.js`が`https://avishaikofun.com`を
 埋め込んだ`dist/manifest.xml`を生成します。
 
-本番サイトとアドインの実行環境は
-[`https://avishaikofun.com/`](https://avishaikofun.com/)
-です。一般利用者は
+アドインの実行環境は apex の
+[`avishaikofun.com`](https://avishaikofun.com/)
+で、このホストはこのリポジトリのものです。コーポレートサイトはここには
+ありません。
+[hjosugi/avishaikofun-site](https://github.com/hjosugi/avishaikofun-site)
+に分離し、`www`から配信しています。マーケティングページの文言修正が、
+このプロジェクトのビルド・テスト・リリースゲートを通らなくなりました。
+apexの`/`はそちらへリダイレクトし（`public/_redirects`）、それ以外の
+パスはすべてアドインです。
+
+Mail Lookoutの製品ページ — `support.html` / `privacy.html` /
+`terms.html` — は意図的に残しています。マニフェストが`SupportUrl`を
+埋め込み、Marketplace掲載もこれらのURLを指しているため、移すと再認証が
+必要になるからです。
+
+一般利用者は
 [Microsoft Marketplace](https://marketplace.microsoft.com/ja-jp/product/WA200011471?tab=Overview)
 からインストールしてください。公開サイトの`/manifest.xml`は、開発・
 テスト用途で引き続き利用できます。
@@ -185,7 +198,6 @@ GitHub ActionsがRelease assetを作ります。minor/majorは
 version commitだけ作りたい場合は`bun run version:bump patch`を使います。
 
 手順は[CLOUDFLARE.md](./CLOUDFLARE.md)を参照してください。
-`NETLIFY.md`は代替デプロイ手順として残しています。
 
 元のマニフェストはプレースホルダ値で出荷されます。本番運用や
 Marketplace公開の前には置き換えてください。
@@ -220,8 +232,8 @@ Marketplaceの説明文と認証担当者向けメモは
 
 出荷時の既定値は[`src/config/defaults.ts`](./src/config/defaults.ts)
 にあります。変更するにはこのファイルをフォークしてください。実行時は
-設定タスクペインが、社内ドメインとデフォルトの待ち時間をユーザーごとに
-上書きします。主なオプション:
+設定タスクペインが、以下のうち「設定ペインでも変更可」と書いたものを
+ユーザーごとに上書きします。主なオプション:
 
 ### デフォルト送信待機時間の設定方法
 
@@ -233,9 +245,15 @@ OutlookのリボンでMail Lookoutの**Settings**を開き、
 - `internalDomains`: 社内として扱うドメイン（設定ペインでも変更可）。
 - `sendDelaySeconds`: 確認後に送信するまでのカウントダウンの既定値
   （設定ペインでも変更可）。
-- `requireRecipientConfirmation`: 送信時の確認に宛先を含める。
-- `requireAttachmentConfirmation`: 送信時の確認に添付ファイルを含める。
-- `requireBodyConfirmation`: 送信時の確認に本文プレビューを含める。
+- `requireRecipientConfirmation`: 送信時の確認に宛先を含める
+  （設定ペインでも変更可）。
+- `requireAttachmentConfirmation`: 送信時の確認に添付ファイルを含める
+  （設定ペインでも変更可）。
+- `requireBodyConfirmation`: 送信時の確認に本文プレビューを含める
+  （設定ペインでも変更可）。
+- `allowSendAnyway`: 中止された送信にOutlookの**とにかく送信**を出す
+  （設定ペインでも変更可）。既定はオフ。何に届いて何に届かないかは
+  [SendMode](#sendmode)を参照。
 - `attachmentKeywords`: 本文が添付に言及しているか判定する語。
   添付付け忘れ警告で使う。
 - `warnOnEmptySubject`: 件名が空のとき警告する。
@@ -260,15 +278,55 @@ OutlookのリボンでMail Lookoutの**Settings**を開き、
 
 マニフェストは`SendMode="SoftBlock"`を使います。SoftBlockでは、
 アドインが送信を中止したとき、ユーザーは下書きに戻って編集する必要
-があります。ワンクリックの「とにかく送信」はありません。これは意図
-的です。すべての中止がワンクリックで回避できる確認ツールは、ほとんど
-確認になりません。
+があります。既定ではワンクリックの「とにかく送信」はありません。これ
+は意図的です。すべての中止がワンクリックで回避できる確認ツールは、
+ほとんど確認になりません。
 
 1回目の送信ではSmart Alertsダイアログを表示し、送信を中止します。
 ダイアログのアクションボタンから、チェックボックス付きの確認ペインを
 開きます。確認ペインで下書きを確認済みにしたあと、Outlookのcompose
 API経由で送信します。予期しないエラーが起きた場合も、ハンドラは送信を
 中止します。確認なしに実メールを送ることはありません。
+
+### SoftBlockでカバーされないこと
+
+SendModeは、アドイン自身では判断できない場合 — ホストに到達できない、
+ブラウザ拡張がフレームを止めている等でランタイムが読み込まれなかった
+場合 — の挙動も決めます。`SoftBlock`では**Outlookはそのメールを送信
+します**。ダイアログも警告もログも残りません。アドインは「壊れている」
+のではなく「静かに不在」になります。
+
+ここで送信を拒否できる唯一のモードは`Block`ですが、**使えません**。
+AppSourceがマニフェストを拒否します。
+
+```
+Error #1: Block SendMode is not allowed
+```
+
+`PromptUser`も解決になりません。アドインが利用不可のときはやはり送信
+してしまう上、すべての中止に恒久的な回避ボタンが付くだけです。したが
+ってMarketplace配布のアドインでは**この穴は塞げず、監視するしかありま
+せん**。`scripts/heartbeat.js`が6時間ごとにホストを確認しています。
+塞ぐにはサイドロードまたは管理者展開で自分でマニフェストを配布し、
+`SendMode="Block"`にする必要があります。
+
+### ユーザーごとに緩める
+
+**設定 → 送信が中止されたとき → 「とにかく送信」を出す** をオンにすると、
+中止された送信にOutlookが **とにかく送信** ボタンを出すようになります。
+既定はオフです。
+
+この方向はAPIによって強制されたもので、設計上の好みではありません。
+`sendModeOverride`が受け付ける値は`promptUser`ただ1つなので、実行中の
+ハンドラはマニフェストが宣言したモードを**緩めることはできても、厳しく
+することはできません**。したがって厳しい側をマニフェストに置き、これを
+opt-outとするしかありません。逆（`PromptUser`を出荷して設定で厳しく
+する）は表現できません。
+
+同じ非対称性が限界も決めます。設定ペインでもチェックボックスの横に
+明記しています。**この設定は、アドインが実際に走ったときにしか適用され
+ません。**上に書いた「読み込み失敗」のケースは、どちらの方向にも変え
+られません。
 
 ## 制限事項
 
@@ -296,6 +354,15 @@ API経由で送信します。予期しないエラーが起きた場合も、�
   宣言しますが、クラシック経路はサポートもテストもしていません。
 - **Outlookモバイルは非対応。** 送信時のSmart Alertsはそこでは
   動きません。
+- **アドインが読み込めないと、メールは未確認のまま送信される。**
+  Outlookは送信のたびにホストから`commands.html`を読み込みます。これ
+  に失敗すると — ホスト障害、拡張機能によるフレームのブロック —
+  `SoftBlock`はダイアログも警告も無しに送信を通します。我々のコードが
+  1行も走らないため、どの設定でも変えられません。ここで拒否できるのは
+  `SendMode="Block"`だけですが、AppSourceはMarketplace向けアドインに
+  Blockを許可していません。これがこのアドインの実質的な弱点で、
+  `scripts/heartbeat.js`が6時間ごとにホストを監視して発生頻度を
+  抑えています。[SendMode](#sendmode)を参照。
 
 ## 免責
 

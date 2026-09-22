@@ -10,6 +10,7 @@ import {
   consumeConfirmation,
   needsSmartAlertConfirmation,
   rememberConfirmation,
+  sendModeOverrideFor,
   smartAlertCancelOptions,
   snapshotFingerprint,
 } from "@/office/smartAlert"
@@ -114,14 +115,14 @@ describe("Smart Alerts message", () => {
   })
 
   it("switches to the waiting copy and button while a countdown runs", () => {
-    const review = smartAlertCancelOptions("ja", false)
+    const review = smartAlertCancelOptions("ja", false, false)
     expect(review.cancelLabel).toBe(locales.ja.smartAlert.openReview)
     expect(review.errorMessage).toContain(locales.ja.smartAlert.prompt)
     expect(review.errorMessage).toContain(
       locales.ja.smartAlert.action(locales.ja.smartAlert.openReview, false),
     )
 
-    const waiting = smartAlertCancelOptions("ja", true)
+    const waiting = smartAlertCancelOptions("ja", true, false)
     expect(waiting.cancelLabel).toBe(locales.ja.smartAlert.showWaiting)
     expect(waiting.errorMessage).toContain(locales.ja.smartAlert.waiting)
     expect(waiting.errorMessage).toContain(
@@ -130,13 +131,33 @@ describe("Smart Alerts message", () => {
   })
 
   it("creates completed options with plaintext and markdown messages", () => {
-    const options = smartAlertCancelOptions("en", false)
+    const options = smartAlertCancelOptions("en", false, false)
 
     expect(options.allowEvent).toBe(false)
     expect(options.errorMessage).toContain("Review before sending")
     expect(options.errorMessageMarkdown).toContain("**Review before sending**")
     expect(options.cancelLabel).toBe("Open review")
     expect(options.commandId).toBe(REVIEW_PANE_COMMAND_ID)
+  })
+})
+
+describe("sendModeOverrideFor", () => {
+  // The manifest declares SendMode="Block". Leaving the override off is
+  // what keeps that in force, so the absent case is the load-bearing one.
+  it("leaves the manifest's Block in force by default", () => {
+    expect(sendModeOverrideFor(false)).toBeUndefined()
+    expect(smartAlertCancelOptions("en", false, false).sendModeOverride).toBeUndefined()
+  })
+
+  // Office.js accepts exactly one override value; anything else is ignored
+  // by the host, which would silently strip the user's opt-in.
+  it("relaxes to promptUser, the only value Office accepts", () => {
+    expect(sendModeOverrideFor(true)).toBe("promptUser")
+    expect(smartAlertCancelOptions("en", false, true).sendModeOverride).toBe("promptUser")
+  })
+
+  it("still blocks the event either way", () => {
+    expect(smartAlertCancelOptions("en", false, true).allowEvent).toBe(false)
   })
 
   it("does not require confirmation when every gate is disabled and there are no warnings", () => {

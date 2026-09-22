@@ -3,9 +3,10 @@
 /**
  * The Settings task pane.
  *
- * Lets the user edit the two per-device settings — the internal domains
- * and the default send-delay — and saves them to local storage, where
- * the send handler and review pane read them.
+ * Lets the user edit the per-user settings — the internal domains, the
+ * default send-delay, which checks the review requires, and whether a
+ * blocked send offers "Send Anyway" — and saves them to Outlook roaming
+ * settings, where the send handler and review pane read them.
  */
 
 import "../dialog/dialog.css"
@@ -82,6 +83,25 @@ function field(labelText: string, input: HTMLElement, hintText: string): HTMLEle
   return wrap
 }
 
+/** A checkbox with its label, and the input so callers can read it back. */
+function toggle(labelText: string): { row: HTMLElement; input: HTMLInputElement } {
+  const row = el("label", "so-set-toggle")
+  const input = el("input")
+  input.type = "checkbox"
+  row.append(input, el("span", "so-set-toggle-label", labelText))
+  return { row, input }
+}
+
+/** A titled group of checkboxes with one hint line under it. */
+function group(labelText: string, rows: readonly HTMLElement[], ...hints: string[]): HTMLElement {
+  const wrap = el("div", "so-set-field")
+  wrap.append(el("span", "so-set-label", labelText), ...rows)
+  for (const hint of hints) {
+    wrap.append(el("span", "so-set-hint", hint))
+  }
+  return wrap
+}
+
 function start(locale: LocaleTag, root: HTMLElement): void {
   const all = getMessages(locale)
   const messages = all.settings
@@ -97,10 +117,19 @@ function start(locale: LocaleTag, root: HTMLElement): void {
   const status = el("p", "so-set-status")
   status.setAttribute("role", "status")
 
+  const recipients = toggle(messages.requireRecipients)
+  const attachments = toggle(messages.requireAttachments)
+  const body = toggle(messages.requireBody)
+  const sendAnyway = toggle(messages.allowSendAnyway)
+
   const fill = (): void => {
     const current = currentSettings()
     domains.value = current.internalDomains.join("\n")
     delay.value = secondsToDelayMinutes(current.sendDelaySeconds)
+    recipients.input.checked = current.requireRecipientConfirmation
+    attachments.input.checked = current.requireAttachmentConfirmation
+    body.input.checked = current.requireBodyConfirmation
+    sendAnyway.input.checked = current.allowSendAnyway
   }
   fill()
 
@@ -121,7 +150,15 @@ function start(locale: LocaleTag, root: HTMLElement): void {
       setStatus(messages.invalid, false)
       return
     }
-    saveSettings({ internalDomains: list, sendDelaySeconds }, ok => {
+    const next = {
+      internalDomains: list,
+      sendDelaySeconds,
+      requireRecipientConfirmation: recipients.input.checked,
+      requireAttachmentConfirmation: attachments.input.checked,
+      requireBodyConfirmation: body.input.checked,
+      allowSendAnyway: sendAnyway.input.checked,
+    }
+    saveSettings(next, ok => {
       if (ok) {
         fill()
         setStatus(messages.saved, true)
@@ -151,6 +188,15 @@ function start(locale: LocaleTag, root: HTMLElement): void {
     el("p", "so-set-intro", messages.intro),
     field(messages.domainsLabel, domains, messages.domainsHint),
     field(`${messages.delayLabel}（${messages.delayUnit}）`, delay, messages.delayHint),
+    group(messages.checksLabel, [recipients.row, attachments.row, body.row], messages.checksHint),
+    // The limit line is not decoration: without it the checkbox reads as
+    // "this add-in can never stop me", which is not what it does.
+    group(
+      messages.strictnessLabel,
+      [sendAnyway.row],
+      messages.allowSendAnywayHint,
+      messages.allowSendAnywayLimit,
+    ),
     actions,
     status,
     waiting.element,

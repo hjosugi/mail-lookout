@@ -110,6 +110,18 @@ export const en: Messages = {
     delayHint:
       "The starting countdown after you select Review & send. You can enter tenths of a minute.",
     delayUnit: "min",
+    checksLabel: "Required checks",
+    checksHint:
+      "Which items the review pane makes you confirm before it will send. Turning all of them off leaves only the warnings.",
+    requireRecipients: "Confirm every recipient",
+    requireAttachments: "Confirm every attachment",
+    requireBody: "Confirm the body",
+    strictnessLabel: "When a send is blocked",
+    allowSendAnyway: "Offer Send Anyway",
+    allowSendAnywayHint:
+      "Off: a blocked send goes back to the draft, and the review pane is the only way through. On: Outlook also offers Send Anyway.",
+    allowSendAnywayLimit:
+      "Either way, if the add-in fails to load, Outlook refuses the send. That case is decided before this setting can be read.",
     save: "Save",
     saved: "Saved.",
     reset: "Reset to defaults",

@@ -36,3 +36,82 @@ jobs:
 
       - name: Build
         run: bun run build
+        env:
+          ADDIN_HOST_URL: https://avishaikofun.com
+
+      # The deploy job publishes exactly these bytes instead of rebuilding,
+      # so what reaches the host is what the checks above passed on.
+      - name: Upload the build
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+          retention-days: 7
+          if-no-files-found: error
+
+  # Outlook loads commands.html from the host on every send, so main and the
+  # host have to stay in step. Nothing kept them there before this job: the
+  # deploy was a manual `bun run deploy:cloudflare`, and when it was skipped
+  # the host sat on an older build indefinitely while main moved on — which
+  # is how production ended up serving 1.1.13 against a 1.1.14 main.
+  deploy:
+    needs: check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    # Two deploys racing could leave the older build live, so let a running
+    # deploy finish rather than cancelling it.
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+
+      - name: Download the build
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      # public/_redirects sends the apex root to the company site, which is
+      # a different Pages project. Deploying that redirect before the
+      # target hostname exists would point the bare domain at nothing —
+      # and since the deploy lands before the verification below runs, a
+      # failed check would not undo it. So refuse up front instead.
+      - name: Confirm the redirect target exists
+        run: |
+          set -euo pipefail
+          status="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 10 "$COMPANY_SITE_URL" || true)"
+          if [ "${status:-000}" != "200" ]; then
+            echo "::error::${COMPANY_SITE_URL} answered ${status:-000}. public/_redirects points the apex root there, so it has to be live before this deploys. Attach the hostname to the company site's Pages project first."
+            exit 1
+          fi
+          echo "ok: ${COMPANY_SITE_URL}"
+        env:
+          COMPANY_SITE_URL: https://www.avishaikofun.com/
+
+      - name: Deploy to Cloudflare Pages
+        run: bunx wrangler pages deploy dist --project-name=avishai-kofun --branch=main
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      # A deploy can report success while the host still serves the previous
+      # build, and that silent case is the whole reason this job exists, so
+      # confirm the version is actually live before calling the deploy done.
+      # The propagation is not instant, hence the attempts.
+      - name: Confirm the host serves this build
+        run: |
+          set -euo pipefail
+          version="$(bun scripts/manifest-version.js dist/manifest.xml)"
+          bun scripts/heartbeat.js --attempts=10 --expect-version="$version"
+        env:
+          ADDIN_HOST_URL: https://avishaikofun.com

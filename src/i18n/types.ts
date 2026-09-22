@@ -132,6 +132,18 @@ export interface Messages {
     readonly delayLabel: string
     readonly delayHint: string
     readonly delayUnit: string
+    /** Heading for the group of checks the review pane requires. */
+    readonly checksLabel: string
+    readonly checksHint: string
+    readonly requireRecipients: string
+    readonly requireAttachments: string
+    readonly requireBody: string
+    /** Heading for the strictness control. */
+    readonly strictnessLabel: string
+    readonly allowSendAnyway: string
+    readonly allowSendAnywayHint: string
+    /** The part of the strictness note no setting can change. */
+    readonly allowSendAnywayLimit: string
     readonly save: string
     readonly saved: string
     readonly reset: string

@@ -5,14 +5,17 @@ import { fileURLToPath } from "node:url"
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootDir = path.resolve(__dirname, "..")
 
+/**
+ * The host to embed in the manifest.
+ *
+ * `URL`, `DEPLOY_PRIME_URL`, and `DEPLOY_URL` used to be honoured here
+ * for Netlify's build environment. They are gone with it: those names
+ * are generic enough that an unrelated `URL` in some future environment
+ * could silently rewrite every manifest URL, and CI sets ADDIN_HOST_URL
+ * explicitly anyway.
+ */
 function resolveDeployUrl() {
-  return (
-    process.env.ADDIN_HOST_URL ??
-    process.env.URL ??
-    process.env.DEPLOY_PRIME_URL ??
-    process.env.DEPLOY_URL ??
-    "https://avishaikofun.com"
-  )
+  return process.env.ADDIN_HOST_URL ?? "https://avishaikofun.com"
 }
 
 function generateManifest() {

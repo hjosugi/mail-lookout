@@ -21,6 +21,13 @@ import type { Config } from "../config/types"
 
 const KEY_DOMAINS = "internalDomains"
 const KEY_DELAY = "sendDelaySeconds"
+const KEY_RECIPIENTS = "requireRecipientConfirmation"
+const KEY_ATTACHMENTS = "requireAttachmentConfirmation"
+const KEY_BODY = "requireBodyConfirmation"
+const KEY_SEND_ANYWAY = "allowSendAnyway"
+
+/** Every key this add-in owns, so a reset cannot leave one behind. */
+const allKeys = [KEY_DOMAINS, KEY_DELAY, KEY_RECIPIENTS, KEY_ATTACHMENTS, KEY_BODY, KEY_SEND_ANYWAY]
 
 /** The roaming settings bag, or undefined where it isn't available. */
 function roaming(): Office.RoamingSettings | undefined {
@@ -33,10 +40,21 @@ export function loadConfig(): Config {
   if (!settings) {
     return defaultConfig
   }
-  return applySettings({
-    internalDomains: settings.get(KEY_DOMAINS),
-    sendDelaySeconds: settings.get(KEY_DELAY),
-  })
+  // This runs on the send path, where a throw escaping the handler means
+  // Outlook never hears back and the send stalls. Reading the settings
+  // bag is not worth that risk: a failed read falls back to the defaults.
+  try {
+    return applySettings({
+      internalDomains: settings.get(KEY_DOMAINS),
+      sendDelaySeconds: settings.get(KEY_DELAY),
+      requireRecipientConfirmation: settings.get(KEY_RECIPIENTS),
+      requireAttachmentConfirmation: settings.get(KEY_ATTACHMENTS),
+      requireBodyConfirmation: settings.get(KEY_BODY),
+      allowSendAnyway: settings.get(KEY_SEND_ANYWAY),
+    })
+  } catch {
+    return defaultConfig
+  }
 }
 
 /** The effective settings to show in the Settings pane. */
@@ -65,6 +83,10 @@ export function saveSettings(settings: UserSettings, callback: (ok: boolean) => 
   }
   store.set(KEY_DOMAINS, [...clean.internalDomains])
   store.set(KEY_DELAY, clean.sendDelaySeconds)
+  store.set(KEY_RECIPIENTS, clean.requireRecipientConfirmation)
+  store.set(KEY_ATTACHMENTS, clean.requireAttachmentConfirmation)
+  store.set(KEY_BODY, clean.requireBodyConfirmation)
+  store.set(KEY_SEND_ANYWAY, clean.allowSendAnyway)
   store.saveAsync(result => {
     callback(result.status === Office.AsyncResultStatus.Succeeded)
   })
@@ -77,8 +99,9 @@ export function clearSettings(callback: (ok: boolean) => void): void {
     callback(false)
     return
   }
-  store.remove(KEY_DOMAINS)
-  store.remove(KEY_DELAY)
+  for (const key of allKeys) {
+    store.remove(key)
+  }
   store.saveAsync(result => {
     callback(result.status === Office.AsyncResultStatus.Succeeded)
   })

@@ -138,6 +138,29 @@ describe("manifest URLs", () => {
   })
 })
 
+describe("manifest send mode", () => {
+  // Two different rules pin this attribute, and both fail late.
+  //
+  // Not PromptUser: sendModeOverride only ever relaxes, never tightens,
+  // so shipping PromptUser would hand out a one-click bypass that the
+  // "send anyway" setting could never withdraw. Strict has to be what is
+  // declared here, with the setting as the opt-out.
+  //
+  // Not Block, however tempting: Block is the one mode that also refuses
+  // the send when the add-in is unavailable, but AppSource rejects the
+  // manifest outright with "Block SendMode is not allowed". That failure
+  // only surfaces from `bun run validate`, which the release workflow
+  // runs after a tag is already pushed.
+  it("declares SoftBlock — the strictest mode AppSource accepts", () => {
+    const sendModes = matchAll(/<LaunchEvent[^>]*\bSendMode="([^"]+)"/g)
+
+    expect(sendModes.length).toBeGreaterThan(0)
+    for (const sendMode of sendModes) {
+      expect(sendMode).toBe("SoftBlock")
+    }
+  })
+})
+
 describe("manifest version", () => {
   it("matches package.json", () => {
     const version = /<Version>([^<]+)<\/Version>/.exec(manifest)?.[1]

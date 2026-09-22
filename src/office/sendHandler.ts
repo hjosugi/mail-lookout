@@ -24,6 +24,7 @@ import type { LocaleTag } from "../i18n/catalog"
 import {
   consumeConfirmation,
   needsSmartAlertConfirmation,
+  sendModeOverrideFor,
   smartAlertCancelOptions,
   snapshotFingerprint,
 } from "./smartAlert"
@@ -44,9 +45,21 @@ function completeOnce(
   }
 }
 
+/**
+ * The options used when the handler itself fails.
+ *
+ * This follows the user's "send anyway" setting like any other canceled
+ * send. It is worth being explicit about what that costs: with the
+ * setting off, a bug in this handler leaves the user with no way past
+ * the dialog except fixing the draft it is complaining about. Forcing
+ * the override on here would remove that dead-end, but it would also
+ * mean any thrown error hands out a one-click bypass — the exact thing
+ * the strict default exists to prevent. The setting decides.
+ */
 function failureOptions(
   locale: LocaleTag,
   error: unknown,
+  allowSendAnyway: boolean,
 ): Office.SmartAlertsEventCompletedOptions {
   const messages = getMessages(locale)
   const detail = error instanceof Error ? `${error.name}: ${error.message}` : String(error)
@@ -54,6 +67,7 @@ function failureOptions(
     allowEvent: false,
     errorMessage: `${messages.cancel.notSent}\n\nMail Lookout error: ${detail.slice(0, 180)}`,
     cancelLabel: messages.cancel.returnLabel,
+    sendModeOverride: sendModeOverrideFor(allowSendAnyway),
   }
 }
 
@@ -88,10 +102,12 @@ export async function onMessageSendHandler(event: Office.AddinCommands.Event): P
     // task pane — not here — so closing the pane or sending again without
     // reviewing stays blocked. If a countdown is already running, the
     // alert points at the status pane instead.
-    complete(smartAlertCancelOptions(locale, isCountdownActive(fingerprint)))
+    complete(
+      smartAlertCancelOptions(locale, isCountdownActive(fingerprint), config.allowSendAnyway),
+    )
   } catch (error) {
     // Last resort. Never send real mail without a confirmation.
     console.error("mail-lookout: unexpected error in send handler", error)
-    complete(failureOptions(locale, error))
+    complete(failureOptions(locale, error, config.allowSendAnyway))
   }
 }

@@ -27,6 +27,9 @@ export const defaultConfig: Config = configSchema.parse({
     "see attached",
   ],
   warnOnEmptySubject: true,
+  // Strict by default: a blocked send goes back to the draft. The
+  // Settings pane is where a user opts into the escape hatch.
+  allowSendAnyway: false,
   fallbackLocale: "en",
   dialog: {
     widthPercent: 32,
