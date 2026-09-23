@@ -21,7 +21,9 @@ repo の **Settings** → **Secrets and variables** → **Actions** に登録し
 - `CLOUDFLARE_API_TOKEN`: **Cloudflare Pages — Edit** 権限を持つ API token
 - `CLOUDFLARE_ACCOUNT_ID`: Cloudflare account ID
 
-この2つが無いと `deploy` job は失敗します。
+この2つが無いと `deploy` job は最初のステップで不足している secret 名を表示して失敗します。チェックやビルドの成功だけでは、本番への反映は確認できません。
+
+2026-09-23 の調査では `CLOUDFLARE_ACCOUNT_ID` のみが登録されており、API token 不足で自動デプロイが停止していました。手元の `wrangler login` による OAuth 認証は GitHub Actions には引き継がれません。CI 用には上記の API token を登録してください。token の値をログやチャットに貼り付ける必要はありません。
 
 ### dashboard の Git 連携は使わない
 
@@ -34,6 +36,10 @@ CI を経由せず手元から上げる場合のみ使います。
 ```sh
 bun run deploy:cloudflare
 ```
+
+手動・CI ともに `scripts/deploy-cloudflare.js` を使い、www の応答を確認してから `main` の本番環境に公開し、公開後に manifest のバージョンと各 URL を検証します。Wrangler は `package.json` と `bun.lock` に固定したバージョンを使います。
+
+検証済みの `dist/` をそのまま公開する場合は `bun run deploy:cloudflare:artifact` を使います。GitHub Actions もこのコマンドでビルド済み artifact を公開します。
 
 ## Environment variables
 
@@ -54,8 +60,7 @@ bun run deploy:cloudflare
 サイトは [hjosugi/avishaikofun-site](https://github.com/hjosugi/avishaikofun-site)
 に分離し、別の Pages project（`avishaikofun-site`）から www で配信します。
 
-**順序に注意。** 2026-07-28 時点で `www.avishaikofun.com` は DNS に存在
-しません（apex のみ）。apex の `/` は www へ 308 するので、**www を先に
+**順序に注意。** apex の `/` は www へ 308 するので、**www を先に
 用意しないと、素のドメインが解決しないホストへの行き止まりになります。**
 
 1. 新しい Pages project `avishaikofun-site` に `www.avishaikofun.com` を
@@ -84,3 +89,5 @@ curl -I https://avishaikofun.com/
 curl -I https://avishaikofun.com/manifest.xml
 bun run heartbeat
 ```
+
+監視は設定画面と実行用 JavaScript も確認します。JavaScript の URL が HTML の代替ページを返す場合や、www が 404・500 を返す場合も失敗として検出します。

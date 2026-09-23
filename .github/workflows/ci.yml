@@ -67,6 +67,21 @@ jobs:
       cancel-in-progress: false
 
     steps:
+      - name: Check deployment credentials
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          missing=0
+          for name in CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Missing Actions secret ${name} in $GITHUB_REPOSITORY. See CLOUDFLARE.md; production was not deployed."
+              missing=1
+            fi
+          done
+          exit "$missing"
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -81,37 +96,11 @@ jobs:
           name: dist
           path: dist
 
-      # public/_redirects sends the apex root to the company site, which is
-      # a different Pages project. Deploying that redirect before the
-      # target hostname exists would point the bare domain at nothing —
-      # and since the deploy lands before the verification below runs, a
-      # failed check would not undo it. So refuse up front instead.
-      - name: Confirm the redirect target exists
-        run: |
-          set -euo pipefail
-          status="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 10 "$COMPANY_SITE_URL" || true)"
-          if [ "${status:-000}" != "200" ]; then
-            echo "::error::${COMPANY_SITE_URL} answered ${status:-000}. public/_redirects points the apex root there, so it has to be live before this deploys. Attach the hostname to the company site's Pages project first."
-            exit 1
-          fi
-          echo "ok: ${COMPANY_SITE_URL}"
-        env:
-          COMPANY_SITE_URL: https://www.avishaikofun.com/
+      - name: Install deployment dependencies
+        run: bun install --frozen-lockfile
 
-      - name: Deploy to Cloudflare Pages
-        run: bunx wrangler pages deploy dist --project-name=avishai-kofun --branch=main
+      - name: Deploy and verify Cloudflare Pages
+        run: bun run deploy:cloudflare:artifact
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
-      # A deploy can report success while the host still serves the previous
-      # build, and that silent case is the whole reason this job exists, so
-      # confirm the version is actually live before calling the deploy done.
-      # The propagation is not instant, hence the attempts.
-      - name: Confirm the host serves this build
-        run: |
-          set -euo pipefail
-          version="$(bun scripts/manifest-version.js dist/manifest.xml)"
-          bun scripts/heartbeat.js --attempts=10 --expect-version="$version"
-        env:
-          ADDIN_HOST_URL: https://avishaikofun.com
